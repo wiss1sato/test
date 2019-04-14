@@ -49,7 +49,7 @@ $( document ).on(
 
 // スタートボタン
 $(document).on('click', '#start-button',
-    () => 
+    (event) => 
     {
         // サーバーに'enter-the-game'を送信
         const objConfig = { strNickName: $( '#nickname' ).val() };
