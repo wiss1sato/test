@@ -9,10 +9,13 @@ const GameSettings = require( './GameSettings.js' );
 module.exports = class Tank extends GameObject
 {
     // コンストラクタ
-    constructor()
+    constructor(strSocketID, strNickName)
     {
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.TANK_WIDTH, SharedSettings.TANK_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI );
+
+        this.strSocketID = strSocketID;
+        this.strNickName = strNickName;
 
         this.objMovement = {};	// 動作
         this.fSpeed = GameSettings.TANK_SPEED;    // 速度[m/s]。1frameあたり5進む => 1/30[s] で5進む => 1[s]で150進む。
@@ -21,6 +24,16 @@ module.exports = class Tank extends GameObject
         // 初期位置
         this.fX = Math.random() * ( SharedSettings.FIELD_WIDTH - SharedSettings.TANK_WIDTH );
         this.fY = Math.random() * ( SharedSettings.FIELD_HEIGHT - SharedSettings.TANK_HEIGHT );
+    }
+
+    toJSON()
+    {
+        return Object.assign(
+            super.toJSON(),
+            {
+                strSocketID: this.strSocketID,
+                strNickName: this.strNickName
+            } );
     }
 
     // 更新

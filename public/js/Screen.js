@@ -40,7 +40,15 @@ class Screen
             {
                 console.log( 'connect : socket.id = %s', socket.id );
                 // サーバーに'enter-the-game'を送信
-                this.socket.emit( 'enter-the-game' );
+                // this.socket.emit( 'enter-the-game' );
+            } );
+
+        // デッドしたらスタート画面に戻る
+        this.socket.on(
+            'dead',
+            () =>
+            {
+                $( '#start-screen' ).show();
             } );
 
         // サーバーからの状態通知に対する処理
@@ -148,6 +156,15 @@ class Screen
             SharedSettings.TANK_HEIGHT );	// 描画先領域の大きさ
         this.context.restore();
 
+        // ニックネーム
+        this.context.save();
+        this.context.textAlign = 'center';
+        this.context.font = RenderingSettings.NICKNAME_FONT;
+        this.context.fillStyle = RenderingSettings.NICKNAME_COLOR;
+        this.context.fillText( tank.strNickName, 0, -50 );
         this.context.restore();
+
+        this.context.restore();
+
     }
 }

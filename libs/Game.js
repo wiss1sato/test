@@ -16,7 +16,7 @@ module.exports = class Game
         // 変数
         const world = new World( io ); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
-
+        let player = 0;
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -31,14 +31,19 @@ module.exports = class Game
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game',
-                    () =>
+                    ( objConfig ) =>
                     {	// 自タンクの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
-                        tank = world.createTank();
+                        tank = world.createTank( socket.id, objConfig.strNickName );
+                        player = player + 1;
+                        console.log(player);
+                        if (player === 5) {
+                            
+                        }
                     } );
 
                 // 移動コマンドの処理の指定
-                // ・クライアント側のキー入力時の「socket.emit( 'change-my-movement', objMovement );」に対する処理
+                // ・クライアント側のキー入力時の「socket.emit( 'change-my-movement', objMovement );」に対する処理 => カードが出たとき
                 socket.on( 'change-my-movement',
                     ( objMovement ) =>
                     {

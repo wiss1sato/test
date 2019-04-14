@@ -51,10 +51,11 @@ module.exports = class World
     }
 
         // タンクの生成
-        createTank()
+        createTank(strSocketID, strNickName )
         {
-            // タンクの生成
-            const tank = new Tank();
+
+        // タンクの生成
+        const tank = new Tank( strSocketID, strNickName);
     
             // タンクリストへの登録
             this.setTank.add( tank );
@@ -67,5 +68,8 @@ module.exports = class World
         {
             // タンクリストリストからの削除
             this.setTank.delete( tank );
+
+            // 削除タンクのクライアントにイベント'dead'を送信
+            this.io.to( tank.strSocketID ).emit( 'dead' );
         }
 }

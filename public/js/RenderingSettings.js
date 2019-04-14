@@ -12,4 +12,8 @@ class RenderingSettings
     // 処理時間
     static get PROCESSINGTIME_FONT() { return '30px Bold Arial'; }
     static get PROCESSINGTIME_COLOR() { return 'black'; }
+
+    // ニックネーム
+    static get NICKNAME_FONT() { return '30px Bold Arial'; }
+    static get NICKNAME_COLOR() { return 'blue'; }
 }
