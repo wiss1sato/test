@@ -33,11 +33,13 @@ module.exports = class Game
                 socket.on( 'enter-the-game', ( objConfig ) =>
                     {	// 自タンクの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
-                        console.log( objConfig );
-                        tank = world.createTank( socket.id, objConfig.strNickName);
-                        player = player + 1;
-                        console.log(player);
-                        if (player === 5) {
+                        // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる（謎・・・）
+                        if (objConfig !== undefined) {
+                            tank = world.createTank( socket.id, objConfig.strNickName);
+                            player = player + 1;
+                            console.log(player);
+                            if (player === 5) {
+                            }
                         }
                     } );
 
