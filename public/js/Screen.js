@@ -38,6 +38,7 @@ class Screen
             'connect',
             () => 
             {
+                console.log( 'connect!!!!!!!!!!!!!!!!');
                 console.log( 'connect : socket.id = %s', socket.id );
                 // サーバーに'enter-the-game'を送信
                 // this.socket.emit( 'enter-the-game' );
