@@ -48,8 +48,7 @@ $( document ).on(
     } );
 
 // スタートボタン
-$( '#start-button' ).on(
-    'click',
+$(document).on('click', '#start-button',
     () => 
     {
         // サーバーに'enter-the-game'を送信
