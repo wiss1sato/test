@@ -13,7 +13,7 @@ class Assets
         // アイテム画像
         this.imageItems = new Image();
         this.imageItems.src = '../images/items.png'
-        this.arectTankInItemsImage = [
+        this.arectPlayerInItemsImage = [
             { sx: 2, sy: 2, sw: 16, sh: 16 },
             { sx: 20, sy: 2, sw: 16, sh: 16 },];
     }

@@ -1,5 +1,5 @@
 // モジュール
-const Tank = require( './Tank.js' );
+const Player = require( './Player.js' );
 
 // ワールドクラス
 // ・ゲーム内の各種要素を保持する
@@ -12,7 +12,7 @@ module.exports = class World
     constructor( io )
     {
         this.io = io;   // socketIO
-         this.setTank = new Set();	// タンクリスト
+         this.setPlayer = new Set();	// プレイヤーリスト
     }
 
     // 更新処理
@@ -27,11 +27,11 @@ module.exports = class World
         // 新たな行動（特に、ボットに関する生成や動作
         this.doNewActions( fDeltaTime );
         
-         // タンクごとの処理
-        this.setTank.forEach(
-            ( tank ) =>
+         // プレイヤーごとの処理
+        this.setPlayer.forEach(
+            ( player ) =>
             {
-                tank.update( fDeltaTime );
+                player.update( fDeltaTime );
             } );
     }
 
@@ -50,26 +50,26 @@ module.exports = class World
     {
     }
 
-        // タンクの生成
-        createTank(strSocketID, strNickName )
+        // プレイヤーの生成
+        createPlayer(strSocketID, strNickName )
         {
 
-        // タンクの生成
-        const tank = new Tank( strSocketID, strNickName);
+        // プレイヤーの生成
+        const player = new Player( strSocketID, strNickName);
     
-            // タンクリストへの登録
-            this.setTank.add( tank );
+            // プレイヤーリストへの登録
+            this.setPlayer.add( player );
     
-            return tank;
+            return player;
         }
     
-        // タンクの破棄
-        destroyTank( tank )
+        // プレイヤーの破棄
+        destroyPlayer( player )
         {
-            // タンクリストリストからの削除
-            this.setTank.delete( tank );
+            // プレイヤーリストリストからの削除
+            this.setPlayer.delete( player );
 
-            // 削除タンクのクライアントにイベント'dead'を送信
-            this.io.to( tank.strSocketID ).emit( 'dead' );
+            // 削除プレイヤーのクライアントにイベント'dead'を送信
+            this.io.to( player.strSocketID ).emit( 'dead' );
         }
 }

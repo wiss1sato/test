@@ -6,7 +6,7 @@ class SharedSettings
     // 　「FIELD_WIDTHは、FIELDTILE_WIDTHの定数倍」「FIELD_HEIGHTは、FIELDTILE_HEIGHTの定数倍」にする必要あり。
     static get FIELD_WIDTH() { return 1024.0; }
     static get FIELD_HEIGHT() { return 1024.0; }
-    // タンク
+    // プレイヤー
     static get TANK_WIDTH() { return 80.0; }
     static get TANK_HEIGHT() { return 80.0; }
 }

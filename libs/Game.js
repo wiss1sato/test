@@ -16,7 +16,7 @@ module.exports = class Game
         // 変数
         const world = new World( io ); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
-        let player = 0;
+        let playerNum = 0;
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -26,19 +26,18 @@ module.exports = class Game
             ( socket ) =>
             {
                 console.log( 'connection : socket.id = %s', socket.id );
-                let tank = null;	// コネクションごとのタンクオブジェクト。イベントをまたいで使用される。
+                let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
 
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
-                    {	// 自タンクの作成
+                    {	// 自プレイヤーの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
                         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる（謎・・・）
                         if (objConfig !== undefined) {
-                            tank = world.createTank( socket.id, objConfig.strNickName);
-                            player = player + 1;
-                            console.log(player);
-                            if (player === 5) {
+                            player = world.createPlayer( socket.id, objConfig.strNickName);
+                            playerNum = playerNum + 1;
+                            if (playerNum === 5) {
                             }
                         }
                     } );
@@ -49,11 +48,11 @@ module.exports = class Game
                     ( objMovement ) =>
                     {
                         //console.log( 'change-my-movement : socket.id = %s', socket.id );
-                        if( !tank )
+                        if( !player )
                         {
                             return;
                         }
-                        tank.objMovement = objMovement;	// 動作
+                        player.objMovement = objMovement;	// 動作
                     } );
 
                 // 切断時の処理の指定
@@ -86,7 +85,7 @@ module.exports = class Game
 
                 // 最新状況をクライアントに送信
                 io.emit( 'update',
-                    Array.from( world.setTank ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
+                    Array.from( world.setPlayer ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]

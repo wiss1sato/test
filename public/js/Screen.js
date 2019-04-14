@@ -10,7 +10,7 @@ class Screen
 
         this.assets = new Assets();
         this.iProcessingTimeNanoSec = 0;
-        this.aTank = null;
+        this.aPlayer = null;
 
         // キャンバスの初期化
         this.canvas.width = SharedSettings.FIELD_WIDTH;
@@ -53,9 +53,9 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aTank, iProcessingTimeNanoSec ) =>
+            ( aPlayer, iProcessingTimeNanoSec ) =>
             {
-                this.aTank = aTank;
+                this.aPlayer = aPlayer;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -83,15 +83,15 @@ class Screen
         // キャンバスの塗りつぶし
         this.renderField();
 
-        // タンクの描画
-        if( null !== this.aTank )
+        // プレイヤーの描画
+        if( null !== this.aPlayer )
         {
             const fTimeCurrentSec = iTimeCurrent * 0.001; // iTimeCurrentは、ミリ秒。秒に変換。
             const iIndexFrame = parseInt( fTimeCurrentSec / 0.2 ) % 2;  // フレーム番号
-            this.aTank.forEach(
-                ( tank ) =>
+            this.aPlayer.forEach(
+                ( player ) =>
                 {
-                    this.renderTank( tank, iIndexFrame );
+                    this.renderPlayer( player, iIndexFrame );
                 } );
         }
 
@@ -135,19 +135,19 @@ class Screen
         this.context.restore();
     }
 
-    renderTank( tank, iIndexFrame )
+    renderPlayer( player, iIndexFrame )
     {
         this.context.save();
 
-        // タンクの座標値に移動
-        this.context.translate( tank.fX, tank.fY );
+        // プレイヤーの座標値に移動
+        this.context.translate( player.fX, player.fY );
 
         // 画像描画
         this.context.save();
-        this.context.rotate( tank.fAngle );
+        this.context.rotate( player.fAngle );
         this.context.drawImage( this.assets.imageItems,
-            this.assets.arectTankInItemsImage[iIndexFrame].sx, this.assets.arectTankInItemsImage[iIndexFrame].sy,	// 描画元画像の右上座標
-            this.assets.arectTankInItemsImage[iIndexFrame].sw, this.assets.arectTankInItemsImage[iIndexFrame].sh,	// 描画元画像の大きさ
+            this.assets.arectPlayerInItemsImage[iIndexFrame].sx, this.assets.arectPlayerInItemsImage[iIndexFrame].sy,	// 描画元画像の右上座標
+            this.assets.arectPlayerInItemsImage[iIndexFrame].sw, this.assets.arectPlayerInItemsImage[iIndexFrame].sh,	// 描画元画像の大きさ
             -SharedSettings.TANK_WIDTH * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
             -SharedSettings.TANK_HEIGHT * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
             SharedSettings.TANK_WIDTH,	// 描画先領域の大きさ
@@ -159,7 +159,7 @@ class Screen
         this.context.textAlign = 'center';
         this.context.font = RenderingSettings.NICKNAME_FONT;
         this.context.fillStyle = RenderingSettings.NICKNAME_COLOR;
-        this.context.fillText( tank.strNickName, 0, -50 );
+        this.context.fillText( player.strNickName, 0, -50 );
         this.context.restore();
 
         this.context.restore();
