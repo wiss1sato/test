@@ -53,7 +53,6 @@ $( '#start-button' ).on(
     () => 
     {
         // サーバーに'enter-the-game'を送信
-        console.log( 'connect!?!?!?!?!?!?!?!');
         const objConfig = { strNickName: $( '#nickname' ).val() };
         socket.emit( 'enter-the-game',
             objConfig );

@@ -38,9 +38,7 @@ class Screen
             'connect',
             () => 
             {
-                console.log( 'connect!!!!!!!!!!!!!!!!');
                 console.log( 'connect : socket.id = %s', socket.id );
-                // サーバーに'enter-the-game'を送信
             } );
 
         // デッドしたらスタート画面に戻る
