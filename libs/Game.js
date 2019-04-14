@@ -39,7 +39,6 @@ module.exports = class Game
                         player = player + 1;
                         console.log(player);
                         if (player === 5) {
-                            
                         }
                     } );
 
