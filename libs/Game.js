@@ -30,12 +30,11 @@ module.exports = class Game
 
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
-                socket.on( 'enter-the-game',
-                    ( objConfig ) =>
+                socket.on( 'enter-the-game', ( objConfig ) =>
                     {	// 自タンクの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
                         console.log( objConfig );
-                        tank = world.createTank( socket.id, 'objConfig.strNickName');
+                        tank = world.createTank( socket.id, objConfig.strNickName);
                         player = player + 1;
                         console.log(player);
                         if (player === 5) {
