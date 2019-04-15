@@ -37,7 +37,10 @@ module.exports = class Game
                         if (objConfig !== undefined) {
                             player = world.createPlayer( socket.id, objConfig.strNickName);
                             playerNum = playerNum + 1;
-                            if (playerNum === 5) {
+                            if (playerNum == 5) {
+                                console.log('ゲーム開始！');
+                                // ゲーム開始をクライアントに送信
+                                io.emit( 'game-start');	// 送信                                
                             }
                         }
                     } );
@@ -60,6 +63,7 @@ module.exports = class Game
                 socket.on( 'disconnect',
                     () =>
                     {
+                        playerNum = playerNum - 1;
                         console.log( 'disconnect : socket.id = %s', socket.id );
                     } );
             } );

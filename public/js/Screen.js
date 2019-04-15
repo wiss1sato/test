@@ -59,6 +59,16 @@ class Screen
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
+        // サーバーからの状態通知に対する処理
+        // ・サーバー側の周期的処理の「io.sockets.emit( 'game-start', ・・・ );」に対する処理
+        // ゲーム開始を知らせ、ゲーム画面を表示
+        this.socket.on(
+            'game-start',
+            () =>
+            {
+                $( '#game-screen' ).show();
+            } );
+
     }
 
     // アニメーション（無限ループ処理）
