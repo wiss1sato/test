@@ -5,6 +5,8 @@ const GameObject = require( './GameObject.js' );
 const SharedSettings = require( '../public/js/SharedSettings.js' );
 const GameSettings = require( './GameSettings.js' );
 
+let playerNum = 0;
+
 // プレイヤークラス
 module.exports = class Player extends GameObject
 {
@@ -12,14 +14,41 @@ module.exports = class Player extends GameObject
     constructor(strSocketID, strNickName)
     {
         // 親クラスのコンストラクタ呼び出し
-        super( SharedSettings.TANK_WIDTH, SharedSettings.TANK_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI );
+        super( SharedSettings.PLAYER_WIDTH, SharedSettings.PLAYER_HEIGHT, 0.0, 0.0, 0.0 );
 
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
 
         // 初期位置
-        this.fX = Math.random() * ( SharedSettings.FIELD_WIDTH - SharedSettings.TANK_WIDTH );
-        this.fY = Math.random() * ( SharedSettings.FIELD_HEIGHT - SharedSettings.TANK_HEIGHT );
+
+        if (playerNum === 0) {
+            this.fX = 500;
+            this.fY = 1000;
+        }
+        
+        if (playerNum === 1) {
+            this.fX = 0;
+            this.fY = 300;
+        }
+
+        if (playerNum === 2) {
+            this.fX = 0;
+            this.fY = 600;
+        }
+                
+        if (playerNum === 3) {
+            this.fX = 1000;
+            this.fY = 300;
+        }
+
+        if (playerNum === 4) {
+            this.fX = 1000;
+            this.fY = 600;
+        }
+
+        playerNum = playerNum + 1;
+
+
     }
 
     toJSON()

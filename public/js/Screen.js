@@ -158,10 +158,10 @@ class Screen
         this.context.drawImage( this.assets.imageItems,
             this.assets.arectPlayerInItemsImage[iIndexFrame].sx, this.assets.arectPlayerInItemsImage[iIndexFrame].sy,	// 描画元画像の右上座標
             this.assets.arectPlayerInItemsImage[iIndexFrame].sw, this.assets.arectPlayerInItemsImage[iIndexFrame].sh,	// 描画元画像の大きさ
-            -SharedSettings.TANK_WIDTH * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-            -SharedSettings.TANK_HEIGHT * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-            SharedSettings.TANK_WIDTH,	// 描画先領域の大きさ
-            SharedSettings.TANK_HEIGHT );	// 描画先領域の大きさ
+            -SharedSettings.PLAYER_WIDTH * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+            -SharedSettings.PLAYER_HEIGHT * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+            SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ
         this.context.restore();
 
         // ニックネーム
