@@ -45,10 +45,7 @@ module.exports = class Player extends GameObject
             this.fX = 1000;
             this.fY = 600;
         }
-
         playerNum = playerNum + 1;
-
-
     }
 
     toJSON()

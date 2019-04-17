@@ -7,7 +7,6 @@ class Screen
         this.socket = socket;
         this.canvas = canvas;
         this.context = canvas.getContext( '2d' );
-
         this.assets = new Assets();
         this.iProcessingTimeNanoSec = 0;
         this.aPlayer = null;
@@ -111,15 +110,6 @@ class Screen
         this.context.lineWidth = RenderingSettings.FIELD_LINEWIDTH;
         this.context.strokeRect( 0, 0, canvas.width, canvas.height );
         this.context.restore();
-
-        // 画面右上にサーバー処理時間表示
-        this.context.save();
-        this.context.font = RenderingSettings.PROCESSINGTIME_FONT;
-        this.context.fillStyle = RenderingSettings.PROCESSINGTIME_COLOR;
-        this.context.fillText( ( this.iProcessingTimeNanoSec * 1e-9 ).toFixed( 9 ) + ' [s]',
-            this.canvas.width - 30 * 10,
-            40 );
-        this.context.restore();
     }
 
     renderField()
@@ -145,10 +135,9 @@ class Screen
         this.context.restore();
     }
 
-    renderPlayer( player, iIndexFrame )
+    renderPlayer( player, iIndexFrame)
     {
         this.context.save();
-
         // プレイヤーの座標値に移動
         this.context.translate( player.fX, player.fY );
 
@@ -163,7 +152,6 @@ class Screen
             SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
             SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ
         this.context.restore();
-
         // ニックネーム
         this.context.save();
         this.context.textAlign = 'center';

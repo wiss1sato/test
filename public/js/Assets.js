@@ -15,6 +15,6 @@ class Assets
         this.imageItems.src = '../images/items.png'
         this.arectPlayerInItemsImage = [
             { sx: 2, sy: 2, sw: 16, sh: 16 },
-            { sx: 20, sy: 2, sw: 16, sh: 16 },];
+            { sx: 2, sy: 2, sw: 16, sh: 16 },];
     }
 }
