@@ -2,18 +2,18 @@
 class Screen
 {
     // コンストラクタ
-    constructor( socket, canvas )
+    constructor( socket, canvas, iconName )
     {
         this.socket = socket;
         this.canvas = canvas;
         this.context = canvas.getContext( '2d' );
-        this.assets = new Assets();
         this.iProcessingTimeNanoSec = 0;
         this.aPlayer = null;
-
+        this.assets = new Assets(iconName);
         // キャンバスの初期化
         this.canvas.width = SharedSettings.FIELD_WIDTH;
         this.canvas.height = SharedSettings.FIELD_HEIGHT;
+        this.aCard = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -52,9 +52,10 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
+                this.aCard = aCard;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -62,10 +63,20 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'game-start', ・・・ );」に対する処理
         // ゲーム開始を知らせ、ゲーム画面を表示
         this.socket.on(
-            'game-start',
+            'enter-the-game',
             () =>
             {
-                $( '#game-screen' ).show();
+                // キャンバスの塗りつぶし
+                this.drawField();
+                // プレイヤーの描画
+                if( null !== this.aPlayer )
+                {
+                    this.aPlayer.forEach(
+                        ( player ) =>
+                        {
+                            this.drawPlayer( player );
+                        } );
+                }
             } );
 
     }
@@ -79,6 +90,17 @@ class Screen
                 this.animate( iTimeCurrent );
             } );
         this.render( iTimeCurrent );
+
+        // カードの描画
+        if( null !== this.aCard )
+        {
+            this.aCard.forEach(
+                ( card ) =>
+                {
+                    this.renderCard( card );
+                } );
+        }
+
     }
 
     // 描画。animateから無限に呼び出される
@@ -86,36 +108,21 @@ class Screen
     {
         //console.log( 'render' );
 
-        // キャンバスのクリア
-        this.context.clearRect( 0, 0, canvas.width, canvas.height );
+        // // キャンバスのクリア
+        // this.context.clearRect( 0, 0, canvas.width, canvas.height );
 
-        // キャンバスの塗りつぶし
-        this.renderField();
 
-        // プレイヤーの描画
-        if( null !== this.aPlayer )
-        {
-            const fTimeCurrentSec = iTimeCurrent * 0.001; // iTimeCurrentは、ミリ秒。秒に変換。
-            const iIndexFrame = parseInt( fTimeCurrentSec / 0.2 ) % 2;  // フレーム番号
-            this.aPlayer.forEach(
-                ( player ) =>
-                {
-                    this.renderPlayer( player, iIndexFrame );
-                } );
-        }
-
-        // キャンバスの枠の描画
-        this.context.save();
-        this.context.strokeStyle = RenderingSettings.FIELD_LINECOLOR;
-        this.context.lineWidth = RenderingSettings.FIELD_LINEWIDTH;
-        this.context.strokeRect( 0, 0, canvas.width, canvas.height );
-        this.context.restore();
+        // // キャンバスの枠の描画
+        // this.context.save();
+        // this.context.strokeStyle = RenderingSettings.FIELD_LINECOLOR;
+        // this.context.lineWidth = RenderingSettings.FIELD_LINEWIDTH;
+        // this.context.strokeRect( 0, 0, canvas.width, canvas.height );
+        // this.context.restore();
     }
 
-    renderField()
+    drawField()
     {
         this.context.save();
-
         let iCountX = parseInt( SharedSettings.FIELD_WIDTH / RenderingSettings.FIELDTILE_WIDTH );
         let iCountY = parseInt( SharedSettings.FIELD_HEIGHT / RenderingSettings.FIELDTILE_HEIGHT );
         for( let iIndexY = 0; iIndexY < iCountY; iIndexY++ )
@@ -135,32 +142,53 @@ class Screen
         this.context.restore();
     }
 
-    renderPlayer( player, iIndexFrame)
+    drawPlayer( player )
     {
         this.context.save();
         // プレイヤーの座標値に移動
         this.context.translate( player.fX, player.fY );
-
         // 画像描画
         this.context.save();
         this.context.rotate( player.fAngle );
-        this.context.drawImage( this.assets.imageItems,
-            this.assets.arectPlayerInItemsImage[iIndexFrame].sx, this.assets.arectPlayerInItemsImage[iIndexFrame].sy,	// 描画元画像の右上座標
-            this.assets.arectPlayerInItemsImage[iIndexFrame].sw, this.assets.arectPlayerInItemsImage[iIndexFrame].sh,	// 描画元画像の大きさ
-            -SharedSettings.PLAYER_WIDTH * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-            -SharedSettings.PLAYER_HEIGHT * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+        this.context.drawImage( this.assets.imageItem,0,0,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
             SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
             SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ
         this.context.restore();
+  
         // ニックネーム
+        
         this.context.save();
+        this.context.restore();
+        this.context.fill();
         this.context.textAlign = 'center';
         this.context.font = RenderingSettings.NICKNAME_FONT;
         this.context.fillStyle = RenderingSettings.NICKNAME_COLOR;
         this.context.fillText( player.strNickName, 0, -50 );
-        this.context.restore();
 
         this.context.restore();
-
+        this.context.restore();
     }
+
+    renderCard( card )
+    {
+        this.context.save();
+
+        // 弾丸の座標値に移動
+//        this.context.translate( card.fX, card.fY );
+
+        // 弾丸の座標値に移動
+        this.context.translate( 200, 100 );
+
+        // 画像描画
+        this.context.rotate( card.fAngle );
+        this.context.drawImage( this.assets.cardS1,0,0,
+            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.CARD_HEIGHT );	// 描画先領域の大きさ
+
+        this.context.restore();
+    }
+
+
+
+    
 }

@@ -33,6 +33,7 @@ module.exports = class Game
                 socket.on( 'enter-the-game', ( objConfig ) =>
                     {	// 自プレイヤーの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
+                        world.createCard( 's1' );	// ♠の1を作る
                         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる（謎・・・）
                         if (objConfig !== undefined) {
                             player = world.createPlayer( socket.id, objConfig.strNickName);
@@ -90,6 +91,7 @@ module.exports = class Game
                 // 最新状況をクライアントに送信
                 io.emit( 'update',
                     Array.from( world.setPlayer ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
+                    Array.from( world.setCard ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]

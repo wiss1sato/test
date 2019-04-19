@@ -1,5 +1,7 @@
 // モジュール
 const Player = require( './Player.js' );
+// モジュール
+const Card = require( './Card.js' );
 
 // ワールドクラス
 // ・ゲーム内の各種要素を保持する
@@ -13,6 +15,7 @@ module.exports = class World
     {
         this.io = io;   // socketIO
          this.setPlayer = new Set();	// プレイヤーリスト
+         this.setCard = new Set();	// 弾丸リスト
     }
 
     // 更新処理
@@ -38,6 +41,12 @@ module.exports = class World
     // オブジェクトの座標値の更新
     updateObjects( fDeltaTime )
     {
+        // カードごとの処理
+        this.setCard.forEach(
+            ( card ) =>
+            {
+                card.update( fDeltaTime, card );
+            } );
     }
 
     // 衝突のチェック
@@ -50,26 +59,35 @@ module.exports = class World
     {
     }
 
-        // プレイヤーの生成
-        createPlayer(strSocketID, strNickName )
-        {
+    // プレイヤーの生成
+    createPlayer(strSocketID, strNickName )
+    {
 
-        // プレイヤーの生成
-        const player = new Player( strSocketID, strNickName);
-    
-            // プレイヤーリストへの登録
-            this.setPlayer.add( player );
-    
-            return player;
-        }
-    
-        // プレイヤーの破棄
-        destroyPlayer( player )
-        {
-            // プレイヤーリストリストからの削除
-            this.setPlayer.delete( player );
+    // プレイヤーの生成
+    const player = new Player( strSocketID, strNickName);
 
-            // 削除プレイヤーのクライアントにイベント'dead'を送信
-            this.io.to( player.strSocketID ).emit( 'dead' );
-        }
+        // プレイヤーリストへの登録
+        this.setPlayer.add( player );
+        this.io.to( player.strSocketID ).emit( 'enter-the-game' );
+        return player;
+    }
+
+    // プレイヤーの破棄
+    destroyPlayer( player )
+    {
+        // プレイヤーリストリストからの削除
+        this.setPlayer.delete( player );
+
+        // 削除プレイヤーのクライアントにイベント'dead'を送信
+        this.io.to( player.strSocketID ).emit( 'dead' );
+    }
+
+    // カードの生成
+    createCard(cardId)
+    {
+        // カードの生成
+        const card = new Card( cardId );
+        this.setCard.add( card );
+        return card;
+    }
 }

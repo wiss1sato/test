@@ -7,7 +7,7 @@ const socket = io.connect();	// クライアントからサーバーへの接続
 const canvas = document.querySelector( '#canvas-2d' );
 
 // キャンバスオブジェクト
-const screen = new Screen( socket, canvas );
+const screen = new Screen( socket, canvas, 'haru_01.jpg');
 
 // キャンバスの描画開始
 screen.animate( 0 );

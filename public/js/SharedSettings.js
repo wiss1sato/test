@@ -3,12 +3,15 @@ class SharedSettings
 {
     // フィールドサイズ
     // ※背景タイル画像のトリム処理未実装のため、
-    // 　「FIELD_WIDTHは、FIELDTILE_WIDTHの定数倍」「FIELD_HEIGHTは、FIELDTILE_HEIGHTの定数倍」にする必要あり。
+    // 　「FIELD_WIDTHは、FIELDTILE_WIDTHの定数倍」「FIELD_HEIGHTは、FIELDTsILE_HEIGHTの定数倍」にする必要あり。
     static get FIELD_WIDTH() { return 1024.0; }
     static get FIELD_HEIGHT() { return 1024.0; }
     // プレイヤー
-    static get PLAYER_WIDTH() { return 130.0; }
-    static get PLAYER_HEIGHT() { return 200.0; }
+    static get PLAYER_WIDTH() { return 180.0; }
+    static get PLAYER_HEIGHT() { return 180.0; }
+
+    static get CARD_WIDTH() { return 30.0; }
+    static get CARD_HEIGHT() { return 30.0; }
 }
 
 if( typeof module !== 'undefined' && typeof module.exports !== 'undefined' )
