@@ -24,6 +24,8 @@ class Screen
         this.context.webkitImageSmoothingEnabled = false;
         this.context.msImageSmoothingEnabled = false;
         this.context.imageSmoothingEnabled = false;
+        this.drawCnt = 0;
+        this.playerList = [];
     }
 
     // ソケットの初期化
@@ -54,28 +56,28 @@ class Screen
             'update',
             ( aPlayer, aCard, iProcessingTimeNanoSec ) =>
             {
-                this.aPlayer = aPlayer;
+                
                 this.aCard = aCard;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
         // サーバーからの状態通知に対する処理
-        // ・サーバー側の周期的処理の「io.sockets.emit( 'game-start', ・・・ );」に対する処理
-        // ゲーム開始を知らせ、ゲーム画面を表示
+        // ・サーバー側の周期的処理の「io.sockets.emit( 'enter-the-game', ・・・ );」に対する処理
+        // プレイヤーを画面に表示する
         this.socket.on(
             'enter-the-game',
-            () =>
+            (aPlayer) =>
             {
+                this.aPlayer = aPlayer;
                 // キャンバスの塗りつぶし
-                this.drawField();
-                // プレイヤーの描画
-                if( null !== this.aPlayer )
+                if (this.drawCnt === 0) {
+                    this.drawField();
+                    this.drawCnt = this.drawCnt + 1;
+                }
+                // プレイヤーの描画（全員)
+                if( null !== this.aPlayer && undefined !== this.aPlayer )
                 {
-                    this.aPlayer.forEach(
-                        ( player ) =>
-                        {
-                            this.drawPlayer( player );
-                        } );
+                    this.drawPlayers(this.aPlayer);
                 }
             } );
 
@@ -142,53 +144,88 @@ class Screen
         this.context.restore();
     }
 
-    drawPlayer( player )
+    drawPlayers( players )
     {
-        this.context.save();
-        // プレイヤーの座標値に移動
-        this.context.translate( player.fX, player.fY );
-        // 画像描画
-        this.context.save();
-        this.context.rotate( player.fAngle );
-        this.context.drawImage( this.assets.imageItem,0,0,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-            SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
-            SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ
-        this.context.restore();
+        var srcs =  []; 
+        for (var i=0, l=players.length; i<l; i++) {
+            srcs.push('../images/' + players[i].iconName);
+        }
+        var ctx = this.context;
+        this.preloadImages(srcs).done(function () {
+            for (var i=0, l=srcs.length; i<l; i++) {
+              var img = new Image();
+              img.src = srcs[i];
+              // 画像描画
+              ctx.save();
+              ctx.drawImage( img,
+                  players[i].fX, players[i].fY,
+                  SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+                  SharedSettings.PLAYER_HEIGHT                  
+                   );	// 描画先領域の大きさ
+              ctx.restore();
   
-        // ニックネーム
-        
-        this.context.save();
-        this.context.restore();
-        this.context.fill();
-        this.context.textAlign = 'center';
-        this.context.font = RenderingSettings.NICKNAME_FONT;
-        this.context.fillStyle = RenderingSettings.NICKNAME_COLOR;
-        this.context.fillText( player.strNickName, 0, -50 );
+              // ニックネーム
+              ctx.save();
+              ctx.restore();
+              ctx.textAlign = 'center';
+              ctx.font = RenderingSettings.NICKNAME_FONT;
+              ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
+            //   ctx.translate( players[i].fX + 80, players[i].fY + 30 );
+              ctx.fillText( players[i].strNickName, players[i].fX + 80, players[i].fY - 30);
+              ctx.restore();
+              ctx.restore();  
+            }
+          });
 
-        this.context.restore();
-        this.context.restore();
+        // img.onload = function() {
+        //     // プレイヤーの座標値に移動
+        // }
+
+
+        // ctx.drawImage( this.assets.imageItem,0,0,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+        //     SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+        //     SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ   
     }
 
     renderCard( card )
     {
-        this.context.save();
+//         this.context.save();
 
-        // 弾丸の座標値に移動
-//        this.context.translate( card.fX, card.fY );
+//         // 弾丸の座標値に移動
+// //        this.context.translate( card.fX, card.fY );
 
-        // 弾丸の座標値に移動
-        this.context.translate( 200, 100 );
+//         // 弾丸の座標値に移動
+//         this.context.translate( 200, 100 );
 
-        // 画像描画
-        this.context.rotate( card.fAngle );
-        this.context.drawImage( this.assets.cardS1,0,0,
-            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
-            SharedSettings.CARD_HEIGHT );	// 描画先領域の大きさ
+//         // 画像描画
+//         this.context.drawImage( this.assets.cardS1,0,0,
+//             SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+//             SharedSettings.CARD_HEIGHT );	// 描画先領域の大きさ
 
-        this.context.restore();
+//         this.context.restore();
     }
 
-
-
-    
+    preloadImages = function (srcs) {
+        if (!srcs.length) {
+          return;
+        }
+        var dfd = $.Deferred();
+        var imgs = [];
+        for (var i=0, l=srcs.length; i<l; i++) {
+          var img = new Image();
+          img.src = srcs[i];
+          imgs.push(img);
+        }
+        var check = function () {
+          for (var i=0, l=imgs.length; i<l; i++) {
+            if (imgs[i].complete !== true) {
+              setTimeout(check, 250);
+              return false;
+            }
+          }
+          dfd.resolve(imgs);
+        };
+        check();
+        return dfd.promise();
+      }    
 }

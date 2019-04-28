@@ -15,7 +15,7 @@ module.exports = class World
     {
         this.io = io;   // socketIO
          this.setPlayer = new Set();	// プレイヤーリスト
-         this.setCard = new Set();	// 弾丸リスト
+         this.setCard = new Set();	// カードリスト
     }
 
     // 更新処理
@@ -60,15 +60,19 @@ module.exports = class World
     }
 
     // プレイヤーの生成
-    createPlayer(strSocketID, strNickName )
+    createPlayer(strSocketID, strNickName, iconName )
     {
 
     // プレイヤーの生成
-    const player = new Player( strSocketID, strNickName);
+    const player = new Player( strSocketID, strNickName, iconName);
 
         // プレイヤーリストへの登録
         this.setPlayer.add( player );
-        this.io.to( player.strSocketID ).emit( 'enter-the-game' );
+        this.setPlayer.forEach(
+            ( p ) =>
+            {
+                this.io.to( p.strSocketID ).emit( 'enter-the-game' );
+            } );
         return player;
     }
 

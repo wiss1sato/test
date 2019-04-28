@@ -7,7 +7,7 @@ const socket = io.connect();	// クライアントからサーバーへの接続
 const canvas = document.querySelector( '#canvas-2d' );
 
 // キャンバスオブジェクト
-const screen = new Screen( socket, canvas, 'haru_01.jpg');
+const screen = new Screen( socket, canvas);
 
 // キャンバスの描画開始
 screen.animate( 0 );
@@ -52,7 +52,7 @@ $(document).on('click', '#start-button',
     () => 
     {
         // サーバーに'enter-the-game'を送信
-        const objConfig = { strNickName: $( '#nickname' ).val() };
+        const objConfig = { strNickName: $( '#nickname' ).val(), iconName: $('#iconName').prop('files')[0].name };
         socket.emit( 'enter-the-game', objConfig );
         $( '#start-screen' ).hide();
     } );

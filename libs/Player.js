@@ -11,19 +11,20 @@ let playerNum = 0;
 module.exports = class Player extends GameObject
 {
     // コンストラクタ
-    constructor(strSocketID, strNickName)
+    constructor(strSocketID, strNickName, iconName)
     {
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.PLAYER_WIDTH, SharedSettings.PLAYER_HEIGHT, 0.0, 0.0, 0.0 );
 
+        this.iconName = iconName;
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
-
+        this.playerNum = playerNum;
         // 初期位置
 
         if (playerNum === 0) {
             this.fX = 400;
-            this.fY = 800;
+            this.fY = 600;
         }
         
         if (playerNum === 1) {
@@ -33,7 +34,7 @@ module.exports = class Player extends GameObject
 
         if (playerNum === 2) {
             this.fX = 100;
-            this.fY = 500;
+            this.fY = 400;
         }
                 
         if (playerNum === 3) {
@@ -43,7 +44,7 @@ module.exports = class Player extends GameObject
 
         if (playerNum === 4) {
             this.fX = 750;
-            this.fY = 500;
+            this.fY = 400;
         }
         playerNum = playerNum + 1;
     }
@@ -53,6 +54,8 @@ module.exports = class Player extends GameObject
         return Object.assign(
             super.toJSON(),
             {
+                playerNum: this.playerNum,
+                iconName: this.iconName,
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName
             } );

@@ -36,13 +36,10 @@ module.exports = class Game
                         world.createCard( 's1' );	// ♠の1を作る
                         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる（謎・・・）
                         if (objConfig !== undefined) {
-                            player = world.createPlayer( socket.id, objConfig.strNickName);
+                            player = world.createPlayer( socket.id, objConfig.strNickName, objConfig.iconName);
                             playerNum = playerNum + 1;
-                            if (playerNum == 5) {
-                                console.log('ゲーム開始！');
-                                // ゲーム開始をクライアントに送信
-                                io.emit( 'game-start');	// 送信                                
-                            }
+                            // 最新状況をクライアントに送信
+                            io.emit( 'enter-the-game', Array.from( world.setPlayer ))
                         }
                     } );
 
