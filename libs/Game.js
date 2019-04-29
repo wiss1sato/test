@@ -80,6 +80,18 @@ module.exports = class Game
                         world.destroyPlayer( player );
                         player = null;	// 自タンクの解放
                     } );
+
+                    socket.on( 'player-clicked',
+                    () =>
+                    {
+                        console.log( 'player-clicked', socket.id );
+                        if( !player )
+                        {
+                            return;
+                        }
+                        player.playerClicked();
+                    } );
+
             } );
 
         // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）

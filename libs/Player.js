@@ -30,6 +30,11 @@ module.exports = class Player extends GameObject
             } );
     }
 
+    playerClicked()
+    {
+        this.fY = this.fY - 30;
+    }
+
     // 配置
     setPlayer(playerNum)
     {

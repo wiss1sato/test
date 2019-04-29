@@ -51,7 +51,7 @@ module.exports = class World
         this.setPlayer.forEach(
             ( player ) =>
             {
-                player.update( fDeltaTime);
+                player.update( player);
             } );            
     }
 

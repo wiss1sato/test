@@ -24,8 +24,12 @@ class Screen
         this.context.webkitImageSmoothingEnabled = false;
         this.context.msImageSmoothingEnabled = false;
         this.context.imageSmoothingEnabled = false;
-        this.drawCnt = 0;
-        this.playerList = [];
+
+        canvas.addEventListener('mousedown', this.onDown, false);
+        canvas.addEventListener('mouseup', this.onUp, false);
+        canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('mouseover', this.onOver, false);
+        canvas.addEventListener('mouseout', this.onOut, false);
     }
 
     // ソケットの初期化
@@ -61,27 +65,8 @@ class Screen
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
-        // サーバーからの状態通知に対する処理
-        // ・サーバー側の周期的処理の「io.sockets.emit( 'enter-the-game', ・・・ );」に対する処理
-        // プレイヤーを画面に表示する
-        // this.socket.on(
-        //     'enter-the-game',
-        //     (aPlayer) =>
-        //     {
-        //         this.aPlayer = aPlayer;
-        //         // キャンバスの塗りつぶし
-        //         if (this.drawCnt === 0) {
-        //             this.drawField();
-        //             this.drawCnt = this.drawCnt + 1;
-        //         }
-        //         // プレイヤーの描画（全員)
-        //         if( null !== this.aPlayer && undefined !== this.aPlayer )
-        //         {
-        //             this.drawPlayers(this.aPlayer);
-        //         }
-        //     } );
 
-                    // デッドしたらスタート画面に戻る
+       // デッドしたらスタート画面に戻る   
         this.socket.on(
             'start-the-game',
             () =>
@@ -226,4 +211,43 @@ class Screen
         check();
         return dfd.promise();
       }    
+
+    onDown(e) {
+        console.log("down");
+    }
+    
+    onUp(e) {
+        console.log("up");
+    }
+    
+    onClick(e) {
+        console.log("click");
+        var x = e.clientX - canvas.offsetLeft;
+        var y = e.clientY - canvas.offsetTop;
+
+        // クリックした座標にカードが位置している場合、ちょっと上に上げる
+        this.aPlayer.forEach(
+            ( player ) =>
+            {
+                if ((player.fX <= x && x <= player.fX + SharedSettings.PLAYER_WIDTH) 
+                    &&
+                    (player.fY <= y && y <= player.fY + SharedSettings.PLAYER_HEIGHT) 
+                    ){
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'player-clicked' );
+                }
+            } );
+
+        console.log("x:", x, "y:", y);
+    }
+    
+    onOver(e) {
+        console.log("mouseover");
+    }
+    
+    onOut() {
+        console.log("mouseout");
+    }
+
+
 }
