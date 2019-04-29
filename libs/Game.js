@@ -17,6 +17,7 @@ module.exports = class Game
         const world = new World( io ); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let playerNum = 0;
+        let playerList = [];
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -33,13 +34,23 @@ module.exports = class Game
                 socket.on( 'enter-the-game', ( objConfig ) =>
                     {	// 自プレイヤーの作成
                         console.log( 'enter-the-game : socket.id = %s', socket.id );
-                        world.createCard( 's1' );	// ♠の1を作る
-                        // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる（謎・・・）
+                        // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる
                         if (objConfig !== undefined) {
                             player = world.createPlayer( socket.id, objConfig.strNickName, objConfig.iconName);
-                            playerNum = playerNum + 1;
+                            playerNum = 0;
+                            world.setPlayer.forEach(
+                                // プレイヤー採番(一旦適当)
+                                ( player ) =>
+                                {  
+                                    playerNum = playerNum  + 1;
+                                    // 採番ごとに配置する
+                                    player.setPlayer(playerNum);
+                                } );
+                            
                             // 最新状況をクライアントに送信
-                            io.emit( 'enter-the-game', Array.from( world.setPlayer ))
+                            // io.emit( 'enter-the-game', Array.from( world.setPlayer ));
+                                // // ゲーム開始を各プレイヤーに送信
+                                // io.emit( 'start-the-game', Array.from( world.setPlayer ));
                         }
                     } );
 
@@ -61,8 +72,13 @@ module.exports = class Game
                 socket.on( 'disconnect',
                     () =>
                     {
-                        playerNum = playerNum - 1;
                         console.log( 'disconnect : socket.id = %s', socket.id );
+                        if( !player )
+                        {
+                            return;
+                        }
+                        world.destroyPlayer( player );
+                        player = null;	// 自タンクの解放
                     } );
             } );
 

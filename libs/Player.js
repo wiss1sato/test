@@ -5,13 +5,11 @@ const GameObject = require( './GameObject.js' );
 const SharedSettings = require( '../public/js/SharedSettings.js' );
 const GameSettings = require( './GameSettings.js' );
 
-let playerNum = 0;
-
 // プレイヤークラス
 module.exports = class Player extends GameObject
 {
     // コンストラクタ
-    constructor(strSocketID, strNickName, iconName)
+    constructor(strSocketID, strNickName, iconName, playerNum)
     {
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.PLAYER_WIDTH, SharedSettings.PLAYER_HEIGHT, 0.0, 0.0, 0.0 );
@@ -19,34 +17,6 @@ module.exports = class Player extends GameObject
         this.iconName = iconName;
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
-        this.playerNum = playerNum;
-        // 初期位置
-
-        if (playerNum === 0) {
-            this.fX = 400;
-            this.fY = 600;
-        }
-        
-        if (playerNum === 1) {
-            this.fX = 100;
-            this.fY = 100;
-        }
-
-        if (playerNum === 2) {
-            this.fX = 100;
-            this.fY = 400;
-        }
-                
-        if (playerNum === 3) {
-            this.fX = 750;
-            this.fY = 100;
-        }
-
-        if (playerNum === 4) {
-            this.fX = 750;
-            this.fY = 400;
-        }
-        playerNum = playerNum + 1;
     }
 
     toJSON()
@@ -54,11 +24,41 @@ module.exports = class Player extends GameObject
         return Object.assign(
             super.toJSON(),
             {
-                playerNum: this.playerNum,
                 iconName: this.iconName,
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName
             } );
+    }
+
+    // 配置
+    setPlayer(playerNum)
+    {
+        // 初期位置
+
+        if (playerNum === 1) {
+            this.fX = 400;
+            this.fY = 600;
+        }
+        
+        if (playerNum === 2) {
+            this.fX = 100;
+            this.fY = 100;
+        }
+
+        if (playerNum === 3) {
+            this.fX = 100;
+            this.fY = 400;
+        }
+                
+        if (playerNum === 4) {
+            this.fX = 750;
+            this.fY = 100;
+        }
+
+        if (playerNum === 5) {
+            this.fX = 750;
+            this.fY = 400;
+        }
     }
 
     // ショット

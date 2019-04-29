@@ -56,7 +56,7 @@ class Screen
             'update',
             ( aPlayer, aCard, iProcessingTimeNanoSec ) =>
             {
-                
+                this.aPlayer = aPlayer;
                 this.aCard = aCard;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
@@ -64,21 +64,29 @@ class Screen
         // サーバーからの状態通知に対する処理
         // ・サーバー側の周期的処理の「io.sockets.emit( 'enter-the-game', ・・・ );」に対する処理
         // プレイヤーを画面に表示する
+        // this.socket.on(
+        //     'enter-the-game',
+        //     (aPlayer) =>
+        //     {
+        //         this.aPlayer = aPlayer;
+        //         // キャンバスの塗りつぶし
+        //         if (this.drawCnt === 0) {
+        //             this.drawField();
+        //             this.drawCnt = this.drawCnt + 1;
+        //         }
+        //         // プレイヤーの描画（全員)
+        //         if( null !== this.aPlayer && undefined !== this.aPlayer )
+        //         {
+        //             this.drawPlayers(this.aPlayer);
+        //         }
+        //     } );
+
+                    // デッドしたらスタート画面に戻る
         this.socket.on(
-            'enter-the-game',
-            (aPlayer) =>
+            'start-the-game',
+            () =>
             {
-                this.aPlayer = aPlayer;
-                // キャンバスの塗りつぶし
-                if (this.drawCnt === 0) {
-                    this.drawField();
-                    this.drawCnt = this.drawCnt + 1;
-                }
-                // プレイヤーの描画（全員)
-                if( null !== this.aPlayer && undefined !== this.aPlayer )
-                {
-                    this.drawPlayers(this.aPlayer);
-                }
+                $( '#game-start' ).show();
             } );
 
     }
@@ -108,21 +116,23 @@ class Screen
     // 描画。animateから無限に呼び出される
     render( iTimeCurrent )
     {
-        //console.log( 'render' );
+        // キャンバスの塗りつぶし
+        this.renderField();
 
-        // // キャンバスのクリア
-        // this.context.clearRect( 0, 0, canvas.width, canvas.height );
-
-
-        // // キャンバスの枠の描画
-        // this.context.save();
-        // this.context.strokeStyle = RenderingSettings.FIELD_LINECOLOR;
-        // this.context.lineWidth = RenderingSettings.FIELD_LINEWIDTH;
-        // this.context.strokeRect( 0, 0, canvas.width, canvas.height );
-        // this.context.restore();
+        // タンクの描画
+        if( null !== this.aPlayer )
+        {
+            const fTimeCurrentSec = iTimeCurrent * 0.001; // iTimeCurrentは、ミリ秒。秒に変換。
+            const iIndexFrame = parseInt( fTimeCurrentSec / 0.2 ) % 2;  // フレーム番号
+            this.aPlayer.forEach(
+                ( player ) =>
+                {
+                    this.renderPlayer( player );
+                } );
+        }
     }
 
-    drawField()
+    renderField()
     {
         this.context.save();
         let iCountX = parseInt( SharedSettings.FIELD_WIDTH / RenderingSettings.FIELDTILE_WIDTH );
@@ -144,38 +154,32 @@ class Screen
         this.context.restore();
     }
 
-    drawPlayers( players )
+    renderPlayer( player )
     {
-        var srcs =  []; 
-        for (var i=0, l=players.length; i<l; i++) {
-            srcs.push('../images/' + players[i].iconName);
-        }
+        var src = '../images/' + player.iconName;
         var ctx = this.context;
-        this.preloadImages(srcs).done(function () {
-            for (var i=0, l=srcs.length; i<l; i++) {
-              var img = new Image();
-              img.src = srcs[i];
-              // 画像描画
-              ctx.save();
-              ctx.drawImage( img,
-                  players[i].fX, players[i].fY,
-                  SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
-                  SharedSettings.PLAYER_HEIGHT                  
-                   );	// 描画先領域の大きさ
-              ctx.restore();
-  
-              // ニックネーム
-              ctx.save();
-              ctx.restore();
-              ctx.textAlign = 'center';
-              ctx.font = RenderingSettings.NICKNAME_FONT;
-              ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
-            //   ctx.translate( players[i].fX + 80, players[i].fY + 30 );
-              ctx.fillText( players[i].strNickName, players[i].fX + 80, players[i].fY - 30);
-              ctx.restore();
-              ctx.restore();  
-            }
-          });
+        this.preloadImages(src).done(function () {
+            var img = new Image();
+            img.src = src;
+            // 画像描画
+            ctx.save();
+            ctx.drawImage( img,
+                player.fX, player.fY,
+                SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.PLAYER_HEIGHT                  
+                );	// 描画先領域の大きさ
+            ctx.restore();
+
+            // ニックネーム
+            ctx.save();
+            ctx.restore();
+            ctx.textAlign = 'center';
+            ctx.font = RenderingSettings.NICKNAME_FONT;
+            ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
+            ctx.fillText( player.strNickName, player.fX + 80, player.fY - 30);
+            ctx.restore();
+            ctx.restore();  
+        });
 
         // img.onload = function() {
         //     // プレイヤーの座標値に移動
@@ -205,25 +209,19 @@ class Screen
 //         this.context.restore();
     }
 
-    preloadImages = function (srcs) {
-        if (!srcs.length) {
+    preloadImages = function (src) {
+        if (!src.length) {
           return;
         }
         var dfd = $.Deferred();
-        var imgs = [];
-        for (var i=0, l=srcs.length; i<l; i++) {
-          var img = new Image();
-          img.src = srcs[i];
-          imgs.push(img);
-        }
+        var img = new Image();
+        img.src = src;
         var check = function () {
-          for (var i=0, l=imgs.length; i<l; i++) {
-            if (imgs[i].complete !== true) {
-              setTimeout(check, 250);
-              return false;
-            }
-          }
-          dfd.resolve(imgs);
+        if (img.complete !== true) {
+            setTimeout(check, 250);
+            return false;
+        }
+          dfd.resolve(img);
         };
         check();
         return dfd.promise();

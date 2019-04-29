@@ -47,6 +47,12 @@ module.exports = class World
             {
                 card.update( fDeltaTime, card );
             } );
+        // プレイヤーごとの処理
+        this.setPlayer.forEach(
+            ( player ) =>
+            {
+                player.update( fDeltaTime);
+            } );            
     }
 
     // 衝突のチェック
