@@ -52,7 +52,13 @@ $(document).on('click', '#start-button',
     () => 
     {
         // サーバーに'enter-the-game'を送信
-        const objConfig = { strNickName: $( '#nickname' ).val(), iconName: $('#iconName').prop('files')[0].name };
+        let icNm = '';
+        if ($('#iconName').prop('files')[0] !== undefined) {
+            icNm = $('#iconName').prop('files')[0].name;
+        } else {
+            icNm = 'default.png'
+        }
+        const objConfig = { strNickName: $( '#nickname' ).val(), iconName: icNm };
         socket.emit( 'enter-the-game', objConfig );
         $( '#start-screen' ).hide();
     } );

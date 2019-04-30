@@ -70,9 +70,42 @@ class Screen
             'start-the-game',
             () =>
             {
-
+                let card = null;
+                let cardList = [];
+            // カードデータを全て生成する
+            for (let i = 1; i <= 4; i++) {
+                for (let j = 1; j <= 13; j++) {
+                    if (i === 1) {
+                        card ='s' + j;
+                    }
+                    if (i === 2) {
+                        card = 'c' + j;
+                    }
+                    if (i === 3) {
+                        card = 'd' + j;
+                    }
+                    if (i === 4) {
+                        card = 'h' + j;
+                    }
+                    cardList.push(card);
+                }
+            }
+            cardList.push('jo');
+            // 並び替え
+            for (let i = cardList.length - 1; i >= 0; i--){
+                // 0~iのランダムな数値を取得
+                let rand = Math.floor( Math.random() * ( i + 1 ) );
+                // 配列の数値を入れ替える
+                [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
+              }
+            // 各プレイヤーに配る
+            this.aPlayer.forEach(
+                ( player ) =>
+                {
+                    let cards = cardList.splice(0,10);
+                    this.socket.emit( 'deal-card' , player,  cards );
+                } );
             } );
-
     }
 
     // アニメーション（無限ループ処理）

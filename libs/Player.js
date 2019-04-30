@@ -17,6 +17,7 @@ module.exports = class Player extends GameObject
         this.iconName = iconName;
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
+        this.hasCards = null;
     }
 
     toJSON()
@@ -26,7 +27,8 @@ module.exports = class Player extends GameObject
             {
                 iconName: this.iconName,
                 strSocketID: this.strSocketID,
-                strNickName: this.strNickName
+                strNickName: this.strNickName,
+                hasCards: this.hasCards
             } );
     }
 
@@ -72,6 +74,13 @@ module.exports = class Player extends GameObject
         // const fX = this.fX + this.fWidth * 0.5 * Math.cos( this.fAngle );
         // const fY = this.fY + this.fWidth * 0.5 * Math.sin( this.fAngle );
         // return new Card( fX, fY, this.fAngle, this );
+    }
+
+    
+    // 更新
+    dealCards( cards )
+    {
+        this.hasCards = cards;
     }
 
     // 更新

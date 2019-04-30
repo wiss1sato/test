@@ -47,24 +47,23 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 1) {
+                                if (playerNum === 5) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
                                         for (let j = 1; j <= 13; j++) {
                                             if (i === 1) {
-                                                card = world.createCard('s' + j)
+                                                card = world.createCard('s' + j);
                                             }
                                             if (i === 2) {
-                                                card = world.createCard('c' + j)
+                                                card = world.createCard('c' + j);
                                             }
                                             if (i === 3) {
-                                                card = world.createCard('d' + j)
+                                                card = world.createCard('d' + j);
                                             }
                                             if (i === 4) {
-                                                card = world.createCard('h' + j)
+                                                card = world.createCard('h' + j);
                                             }
-
                                         }
                                     }
                                     io.emit( 'start-the-game', Array.from( world.setPlayer ));
@@ -116,6 +115,35 @@ module.exports = class Game
                             {  
                                 if (c.cardId === card.cardId) {
                                     c.cardClicked();
+                                }
+                            } );
+                    } );
+
+                    socket.on( 'deal-card',
+                    ( player, cards ) =>
+                    {
+                        world.setPlayer.forEach(
+                            ( p ) =>
+                            {  
+                                if (p.strSocketID === player.strSocketID) {
+                                    // プレイヤーにカードを配る
+                                    p.dealCards(cards);
+                                    // カードには座標を与える
+                                    let fX = p.fX - 150;
+                                    let fY = p.fY + 200;
+                                    world.setCard.forEach(
+                                        ( c ) =>
+                                        {
+                                            let cardNum = 0;
+                                            cards.forEach(
+                                                ( card ) =>
+                                                {
+                                                    if(c.cardId === card) {
+                                                        c.setPosition(fX, fY);
+                                                        fX = fX + 50;
+                                                    }
+                                                } );                                              
+                                        } );
                                 }
                             } );
                     } );
