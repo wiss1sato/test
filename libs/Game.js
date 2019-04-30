@@ -141,6 +141,10 @@ module.exports = class Game
                     socket.on( 'deal-card',
                     () =>
                     {
+                    if( !player )
+                    {
+                        return;
+                    }
                     // プレイヤーにカードを配る
                     console.log('cardList:' + cardList);
                     let cards = cardList.splice(0,10);
