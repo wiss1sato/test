@@ -17,6 +17,11 @@ module.exports = class Card extends GameObject
         this.cardId = cardId;
     }
 
+    cardClicked()
+    {
+        this.fY = this.fY - 30;
+    }
+
     // 更新
     // ※rectField : フィールド矩形は、オブジェクト中心と判定する。（OverlapTester.pointInRect()）
     //               オブジェクトの大きさ分狭めた(上下左右で、大きさの半分づつ狭めた）矩形が必要。
@@ -54,10 +59,4 @@ module.exports = class Card extends GameObject
                 cardId: this.cardId
             } );
     }
-
-    // cardClicked()
-    // {
-    //     this.fY = this.fY - 30;
-    // }
-
 };

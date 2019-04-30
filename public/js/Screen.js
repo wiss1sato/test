@@ -193,14 +193,14 @@ class Screen
 
         // クリックした座標にカードが位置している場合、ちょっと上に上げる
         this.aCard.forEach(
-            ( aCard ) =>
+            ( card ) =>
             {
-                if ((aCard.fX <= x && x <= aCard.fX + SharedSettings.CARD_WIDTH) 
+                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
                     &&
-                    (aCard.fY <= y && y <= aCard.fY + SharedSettings.CARD_HEIGHT) 
+                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                     ){
                         // サーバにクリックされたことを伝える
-                        this.socket.emit( 'card-clicked' );
+                        this.socket.emit( 'card-clicked' , card );
                 }
             } );
 

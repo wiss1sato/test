@@ -17,7 +17,6 @@ module.exports = class Game
         const world = new World( io ); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let playerNum = 0;
-        let playerList = [];
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -28,6 +27,7 @@ module.exports = class Game
             {
                 console.log( 'connection : socket.id = %s', socket.id );
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
+                let card = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
 
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
@@ -53,17 +53,18 @@ module.exports = class Game
                                     for (let i = 1; i <= 4; i++) {
                                         for (let j = 1; j <= 13; j++) {
                                             if (i === 1) {
-                                                world.createCard('s' + j)
+                                                card = world.createCard('s' + j)
                                             }
                                             if (i === 2) {
-                                                world.createCard('c' + j)
+                                                card = world.createCard('c' + j)
                                             }
                                             if (i === 3) {
-                                                world.createCard('d' + j)
+                                                card = world.createCard('d' + j)
                                             }
                                             if (i === 4) {
-                                                world.createCard('h' + j)
-                                            }                                                                                                                                    
+                                                card = world.createCard('h' + j)
+                                            }
+
                                         }
                                     }
                                     io.emit( 'start-the-game', Array.from( world.setPlayer ));
@@ -107,16 +108,17 @@ module.exports = class Game
                         }
                     } );
 
-                    // socket.on( 'card-clicked',
-                    // () =>
-                    // {
-                    //     console.log( 'card-clicked', socket.id );
-                    //     if( !card )
-                    //     {
-                    //         return;
-                    //     }
-                    //     card.cardClicked();
-                    // } );
+                    socket.on( 'card-clicked',
+                    ( card ) =>
+                    {
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {  
+                                if (c.cardId === card.cardId) {
+                                    c.cardClicked();
+                                }
+                            } );
+                    } );
 
             } );
 
