@@ -17,7 +17,7 @@ module.exports = class Card extends GameObject
 
     cardClicked()
     {
-        this.fY = this.fY - 30;
+        this.fY = this.fY - 15;
     }
 
     setPosition(fX, fY)

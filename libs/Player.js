@@ -77,7 +77,7 @@ module.exports = class Player extends GameObject
     }
 
     
-    // 更新
+    // カード配布
     dealCards( cards )
     {
         this.hasCards = cards;

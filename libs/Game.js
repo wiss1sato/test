@@ -52,20 +52,32 @@ module.exports = class Game
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
-                                        for (let j = 1; j <= 13; j++) {
+                                        for (let j = 2; j <= 13; j++) {
                                             if (i === 1) {
                                                 card = world.createCard('s' + j);
                                             }
                                             if (i === 2) {
-                                                card = world.createCard('c' + j);
+                                                card = world.createCard('h' + j);
                                             }
                                             if (i === 3) {
                                                 card = world.createCard('d' + j);
                                             }
                                             if (i === 4) {
-                                                card = world.createCard('h' + j);
+                                                card = world.createCard('c' + j);
                                             }
                                         }
+                                        if (i === 1) {
+                                            card = world.createCard('s' + 1);
+                                        }
+                                        if (i === 2) {
+                                            card = world.createCard('h' + 1);
+                                        }
+                                        if (i === 3) {
+                                            card = world.createCard('d' + 1);
+                                        }
+                                        if (i === 4) {
+                                            card = world.createCard('c' + 1);
+                                        }                                        
                                     }
                                     // ジョーカー
                                     card = world.createCard('jo');
