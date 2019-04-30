@@ -17,6 +17,34 @@ module.exports = class Game
         const world = new World( io ); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let playerNum = 0;
+        let cardId = null;
+        let cardList = [];
+        // カードデータを全て生成する
+        for (let i = 1; i <= 4; i++) {
+            for (let j = 1; j <= 13; j++) {
+                if (i === 1) {
+                    cardId ='s' + j;
+                }
+                if (i === 2) {
+                    cardId = 'c' + j;
+                }
+                if (i === 3) {
+                    cardId = 'd' + j;
+                }
+                if (i === 4) {
+                    cardId = 'h' + j;
+                }
+                cardList.push(cardId);
+            }
+        }
+        cardList.push('jo');
+        // 並び替え
+        for (let i = cardList.length - 1; i >= 0; i--){
+            // 0~iのランダムな数値を取得
+            let rand = Math.floor( Math.random() * ( i + 1 ) );
+            // 配列の数値を入れ替える
+            [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
+        }
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -28,7 +56,6 @@ module.exports = class Game
                 console.log( 'connection : socket.id = %s', socket.id );
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
                 let card = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
-
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
@@ -107,6 +134,7 @@ module.exports = class Game
                         }
                     } );
 
+                    // カードがクリックされた時の処理（ちょっと上にあげる）
                     socket.on( 'card-clicked',
                     ( card ) =>
                     {
@@ -119,32 +147,29 @@ module.exports = class Game
                             } );
                     } );
 
+                    // カードを配る処理
                     socket.on( 'deal-card',
-                    ( player, cards ) =>
+                    () =>
                     {
-                        world.setPlayer.forEach(
-                            ( p ) =>
-                            {  
-                                if (p.strSocketID === player.strSocketID) {
-                                    // プレイヤーにカードを配る
-                                    p.dealCards(cards);
-                                    // カードには座標を与える
-                                    let fX = p.fX - 150;
-                                    let fY = p.fY + 200;
-                                    world.setCard.forEach(
-                                        ( c ) =>
-                                        {
-                                            let cardNum = 0;
-                                            cards.forEach(
-                                                ( card ) =>
-                                                {
-                                                    if(c.cardId === card) {
-                                                        c.setPosition(fX, fY);
-                                                        fX = fX + 50;
-                                                    }
-                                                } );                                              
-                                        } );
-                                }
+                        // プレイヤーにカードを配る
+                        console.log('cardList:' + cardList);
+                        let cards = cardList.splice(0,10);
+                        console.log('cards:' + cards);
+                        player.dealCards(cards);
+                        // 左端のカード（初期座標）
+                        let fX = player.fX - 150;
+                        let fY = player.fY + 200;
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card) {
+                                            c.setPosition(fX, fY);
+                                            fX = fX + 50;
+                                        }
+                                    } );                                              
                             } );
                     } );
 
