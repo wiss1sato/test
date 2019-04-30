@@ -10,7 +10,7 @@ module.exports = class Card extends GameObject
 {
     constructor( cardId )
     {
-        // 親クラスのコンストラクタ呼び出しwa
+        // 親クラスのコンストラクタ呼び出しwaaa
         super( SharedSettings.CARD_WIDTH, SharedSettings.CARD_HEIGHT );
         this.cardId = cardId;
     }
