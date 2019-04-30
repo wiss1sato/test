@@ -145,6 +145,7 @@ module.exports = class Game
                     console.log('cardList:' + cardList);
                     let cards = cardList.splice(0,10);
                     console.log('cards:' + cards);
+                    console.log(player);
                     player.dealCards(cards);
                     // 左端のカード（初期座標）
                     let fX = player.fX - 150;
