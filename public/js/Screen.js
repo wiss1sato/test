@@ -68,8 +68,9 @@ class Screen
             // ゲーム開始
         this.socket.on(
             'start-the-game',
-            () =>
+            (aPlayer) =>
             {
+                this.aPlayer = aPlayer;
                 let card = null;
                 let cardList = [];
             // カードデータを全て生成する
@@ -92,16 +93,17 @@ class Screen
             }
             cardList.push('jo');
             // 並び替え
-            for (let i = cardList.length - 1; i >= 0; i--){
-                // 0~iのランダムな数値を取得
-                let rand = Math.floor( Math.random() * ( i + 1 ) );
-                // 配列の数値を入れ替える
-                [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
-              }
+            // for (let i = cardList.length - 1; i >= 0; i--){
+            //     // 0~iのランダムな数値を取得
+            //     let rand = Math.floor( Math.random() * ( i + 1 ) );
+            //     // 配列の数値を入れ替える
+            //     [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
+            //   }
             // 各プレイヤーに配る
             this.aPlayer.forEach(
                 ( player ) =>
                 {
+                    console.log('aaa');
                     let cards = cardList.splice(0,10);
                     this.socket.emit( 'deal-card' , player,  cards );
                 } );
@@ -179,7 +181,6 @@ class Screen
         this.preloadImages(src).done(function () {
             var img = new Image();
             img.src = src;
-            // 画像描画
             ctx.save();
             ctx.drawImage( img,
                 player.fX, player.fY,
