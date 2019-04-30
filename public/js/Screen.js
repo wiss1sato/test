@@ -68,14 +68,9 @@ class Screen
             // ゲーム開始
         this.socket.on(
             'start-the-game',
-            (aPlayer) =>
+            () =>
             {
-            this.aPlayer = aPlayer;
-            this.aPlayer.forEach(
-                () =>
-                {
-                    this.socket.emit( 'deal-card' );
-                } );
+                this.socket.emit( 'deal-card' );
             } );
     }
 

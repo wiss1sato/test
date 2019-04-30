@@ -69,7 +69,7 @@ module.exports = class Game
                                     }
                                     // ジョーカー
                                     card = world.createCard('jo');
-                                    io.emit( 'start-the-game', Array.from( world.setPlayer ));
+                                    io.emit( 'start-the-game');
                                 }                            
                             // 最新状況をクライアントに送信
                             // io.emit( 'enter-the-game', Array.from( world.setPlayer ));

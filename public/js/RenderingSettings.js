@@ -2,7 +2,7 @@
 class RenderingSettings
 {
     // 背景タイルのサイズ
-    static get FIELDTILE_WIDTH() { return 512; }
+    static get FIELDTILE_WIDTH() { return 700; }
     static get FIELDTILE_HEIGHT() { return 512; }
 
     // フィールド
