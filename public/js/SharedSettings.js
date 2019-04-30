@@ -10,8 +10,8 @@ class SharedSettings
     static get PLAYER_WIDTH() { return 180.0; }
     static get PLAYER_HEIGHT() { return 180.0; }
 
-    static get CARD_WIDTH() { return 30.0; }
-    static get CARD_HEIGHT() { return 30.0; }
+    static get CARD_WIDTH() { return 60.0; }
+    static get CARD_HEIGHT() { return 90.0; }
 }
 
 if( typeof module !== 'undefined' && typeof module.exports !== 'undefined' )

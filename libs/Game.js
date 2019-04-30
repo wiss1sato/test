@@ -46,7 +46,28 @@ module.exports = class Game
                                     // 採番ごとに配置する
                                     player.setPlayer(playerNum);
                                 } );
-                            
+
+                                if (playerNum === 1) {
+                                    // ゲーム開始を各プレイヤーに送信
+                                    // カード生成
+                                    for (let i = 1; i <= 4; i++) {
+                                        for (let j = 1; j <= 13; j++) {
+                                            if (i === 1) {
+                                                world.createCard('s' + j)
+                                            }
+                                            if (i === 2) {
+                                                world.createCard('c' + j)
+                                            }
+                                            if (i === 3) {
+                                                world.createCard('d' + j)
+                                            }
+                                            if (i === 4) {
+                                                world.createCard('h' + j)
+                                            }                                                                                                                                    
+                                        }
+                                    }
+                                    io.emit( 'start-the-game', Array.from( world.setPlayer ));
+                                }                            
                             // 最新状況をクライアントに送信
                             // io.emit( 'enter-the-game', Array.from( world.setPlayer ));
                                 // // ゲーム開始を各プレイヤーに送信
@@ -73,24 +94,29 @@ module.exports = class Game
                     () =>
                     {
                         console.log( 'disconnect : socket.id = %s', socket.id );
+                        playerNum = playerNum - 1;
                         if( !player )
                         {
                             return;
                         }
                         world.destroyPlayer( player );
-                        player = null;	// 自タンクの解放
+                        player = null;	// 自プレイヤーの解放
+                        if (playerNum === 0) {
+                            // カードを全部消す
+                            world.destroyCard();
+                        }
                     } );
 
-                    socket.on( 'player-clicked',
-                    () =>
-                    {
-                        console.log( 'player-clicked', socket.id );
-                        if( !player )
-                        {
-                            return;
-                        }
-                        player.playerClicked();
-                    } );
+                    // socket.on( 'card-clicked',
+                    // () =>
+                    // {
+                    //     console.log( 'card-clicked', socket.id );
+                    //     if( !card )
+                    //     {
+                    //         return;
+                    //     }
+                    //     card.cardClicked();
+                    // } );
 
             } );
 

@@ -11,8 +11,123 @@ class Assets
 
         this.rectFieldInFieldImage = { sx: 0, sy: 0, sw: 512, sh: 512 };
 
-        
-        this.cardS1 = new Image();
-        this.cardS1.src = '../images/s1.png';
+        //　各トランプカード
+        this.s1 = new Image();
+        this.s2 = new Image();
+        this.s3 = new Image();
+        this.s4 = new Image();
+        this.s5 = new Image();
+        this.s6 = new Image();
+        this.s7 = new Image();
+        this.s8 = new Image();
+        this.s9 = new Image();
+        this.s10 = new Image();
+        this.s11 = new Image();
+        this.s12 = new Image();
+        this.s13 = new Image();
+        this.c1 = new Image();
+        this.c2 = new Image();
+        this.c3 = new Image();
+        this.c4 = new Image();
+        this.c5 = new Image();
+        this.c6 = new Image();
+        this.c7 = new Image();
+        this.c8 = new Image();
+        this.c9 = new Image();
+        this.c10 = new Image();
+        this.c11 = new Image();
+        this.c12 = new Image();
+        this.c13 = new Image();
+        this.d1 = new Image();
+        this.d2 = new Image();
+        this.d3 = new Image();
+        this.d4 = new Image();
+        this.d5 = new Image();
+        this.d6 = new Image();
+        this.d7 = new Image();
+        this.d8 = new Image();
+        this.d9 = new Image();
+        this.d10 = new Image();
+        this.d11 = new Image();
+        this.d12 = new Image();
+        this.d13 = new Image();
+        this.h1 = new Image();
+        this.h2 = new Image();
+        this.h3 = new Image();
+        this.h4 = new Image();
+        this.h5 = new Image();
+        this.h6 = new Image();
+        this.h7 = new Image();
+        this.h8 = new Image();
+        this.h9 = new Image();
+        this.h10 = new Image();
+        this.h11 = new Image();
+        this.h12 = new Image();
+        this.h13 = new Image();
+        this.jo = new Image();
+        this.s1.src = '../images/s1.png';
+        this.s2.src ='../images/s2.png';
+        this.s3.src ='../images/s3.png';
+        this.s4.src ='../images/s4.png';
+        this.s5.src ='../images/s5.png';
+        this.s6.src ='../images/s6.png';
+        this.s7.src ='../images/s7.png';
+        this.s8.src ='../images/s8.png';
+        this.s9.src ='../images/s9.png';
+        this.s10.src ='../images/s10.png';
+        this.s11.src ='../images/s11.png';
+        this.s12.src ='../images/s12.png';
+        this.s13.src ='../images/s13.png';
+        this.c1.src = '../images/c1.png';
+        this.c2.src ='../images/c2.png';
+        this.c3.src ='../images/c3.png';
+        this.c4.src ='../images/c4.png';
+        this.c5.src ='../images/c5.png';
+        this.c6.src ='../images/c6.png';
+        this.c7.src ='../images/c7.png';
+        this.c8.src ='../images/c8.png';
+        this.c9.src ='../images/c9.png';
+        this.c10.src ='../images/c10.png';
+        this.c11.src ='../images/c11.png';
+        this.c12.src ='../images/c12.png';
+        this.c13.src ='../images/c13.png';
+        this.d1.src = '../images/d1.png';
+        this.d2.src ='../images/d2.png';
+        this.d3.src ='../images/d3.png';
+        this.d4.src ='../images/d4.png';
+        this.d5.src ='../images/d5.png';
+        this.d6.src ='../images/d6.png';
+        this.d7.src ='../images/d7.png';
+        this.d8.src ='../images/d8.png';
+        this.d9.src ='../images/d9.png';
+        this.d10.src ='../images/d10.png';
+        this.d11.src ='../images/d11.png';
+        this.d12.src ='../images/d12.png';
+        this.d13.src ='../images/d13.png';
+        this.h1.src = '../images/h1.png';
+        this.h2.src ='../images/h2.png';
+        this.h3.src ='../images/h3.png';
+        this.h4.src ='../images/h4.png';
+        this.h5.src ='../images/h5.png';
+        this.h6.src ='../images/h6.png';
+        this.h7.src ='../images/h7.png';
+        this.h8.src ='../images/h8.png';
+        this.h9.src ='../images/h9.png';
+        this.h10.src ='../images/h10.png';
+        this.h11.src ='../images/h11.png';
+        this.h12.src ='../images/h12.png';
+        this.h13.src ='../images/h13.png';
+        this.jo.src ='../images/jo.png';
+        this.cardSet = [];
+        this.cardSet.push(this.s1,this.s2,this.s3,this.s4,this.s5,this.s6,this.s7,this.s8,this.s9,this.s10,this.s11,this.s12,this.s13,this.c1,this.c2,this.c3,this.c4,this.c5,this.c6,this.c7,this.c8,this.c9,this.c10,this.c11,this.c12,this.c13,this.d1,this.d2,this.d3,this.d4,this.d5,this.d6,this.d7,this.d8,this.d9,this.d10,this.d11,this.d12,this.d13,this.h1,this.h2,this.h3,this.h4,this.h5,this.h6,this.h7,this.h8,this.h9,this.h10,this.h11,this.h12,this.h13,this.jo);
+   }
+
+   returnCard(card) {
+       var ret = this.cardSet.filter(
+           function(c){
+                return (c.src.indexOf(card.cardId + '.png') > -1);
+            }
+           );
+       return ret;
    }
 }

@@ -100,4 +100,16 @@ module.exports = class World
         this.setCard.add( card );
         return card;
     }
+
+    // カードの削除
+    destroyCard()
+    {
+        if (undefined !== this.setCard) {
+            this.setCard.forEach(
+                ( card ) =>
+                {
+                    this.setCard.delete(card);
+                } );	
+        }
+    }
 }

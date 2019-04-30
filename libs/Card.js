@@ -12,6 +12,8 @@ module.exports = class Card extends GameObject
     {
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.CARD_WIDTH, SharedSettings.CARD_HEIGHT );
+        this.fX = Math.random() * 800;
+        this.fY = Math.random() * 800;
         this.cardId = cardId;
     }
 
@@ -53,5 +55,9 @@ module.exports = class Card extends GameObject
             } );
     }
 
+    // cardClicked()
+    // {
+    //     this.fY = this.fY - 30;
+    // }
 
 };

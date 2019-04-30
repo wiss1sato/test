@@ -14,16 +14,16 @@ class Screen
         this.canvas.width = SharedSettings.FIELD_WIDTH;
         this.canvas.height = SharedSettings.FIELD_HEIGHT;
         this.aCard = null;
-
         // ソケットの初期化
         this.initSocket();
 
         // コンテキストの初期化
         // アンチエイリアスの抑止（画像がぼやけるのの防止）以下４行
-        this.context.mozImageSmoothingEnabled = false;
-        this.context.webkitImageSmoothingEnabled = false;
-        this.context.msImageSmoothingEnabled = false;
-        this.context.imageSmoothingEnabled = false;
+        // →カードの画質が悪くなるのでコメントアウト
+        // this.context.mozImageSmoothingEnabled = false;
+        // this.context.webkitImageSmoothingEnabled = false;
+        // this.context.msImageSmoothingEnabled = false;
+        // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('mousedown', this.onDown, false);
         canvas.addEventListener('mouseup', this.onUp, false);
@@ -65,13 +65,12 @@ class Screen
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
-
-       // デッドしたらスタート画面に戻る   
+            // ゲーム開始
         this.socket.on(
             'start-the-game',
             () =>
             {
-                $( '#game-start' ).show();
+
             } );
 
     }
@@ -139,6 +138,7 @@ class Screen
         this.context.restore();
     }
 
+    //　プレイヤー描写
     renderPlayer( player )
     {
         var src = '../images/' + player.iconName;
@@ -165,35 +165,9 @@ class Screen
             ctx.restore();
             ctx.restore();  
         });
-
-        // img.onload = function() {
-        //     // プレイヤーの座標値に移動
-        // }
-
-
-        // ctx.drawImage( this.assets.imageItem,0,0,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-        //     SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
-        //     SharedSettings.PLAYER_HEIGHT );	// 描画先領域の大きさ   
     }
 
-    renderCard( card )
-    {
-//         this.context.save();
-
-//         // 弾丸の座標値に移動
-// //        this.context.translate( card.fX, card.fY );
-
-//         // 弾丸の座標値に移動
-//         this.context.translate( 200, 100 );
-
-//         // 画像描画
-//         this.context.drawImage( this.assets.cardS1,0,0,
-//             SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
-//             SharedSettings.CARD_HEIGHT );	// 描画先領域の大きさ
-
-//         this.context.restore();
-    }
-
+    // アイコンを読み込むためのメソッド
     preloadImages = function (src) {
         if (!src.length) {
           return;
@@ -210,15 +184,7 @@ class Screen
         };
         check();
         return dfd.promise();
-      }    
-
-    onDown(e) {
-        console.log("down");
-    }
-    
-    onUp(e) {
-        console.log("up");
-    }
+      }
     
     onClick(e) {
         console.log("click");
@@ -226,28 +192,31 @@ class Screen
         var y = e.clientY - canvas.offsetTop;
 
         // クリックした座標にカードが位置している場合、ちょっと上に上げる
-        this.aPlayer.forEach(
-            ( player ) =>
+        this.aCard.forEach(
+            ( aCard ) =>
             {
-                if ((player.fX <= x && x <= player.fX + SharedSettings.PLAYER_WIDTH) 
+                if ((aCard.fX <= x && x <= aCard.fX + SharedSettings.CARD_WIDTH) 
                     &&
-                    (player.fY <= y && y <= player.fY + SharedSettings.PLAYER_HEIGHT) 
+                    (aCard.fY <= y && y <= aCard.fY + SharedSettings.CARD_HEIGHT) 
                     ){
                         // サーバにクリックされたことを伝える
-                        this.socket.emit( 'player-clicked' );
+                        this.socket.emit( 'card-clicked' );
                 }
             } );
 
         console.log("x:", x, "y:", y);
     }
     
-    onOver(e) {
-        console.log("mouseover");
+    renderCard( card )
+    {
+        var img = this.assets.returnCard(card);
+        this.context.save();
+        this.context.drawImage( img[0],
+            card.fX, card.fY,
+            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.CARD_HEIGHT                  
+            );	// 描画先領域の大きさ
+        this.context.restore();
     }
-    
-    onOut() {
-        console.log("mouseout");
-    }
-
 
 }
