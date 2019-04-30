@@ -18,33 +18,7 @@ module.exports = class Game
         let iTimeLast = Date.now(); // setInterval()内での参照があるので、スコープを抜けても、生存し続ける（ガーベッジコレクションされない）。
         let playerNum = 0;
         let cardId = null;
-        let cardList = [];
-        // カードデータを全て生成する
-        for (let i = 1; i <= 4; i++) {
-            for (let j = 1; j <= 13; j++) {
-                if (i === 1) {
-                    cardId ='s' + j;
-                }
-                if (i === 2) {
-                    cardId = 'c' + j;
-                }
-                if (i === 3) {
-                    cardId = 'd' + j;
-                }
-                if (i === 4) {
-                    cardId = 'h' + j;
-                }
-                cardList.push(cardId);
-            }
-        }
-        cardList.push('jo');
-        // 並び替え
-        for (let i = cardList.length - 1; i >= 0; i--){
-            // 0~iのランダムな数値を取得
-            let rand = Math.floor( Math.random() * ( i + 1 ) );
-            // 配列の数値を入れ替える
-            [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
-        }
+        let cardList =  this.createCardList();
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -93,6 +67,8 @@ module.exports = class Game
                                             }
                                         }
                                     }
+                                    // ジョーカー
+                                    card = world.createCard('jo');
                                     io.emit( 'start-the-game', Array.from( world.setPlayer ));
                                 }                            
                             // 最新状況をクライアントに送信
@@ -128,9 +104,11 @@ module.exports = class Game
                         }
                         world.destroyPlayer( player );
                         player = null;	// 自プレイヤーの解放
-                        if (playerNum === 0) {
+                        if (playerNum !== 5) {
                             // カードを全部消す
                             world.destroyCard();
+                            // データはもう一回作る
+                            cardList = this.createCardList()
                         }
                     } );
 
@@ -151,28 +129,27 @@ module.exports = class Game
                     socket.on( 'deal-card',
                     () =>
                     {
-                        // プレイヤーにカードを配る
-                        console.log('cardList:' + cardList);
-                        let cards = cardList.splice(0,10);
-                        console.log('cards:' + cards);
-                        player.dealCards(cards);
-                        // 左端のカード（初期座標）
-                        let fX = player.fX - 150;
-                        let fY = player.fY + 200;
-                        world.setCard.forEach(
-                            ( c ) =>
-                            {
-                                cards.forEach(
-                                    ( card ) =>
-                                    {
-                                        if(c.cardId === card) {
-                                            c.setPosition(fX, fY);
-                                            fX = fX + 50;
-                                        }
-                                    } );                                              
-                            } );
+                    // プレイヤーにカードを配る
+                    console.log('cardList:' + cardList);
+                    let cards = cardList.splice(0,10);
+                    console.log('cards:' + cards);
+                    player.dealCards(cards);
+                    // 左端のカード（初期座標）
+                    let fX = player.fX - 150;
+                    let fY = player.fY + 200;
+                    world.setCard.forEach(
+                        ( c ) =>
+                        {
+                            cards.forEach(
+                                ( card ) =>
+                                {
+                                    if(c.cardId === card) {
+                                        c.setPosition(fX, fY);
+                                        fX = fX + 50;
+                                    }
+                                } );                                              
+                        } );
                     } );
-
             } );
 
         // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
@@ -201,5 +178,36 @@ module.exports = class Game
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]
+    }
+
+    createCardList() {
+        let cardId = '';
+        let cardList = [];
+        // カードデータを全て生成する
+        for (let i = 1; i <= 4; i++) {
+            for (let j = 1; j <= 13; j++) {
+                if (i === 1) {
+                    cardId ='s' + j;
+                }
+                if (i === 2) {
+                    cardId = 'c' + j;
+                }
+                if (i === 3) {
+                    cardId = 'd' + j;
+                }
+                if (i === 4) {
+                    cardId = 'h' + j;
+                }
+                cardList.push(cardId);
+            }
+        }
+        cardList.push('jo');
+        for (let i = cardList.length - 1; i >= 0; i--){
+            // 0~iのランダムな数値を取得
+            let rand = Math.floor( Math.random() * ( i + 1 ) );
+            // 配列の数値を入れ替える
+            [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
+        }
+        return cardList;
     }
 }
