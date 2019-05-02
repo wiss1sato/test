@@ -30,7 +30,8 @@ module.exports = class Player extends GameObject
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName,
                 hasCards: this.hasCards,
-                img: this.img
+                img: this.img,
+                playerNum : this.playerNum
             } );
     }
 
@@ -38,7 +39,6 @@ module.exports = class Player extends GameObject
     setPlayer(playerNum)
     {
         // 初期位置
-
         if (playerNum === 1) {
             this.fX = 650;
             this.fY = 600;
@@ -63,6 +63,9 @@ module.exports = class Player extends GameObject
             this.fX = 1050;
             this.fY = 350;
         }
+
+        // 順番の情報も付与する
+        this.playerNum = playerNum;
     }
 
     // ショット

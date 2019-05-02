@@ -51,7 +51,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 5) {
+                                if (playerNum === 3) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -127,35 +127,46 @@ module.exports = class Game
                             } );
                     } );
 
+                    // カードがクリックされた時の処理（ちょっと上にあげる）
+                    socket.on( 'card-unclicked',
+                    ( card ) =>
+                    {
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {  
+                                if (c.cardId === card.cardId) {
+                                    c.cardUnclicked();
+                                }
+                            } );
+                    } );
+
+
                     // カードを配る処理
                     socket.on( 'deal-card',
                     () =>
                     {
-                    if( !player )
-                    {
-                        return;
-                    }
-                    // プレイヤーにカードを配る
-                    console.log('cardList:' + cardList);
-                    let cards = cardList.splice(0,10);
-                    console.log('cards:' + cards);
-                    console.log(player);
-                    player.dealCards(cards);
-                    // 左端のカード（初期座標）
-                    let fX = player.fX - 150;
-                    let fY = player.fY + 180;
-                    world.setCard.forEach(
-                        ( c ) =>
+                        if( !player )
                         {
-                            cards.forEach(
-                                ( card ) =>
-                                {
-                                    if(c.cardId === card) {
-                                        c.setPosition(fX, fY);
-                                        fX = fX + 50;
-                                    }
-                                } );                                              
-                        } );
+                            return;
+                        }
+                        // プレイヤーにカードを配る
+                        let cards = cardList.splice(0,10);
+                        player.dealCards(cards);
+                        // 左端のカード（初期座標）
+                        let fX = player.fX - 150;
+                        let fY = player.fY + 180;
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card) {
+                                            c.setPosition(fX, fY, player.playerNum);
+                                            fX = fX + 50;
+                                        }
+                                    } );                                              
+                            } );
                     } );
             } );
 

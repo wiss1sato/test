@@ -98,6 +98,13 @@ class Screen
                 this.animate( iTimeCurrent );
             } );
         this.render( iTimeCurrent );
+    }
+
+    // 描画。animateから無限に呼び出される
+    render( iTimeCurrent )
+    {
+        // キャンバスの塗りつぶし
+        this.renderField();
 
         // カードの描画
         if( null !== this.aCard )
@@ -109,15 +116,7 @@ class Screen
                 } );
         }
 
-    }
-
-    // 描画。animateから無限に呼び出される
-    render( iTimeCurrent )
-    {
-        // キャンバスの塗りつぶし
-        this.renderField();
-
-        // タンクの描画
+        // プレイヤーの描画
         if( null !== this.aPlayer )
         {
             const fTimeCurrentSec = iTimeCurrent * 0.001; // iTimeCurrentは、ミリ秒。秒に変換。
@@ -161,9 +160,19 @@ class Screen
         ctx.save();
         ctx.drawImage( img,
             player.fX, player.fY,
-            SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.PLAYER_WIDTH,
             SharedSettings.PLAYER_HEIGHT                  
-            );	// 描画先領域の大きさ
+            );	
+
+         // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
+         // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
+        if (this.socket.id !== player.strSocketID && this.aCard.length > 0) {
+            ctx.drawImage( img,
+                player.fX - 150, player.fY + 165,
+                500,85
+                );	// 描画先領域の大きさ
+        }
+
         ctx.restore();
 
         // ニックネーム
@@ -172,7 +181,7 @@ class Screen
         ctx.textAlign = 'center';
         ctx.font = RenderingSettings.NICKNAME_FONT;
         ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
-        ctx.fillText( player.strNickName, player.fX + 80, player.fY - 30);
+        ctx.fillText( player.strNickName, player.fX + 80, player.fY - 20);
         ctx.restore();
         ctx.restore();  
     }
@@ -181,7 +190,7 @@ class Screen
         console.log("click");
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
-
+        let c = null;
         // クリックした座標にカードが位置している場合、ちょっと上に上げる
         this.aCard.forEach(
             ( card ) =>
@@ -190,10 +199,21 @@ class Screen
                     &&
                     (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                     ){
+                        c = card;
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'card-clicked' , card );
                 }
             } );
+
+        // カードしてない他のカードを全てクリックを外す
+        this.aCard.forEach(
+            ( card ) =>
+            {
+                if (card !== c) {
+                    // サーバにクリックされたことを伝える
+                    this.socket.emit( 'card-unclicked' , card );
+                }
+            } );            
 
         console.log("x:", x, "y:", y);
     }

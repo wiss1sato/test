@@ -17,13 +17,28 @@ module.exports = class Card extends GameObject
 
     cardClicked()
     {
-        this.fY = this.fY - 15;
+        if (this.selected) {
+            this.selected = false;
+            this.fY = this.fY + 15;
+        } else {
+            this.selected = true;
+            this.fY = this.fY - 15;
+        }
     }
 
-    setPosition(fX, fY)
+    cardUnclicked()
+    {
+        if (this.selected) {
+            this.selected = false;
+            this.fY = this.fY + 15;
+        }
+    }
+
+    setPosition(fX, fY, playerNum)
     {
         this.fX = fX;
         this.fY = fY;
+        this.playerNum = playerNum;
     }
 
     // 更新
@@ -60,7 +75,9 @@ module.exports = class Card extends GameObject
         return Object.assign(
             super.toJSON(),
             {
-                cardId: this.cardId
+                cardId: this.cardId,
+                selected : this.selected,
+                playerNum : this.playerNum
             } );
     }
 };
