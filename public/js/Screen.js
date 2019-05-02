@@ -228,27 +228,16 @@ class Screen
     
     renderCard( card )
     {
-        let img = this.assets.returnCard(card);
+        let img = this.assets.returnCard(card)[0];
         if (card.left) {
             img = this.assets.back;
-            this.context.save();
-            this.context.drawImage( img,
-                card.fX, card.fY,
-                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
-                SharedSettings.CARD_HEIGHT                  
-                );	// 描画先領域の大きさ
-            this.context.restore();
-    
-        } else {
-            this.context.save();
-            this.context.drawImage( img[0],
-                card.fX, card.fY,
-                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
-                SharedSettings.CARD_HEIGHT                  
-                );	// 描画先領域の大きさ
-            this.context.restore();
-        }
-
+        } 
+        this.context.save();
+        this.context.drawImage( img,
+            card.fX, card.fY,
+            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.CARD_HEIGHT                  
+            );	// 描画先領域の大きさ
+        this.context.restore();
     }
-
 }

@@ -71,14 +71,6 @@ module.exports = class Player extends GameObject
     // ショット
     playCard()
     {
-
-        // // 最終ショット時刻を更新
-        // this.iTimeLastShoot = Date.now();
-
-        // // 新しい弾丸の生成（先端から出ているようにするために、幅の半分オフセットした位置に生成する）
-        // const fX = this.fX + this.fWidth * 0.5 * Math.cos( this.fAngle );
-        // const fY = this.fY + this.fWidth * 0.5 * Math.sin( this.fAngle );
-        // return new Card( fX, fY, this.fAngle, this );
     }
 
     
@@ -87,13 +79,7 @@ module.exports = class Player extends GameObject
     {
         this.hasCards = cards;
     }
-
-    // カード配布
-    setImg( img )
-    {
-        this.img = img;
-    }
-
+    
     // 更新
     update( fDeltaTime )
     {

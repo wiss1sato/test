@@ -51,7 +51,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 5) {
+                                if (playerNum === 2) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -166,7 +166,7 @@ module.exports = class Game
                                         }
                                     } );                                              
                             } );
-                        if (cardList.length === 3) {
+                        if (cardList.length === 33) {
                             console.log(player);
                             cards = cardList.splice(0,3);
                             // 左端のカード（初期座標）
@@ -185,8 +185,21 @@ module.exports = class Game
                                         } );
                                 } );
                         }
-                        // io.emit( 'deal-end');
+                        io.emit( 'deal-end');
                     } );
+                    // 宣言フェーズ
+                    socket.on( 'declaration',
+                    () =>
+                    {
+                        
+                    } );
+
+                    // 宣言フェーズ
+                    socket.on( 'deal-card',
+                    () =>
+                    {
+
+                    } );                    
             } );
 
         // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
