@@ -18,6 +18,7 @@ module.exports = class Player extends GameObject
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
         this.hasCards = null;
+        this.img = null;
     }
 
     toJSON()
@@ -28,7 +29,8 @@ module.exports = class Player extends GameObject
                 iconName: this.iconName,
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName,
-                hasCards: this.hasCards
+                hasCards: this.hasCards,
+                img: this.img
             } );
     }
 
@@ -38,28 +40,28 @@ module.exports = class Player extends GameObject
         // 初期位置
 
         if (playerNum === 1) {
-            this.fX = 600;
+            this.fX = 650;
             this.fY = 600;
         }
         
         if (playerNum === 2) {
-            this.fX = 200;
-            this.fY = 100;
+            this.fX = 250;
+            this.fY = 50;
         }
 
         if (playerNum === 3) {
-            this.fX = 200;
-            this.fY = 400;
+            this.fX = 250;
+            this.fY = 350;
         }
                 
         if (playerNum === 4) {
-            this.fX = 1000;
-            this.fY = 100;
+            this.fX = 1050;
+            this.fY = 50;
         }
 
         if (playerNum === 5) {
-            this.fX = 1000;
-            this.fY = 400;
+            this.fX = 1050;
+            this.fY = 350;
         }
     }
 
@@ -81,6 +83,12 @@ module.exports = class Player extends GameObject
     dealCards( cards )
     {
         this.hasCards = cards;
+    }
+
+    // カード配布
+    setImg( img )
+    {
+        this.img = img;
     }
 
     // 更新

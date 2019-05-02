@@ -7,8 +7,8 @@ class SharedSettings
     static get FIELD_WIDTH() { return 1400.0; }
     static get FIELD_HEIGHT() { return 1024.0; }
     // プレイヤー
-    static get PLAYER_WIDTH() { return 180.0; }
-    static get PLAYER_HEIGHT() { return 180.0; }
+    static get PLAYER_WIDTH() { return 150.0; }
+    static get PLAYER_HEIGHT() { return 150.0; }
 
     static get CARD_WIDTH() { return 50.0; }
     static get CARD_HEIGHT() { return 70.0; }

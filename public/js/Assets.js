@@ -7,9 +7,9 @@ class Assets
         // 背景画像
         this.imageField = new Image();
         this.imageField.src = '../images/grass01.png'
-
-
         this.rectFieldInFieldImage = { sx: 0, sy: 0, sw: 512, sh: 512 };
+
+        this.playerIconList = [];
 
         //　各トランプカード
         this.s1 = new Image();
@@ -122,6 +122,7 @@ class Assets
         this.cardSet.push(this.s1,this.s2,this.s3,this.s4,this.s5,this.s6,this.s7,this.s8,this.s9,this.s10,this.s11,this.s12,this.s13,this.c1,this.c2,this.c3,this.c4,this.c5,this.c6,this.c7,this.c8,this.c9,this.c10,this.c11,this.c12,this.c13,this.d1,this.d2,this.d3,this.d4,this.d5,this.d6,this.d7,this.d8,this.d9,this.d10,this.d11,this.d12,this.d13,this.h1,this.h2,this.h3,this.h4,this.h5,this.h6,this.h7,this.h8,this.h9,this.h10,this.h11,this.h12,this.h13,this.jo);
    }
 
+   // カードを返却するメソッド
    returnCard(card) {
        var ret = this.cardSet.filter(
            function(c){
@@ -130,4 +131,36 @@ class Assets
            );
        return ret;
    }
+
+   // アイコンとプレイヤー情報をリストに積み重ねるメソッド
+   setPlayerIcon( player ) {
+       let endFlg = false;
+       // 既に追加したことのあるプレイヤーがいたらだったら何もしない
+       this.playerIconList.forEach(
+        ( p ) =>
+        {  
+            if (p.strSocketID === player.strSocketID) endFlg = true;
+        } );
+        if (endFlg) return;
+        let icon = new Image();
+        icon.src = '../images/' + player.iconName;
+        let data =  
+         {  strSocketID : player.strSocketID,
+            icon  : icon
+         }
+        this.playerIconList.push(data);
+   }
+
+   returnIcon( strSocketID ) {
+    let icon;
+    this.playerIconList.forEach(
+        ( playerIcon ) =>
+        {  
+            if (strSocketID === playerIcon.strSocketID){
+                icon = playerIcon.icon
+            }
+        } );
+        return icon;
+   }
+
 }

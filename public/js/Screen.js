@@ -2,14 +2,14 @@
 class Screen
 {
     // コンストラクタ
-    constructor( socket, canvas, iconName )
+    constructor( socket, canvas )
     {
         this.socket = socket;
         this.canvas = canvas;
         this.context = canvas.getContext( '2d' );
         this.iProcessingTimeNanoSec = 0;
         this.aPlayer = null;
-        this.assets = new Assets(iconName);
+        this.assets = new Assets();
         // キャンバスの初期化
         this.canvas.width = SharedSettings.FIELD_WIDTH;
         this.canvas.height = SharedSettings.FIELD_HEIGHT;
@@ -52,6 +52,21 @@ class Screen
             () =>
             {
                 $( '#start-screen' ).show();
+            } );
+
+        // デッドしたらスタート画面に戻る
+        this.socket.on(
+            'enter-the-game',
+            ( aPlayer ) =>
+            {
+                if ( !aPlayer ){
+                    return;
+                }
+                aPlayer.forEach(
+                    ( player ) =>
+                    {
+                        this.assets.setPlayerIcon(player);
+                    } );
             } );
 
         // サーバーからの状態通知に対する処理
@@ -140,54 +155,32 @@ class Screen
     //　プレイヤー描写
     renderPlayer( player )
     {
-        var src = '../images/' + player.iconName;
+        var img = this.assets.returnIcon(player.strSocketID);
+        if (!img) return;
         var ctx = this.context;
-        this.preloadImages(src).done(function () {
-            var img = new Image();
-            img.src = src;
-            ctx.save();
-            ctx.drawImage( img,
-                player.fX, player.fY,
-                SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
-                SharedSettings.PLAYER_HEIGHT                  
-                );	// 描画先領域の大きさ
-            ctx.restore();
+        ctx.save();
+        ctx.drawImage( img,
+            player.fX, player.fY,
+            SharedSettings.PLAYER_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.PLAYER_HEIGHT                  
+            );	// 描画先領域の大きさ
+        ctx.restore();
 
-            // ニックネーム
-            ctx.save();
-            ctx.restore();
-            ctx.textAlign = 'center';
-            ctx.font = RenderingSettings.NICKNAME_FONT;
-            ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
-            ctx.fillText( player.strNickName, player.fX + 80, player.fY - 30);
-            ctx.restore();
-            ctx.restore();  
-        });
+        // ニックネーム
+        ctx.save();
+        ctx.restore();
+        ctx.textAlign = 'center';
+        ctx.font = RenderingSettings.NICKNAME_FONT;
+        ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
+        ctx.fillText( player.strNickName, player.fX + 80, player.fY - 30);
+        ctx.restore();
+        ctx.restore();  
     }
-
-    // アイコンを読み込むためのメソッド
-    preloadImages = function (src) {
-        if (!src.length) {
-          return;
-        }
-        var dfd = $.Deferred();
-        var img = new Image();
-        img.src = src;
-        var check = function () {
-        if (img.complete !== true) {
-            setTimeout(check, 250);
-            return false;
-        }
-          dfd.resolve(img);
-        };
-        check();
-        return dfd.promise();
-      }
     
     onClick(e) {
         console.log("click");
         var x = e.clientX - canvas.offsetLeft;
-        var y = e.clientY - canvas.offsetTop;
+        var y = e.clientY - canvas.offsetTop - 21;
 
         // クリックした座標にカードが位置している場合、ちょっと上に上げる
         this.aCard.forEach(

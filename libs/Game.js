@@ -4,6 +4,8 @@ const World = require( './World.js' );
 // 設定
 const GameSettings = require( './GameSettings.js' );
 
+var fs = require("fs");
+
 // ゲームクラス
 // ・ワールドを保持する
 // ・通信処理を有する
@@ -38,6 +40,7 @@ module.exports = class Game
                         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる
                         if (objConfig !== undefined) {
                             player = world.createPlayer( socket.id, objConfig.strNickName, objConfig.iconName);
+                            io.emit( 'enter-the-game' , Array.from( world.setPlayer ));
                             playerNum = 0;
                             world.setPlayer.forEach(
                                 // プレイヤー採番(一旦適当)
@@ -90,19 +93,6 @@ module.exports = class Game
                         }
                     } );
 
-                // 移動コマンドの処理の指定
-                // ・クライアント側のキー入力時の「socket.emit( 'change-my-movement', objMovement );」に対する処理 => カードが出たとき
-                socket.on( 'change-my-movement',
-                    ( objMovement ) =>
-                    {
-                        //console.log( 'change-my-movement : socket.id = %s', socket.id );
-                        if( !player )
-                        {
-                            return;
-                        }
-                        player.objMovement = objMovement;	// 動作
-                    } );
-
                 // 切断時の処理の指定
                 // ・クライアントが切断したら、サーバー側では'disconnect'イベントが発生する
                 socket.on( 'disconnect',
@@ -153,7 +143,7 @@ module.exports = class Game
                     player.dealCards(cards);
                     // 左端のカード（初期座標）
                     let fX = player.fX - 150;
-                    let fY = player.fY + 200;
+                    let fY = player.fY + 180;
                     world.setCard.forEach(
                         ( c ) =>
                         {
