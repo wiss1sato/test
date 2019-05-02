@@ -9,6 +9,12 @@ class Assets
         this.imageField.src = '../images/grass01.png'
         this.rectFieldInFieldImage = { sx: 0, sy: 0, sw: 512, sh: 512 };
 
+        this.teban = new Image();
+        this.teban.src = '../images/teban.png'
+
+        this.back = new Image();
+        this.back.src = '../images/back.png'
+
         this.playerIconList = [];
 
         //　各トランプカード

@@ -51,7 +51,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 3) {
+                                if (playerNum === 5) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -140,7 +140,6 @@ module.exports = class Game
                             } );
                     } );
 
-
                     // カードを配る処理
                     socket.on( 'deal-card',
                     () =>
@@ -167,6 +166,26 @@ module.exports = class Game
                                         }
                                     } );                                              
                             } );
+                        if (cardList.length === 3) {
+                            console.log(player);
+                            cards = cardList.splice(0,3);
+                            // 左端のカード（初期座標）
+                            let fX = 680;
+                            let fY = 250;
+                            world.setCard.forEach(
+                                ( c ) =>
+                                {
+                                    cards.forEach(
+                                        ( card ) =>
+                                        {
+                                            if(c.cardId === card) {
+                                                c.setLeftCard(fX, fY);
+                                                fX = fX + 50;
+                                            }
+                                        } );
+                                } );
+                        }
+                        // io.emit( 'deal-end');
                     } );
             } );
 

@@ -34,11 +34,22 @@ module.exports = class Card extends GameObject
         }
     }
 
+    // カードをプレイヤーに配置
     setPosition(fX, fY, playerNum)
     {
         this.fX = fX;
         this.fY = fY;
         this.playerNum = playerNum;
+        this.left = false;
+    }
+
+    // 残ったカードの処理
+    setLeftCard(fX, fY)
+    {
+        console.log('setLeftCard')
+        this.fX = fX;
+        this.fY = fY;
+        this.left = true;
     }
 
     // 更新
@@ -77,7 +88,8 @@ module.exports = class Card extends GameObject
             {
                 cardId: this.cardId,
                 selected : this.selected,
-                playerNum : this.playerNum
+                playerNum : this.playerNum,
+                left : this.left
             } );
     }
 };

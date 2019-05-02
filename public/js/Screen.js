@@ -80,13 +80,21 @@ class Screen
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
-            // ゲーム開始
+        // カードを配る
         this.socket.on(
             'start-the-game',
             () =>
             {
                 this.socket.emit( 'deal-card' );
             } );
+
+        // // カード配ったあとの
+        // this.socket.on(
+        //     'deal-end',
+        //     () =>
+        //     {
+        //         this.socket.emit( 'after-deal' );
+        //     } );    
     }
 
     // アニメーション（無限ループ処理）
@@ -167,7 +175,7 @@ class Screen
          // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
          // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
         if (this.socket.id !== player.strSocketID && this.aCard.length > 0) {
-            ctx.drawImage( img,
+            ctx.drawImage( this.assets.imageField,
                 player.fX - 150, player.fY + 165,
                 500,85
                 );	// 描画先領域の大きさ
@@ -220,14 +228,27 @@ class Screen
     
     renderCard( card )
     {
-        var img = this.assets.returnCard(card);
-        this.context.save();
-        this.context.drawImage( img[0],
-            card.fX, card.fY,
-            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
-            SharedSettings.CARD_HEIGHT                  
-            );	// 描画先領域の大きさ
-        this.context.restore();
+        let img = this.assets.returnCard(card);
+        if (card.left) {
+            img = this.assets.back;
+            this.context.save();
+            this.context.drawImage( img,
+                card.fX, card.fY,
+                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.CARD_HEIGHT                  
+                );	// 描画先領域の大きさ
+            this.context.restore();
+    
+        } else {
+            this.context.save();
+            this.context.drawImage( img[0],
+                card.fX, card.fY,
+                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.CARD_HEIGHT                  
+                );	// 描画先領域の大きさ
+            this.context.restore();
+        }
+
     }
 
 }
