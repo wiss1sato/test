@@ -15,6 +15,7 @@ class Screen
         this.canvas.height = SharedSettings.FIELD_HEIGHT;
         this.aCard = null;
         this.aNumber = null;
+        this.aMark = null;
         // ソケットの初期化
         this.initSocket();
 
@@ -26,11 +27,8 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mousedown', this.onDown, false);
-        canvas.addEventListener('mouseup', this.onUp, false);
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        canvas.addEventListener('mouseover', this.onOver, false);
-        canvas.addEventListener('mouseout', this.onOut, false);
+
     }
 
     // ソケットの初期化
@@ -74,11 +72,12 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, aCard, aNumber, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, aNumber, aMark, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
                 this.aNumber = aNumber;
+                this.aMark = aMark;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -146,6 +145,16 @@ class Screen
                 } );
         }
 
+        // マークの描画
+        if( null !== this.aMark )
+        {
+            this.aMark.forEach(
+                ( mark ) =>
+                {
+                    this.renderMark( mark );
+                } );
+        }
+
     }
 
     renderField()
@@ -204,6 +213,8 @@ class Screen
         ctx.restore();
         ctx.restore();  
     }
+
+    //　クリックされた時の処理
     
     onClick(e) {
         console.log("click");
@@ -211,9 +222,12 @@ class Screen
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
         let n = null;
-        let isClicked = false;
-        // クリックした座標にカードが位置している場合、ちょっと上に上げる
+        let m = null;
+        let isNumberClicked = false;
+        let isCardClicked = false;
+        let isMarkClicked = false;
 
+        // 宣言時の数字
         this.aNumber.forEach(
             ( number ) =>
             {
@@ -224,34 +238,35 @@ class Screen
                         n = number;
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'number-clicked' , number );
-                        isClicked = true;
+                        isNumberClicked = true;
                 }
             } );
-            // カードしてない他のナンバーを全てクリックを外す
+        // 他のナンバーを全てクリックを外す
+        if (isNumberClicked) {
             this.aNumber.forEach(
                 ( number ) =>
                 {
                     if (number !== n) {
-                        // サーバにクリックされたことを伝える
                         this.socket.emit( 'number-unclicked' , number );
                     }
-                } );              
-        
-        if (!isClicked){
-            this.aCard.forEach(
-                ( card ) =>
-                {
-                    if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
-                        &&
-                        (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
-                        ){
-                            c = card;
-                            // サーバにクリックされたことを伝える
-                            this.socket.emit( 'card-clicked' , card );
-                    }
-                } );
-    
-            // クリックしてない他のカードを全てクリックを外す
+                } );  
+        }
+
+        this.aCard.forEach(
+            ( card ) =>
+            {
+                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                    &&
+                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                    ){
+                        c = card;
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'card-clicked' , card );
+                        isCardClicked = true;
+                }
+            } );
+        if (isCardClicked){
+            // 他のカードを全てクリックを外す
             this.aCard.forEach(
                 ( card ) =>
                 {
@@ -262,6 +277,31 @@ class Screen
                 } );  
         }
 
+            this.aMark.forEach(
+                ( mark ) =>
+                {
+                    if ((mark.fX <= x && x <= mark.fX + SharedSettings.MARK_WIDTH) 
+                        &&
+                        (mark.fY <= y && y <= mark.fY + SharedSettings.MARK_HEIGHT) 
+                        ){
+                            m = mark;
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'mark-clicked' , mark );
+                            isMarkClicked = true;
+                    }
+                } );
+            if (isMarkClicked) {
+            // 　他のマークを全てクリックを外す
+            this.aMark.forEach(
+                ( mark ) =>
+                {
+                    if (mark !== m) {
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'mark-unclicked' , mark );
+                    }
+                } );   
+            }
+            
         console.log("x:", x, "y:", y);
     }
     
@@ -291,6 +331,21 @@ class Screen
             number.fX, number.fY,
             SharedSettings.NUMBER_WIDTH,	// 描画先領域の大きさ
             SharedSettings.NUMBER_HEIGHT                  
+            );	// 描画先領域の大きさ
+        this.context.restore();
+    }
+
+    renderMark( mark )
+    {
+        let img = this.assets.returnMark(mark)[0];
+        if (mark.selected) {
+            img = this.assets.returnColorMark(mark)[0];
+        }
+        this.context.save();
+        this.context.drawImage( img,
+            mark.fX, mark.fY,
+            SharedSettings.MARK_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.MARK_HEIGHT                  
             );	// 描画先領域の大きさ
         this.context.restore();
     }

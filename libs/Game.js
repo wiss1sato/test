@@ -31,8 +31,8 @@ module.exports = class Game
             {
                 console.log( 'connection : socket.id = %s', socket.id );
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
-                let card = null;	// コネクションごとのカードオブジェクト。イベントをまたいで使用される。
                 let number = null;
+                let mark = null;
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
@@ -58,33 +58,33 @@ module.exports = class Game
                                     for (let i = 1; i <= 4; i++) {
                                         for (let j = 2; j <= 13; j++) {
                                             if (i === 1) {
-                                                card = world.createCard('s' + j);
+                                                world.createCard('s' + j);
                                             }
                                             if (i === 2) {
-                                                card = world.createCard('h' + j);
+                                                world.createCard('h' + j);
                                             }
                                             if (i === 3) {
-                                                card = world.createCard('d' + j);
+                                                world.createCard('d' + j);
                                             }
                                             if (i === 4) {
-                                                card = world.createCard('c' + j);
+                                                world.createCard('c' + j);
                                             }
                                         }
                                         if (i === 1) {
-                                            card = world.createCard('s' + 1);
+                                            world.createCard('s' + 1);
                                         }
                                         if (i === 2) {
-                                            card = world.createCard('h' + 1);
+                                            world.createCard('h' + 1);
                                         }
                                         if (i === 3) {
-                                            card = world.createCard('d' + 1);
+                                            world.createCard('d' + 1);
                                         }
                                         if (i === 4) {
-                                            card = world.createCard('c' + 1);
+                                            world.createCard('c' + 1);
                                         }                                        
                                     }                                 
                                     // ジョーカー
-                                    card = world.createCard('jo');
+                                    world.createCard('jo');
                                     // 数字を作成する
                                     let fX = 650;
                                     let fY = 350;
@@ -96,7 +96,17 @@ module.exports = class Game
                                         number = world.createNumber(i);
                                         number.setPosition(fX,fY);
                                         fX = fX + 60;
-                                    }                                       
+                                    }
+                                    // マークを作成する
+                                    mark = world.createMark('spade');
+                                    mark.setPosition(650,150);
+                                    mark = world.createMark('heart');
+                                    mark.setPosition(725,150);
+                                    mark = world.createMark('diamond');
+                                    mark.setPosition(800,150);
+                                    mark = world.createMark('clover');
+                                    mark.setPosition(875,150);
+
                                     io.emit( 'start-the-game');
                                 }                            
                             // 最新状況をクライアントに送信
@@ -124,6 +134,8 @@ module.exports = class Game
                             world.destroyCard();
                             // カードを全部消す
                             world.destroyNumber();
+                            // マークを全部消す
+                            world.destroyMark();                            
                             // データはもう一回作る
                             cardList = this.createCardList()
                         }
@@ -142,6 +154,19 @@ module.exports = class Game
                             } );
                     } );
 
+                    // カードがクリックされた時の処理（ちょっと上にあげる）
+                    socket.on( 'card-unclicked',
+                    ( card ) =>
+                    {
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {  
+                                if (c.cardId === card.cardId) {
+                                    c.cardUnclicked();
+                                }
+                            } );
+                    } );                    
+
                     socket.on( 'number-clicked',
                     ( number ) =>
                     {
@@ -154,19 +179,6 @@ module.exports = class Game
                             } );
                     } );                    
 
-                    // カードがクリックされた時の処理（ちょっと上にあげる）
-                    socket.on( 'card-unclicked',
-                    ( card ) =>
-                    {
-                        world.setCard.forEach(
-                            ( c ) =>
-                            {  
-                                if (c.cardId === card.cardId) {
-                                    c.cardUnclicked();
-                                }
-                            } );
-                    } );
-
                     socket.on( 'number-unclicked',
                     ( number ) =>
                     {
@@ -177,7 +189,32 @@ module.exports = class Game
                                     n.numberUnclicked();
                                 }
                             } );
-                    } );                    
+                    } );
+
+                    // カードがクリックされた時の処理（ちょっと上にあげる）
+                    socket.on( 'mark-clicked',
+                    ( mark ) =>
+                    {
+                        world.setMark.forEach(
+                            ( m ) =>
+                            {  
+                                if (m.markId === mark.markId) {
+                                    m.markClicked();
+                                }
+                            } );
+                    } );
+
+                    socket.on( 'mark-unclicked',
+                    ( mark ) =>
+                    {
+                        world.setMark.forEach(
+                            ( m ) =>
+                            {  
+                                if (m.markId === mark.markId) {
+                                    m.markUnclicked();
+                                }
+                            } );
+                    } );                     
 
                     // カードを配る処理
                     socket.on( 'deal-card',
@@ -191,7 +228,7 @@ module.exports = class Game
                         let cards = cardList.splice(0,10);
                         player.dealCards(cards);
                         // 左端のカード（初期座標）
-                        let fX = player.fX - 150;
+                        let fX = player.fX - 100;
                         let fY = player.fY + 180;
                         world.setCard.forEach(
                             ( c ) =>
@@ -201,7 +238,7 @@ module.exports = class Game
                                     {
                                         if(c.cardId === card) {
                                             c.setPosition(fX, fY, player.playerNum);
-                                            fX = fX + 50;
+                                            fX = fX + 40;
                                         }
                                     } );                                              
                             } );
@@ -211,7 +248,7 @@ module.exports = class Game
                             cards = cardList.splice(0,3);
                             // 左端のカード（初期座標）
                             let fX = 680;
-                            let fY = 170;
+                            let fY = 70;
                             world.setCard.forEach(
                                 ( c ) =>
                                 {
@@ -267,6 +304,7 @@ module.exports = class Game
                     Array.from( world.setPlayer ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
                     Array.from( world.setCard ),
                     Array.from( world.setNumber ),
+                    Array.from( world.setMark ),
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]

@@ -60,6 +60,29 @@ class Assets
         this.c20.src = '../images/20c.png'
         this.colorNumberSet = [];
         this.colorNumberSet.push(this.c11,this.c12,this.c13,this.c14,this.c15,this.c16,this.c17,this.c18,this.c19,this.c20);
+
+        this.spade = new Image();
+        this.spade.src = '../images/spade.png'
+        this.heart = new Image();
+        this.heart.src = '../images/heart.png'
+        this.diamond = new Image();
+        this.diamond.src = '../images/diamond.png'
+        this.clover = new Image();
+        this.clover.src = '../images/clover.png'
+        this.markSet = [];
+
+        this.markSet.push(this.spade,this.heart,this.diamond,this.clover); 
+
+        this.cspade = new Image();
+        this.cspade.src = '../images/spadec.png'
+        this.cheart = new Image();
+        this.cheart.src = '../images/heartc.png'
+        this.cdiamond = new Image();
+        this.cdiamond.src = '../images/diamondc.png'
+        this.cclover = new Image();
+        this.cclover.src = '../images/cloverc.png'
+        this.colorMarkSet = [];
+        this.colorMarkSet.push(this.cspade,this.cheart,this.cdiamond,this.cclover); 
         
         this.playerIconList = [];
 
@@ -226,7 +249,7 @@ class Assets
     return ret;
     }
 
-   // ナンバーを返却するメソッド
+   // ナンバーを返却するメソッド(色つき)
    returnColorNumber(number) {
     var ret = this.colorNumberSet.filter(
         function(c){
@@ -235,4 +258,24 @@ class Assets
         );
     return ret;
     }    
+
+   // ナンバーを返却するメソッド
+   returnMark(mark) {
+    var ret = this.markSet.filter(
+        function(m){
+             return (m.src.indexOf(mark.markId + '.png') > -1);
+         }
+        );
+    return ret;
+    }
+
+   // ナンバーを返却するメソッド(色付き)
+   returnColorMark(mark) {
+    var ret = this.colorMarkSet.filter(
+        function(m){
+             return (m.src.indexOf(mark.markId + 'c.png') > -1);
+         }
+        );
+    return ret;
+    }        
 }

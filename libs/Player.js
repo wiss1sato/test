@@ -18,7 +18,6 @@ module.exports = class Player extends GameObject
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
         this.hasCards = null;
-        this.img = null;
     }
 
     toJSON()
@@ -30,7 +29,6 @@ module.exports = class Player extends GameObject
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName,
                 hasCards: this.hasCards,
-                img: this.img,
                 playerNum : this.playerNum
             } );
     }
@@ -46,12 +44,12 @@ module.exports = class Player extends GameObject
         
         if (playerNum === 2) {
             this.fX = 250;
-            this.fY = 50;
+            this.fY = 350;
         }
 
         if (playerNum === 3) {
             this.fX = 250;
-            this.fY = 350;
+            this.fY = 50;
         }
                 
         if (playerNum === 4) {

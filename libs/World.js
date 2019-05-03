@@ -4,6 +4,8 @@ const Player = require( './Player.js' );
 const Card = require( './Card.js' );
 // モジュール
 const Number = require( './Number.js' );
+// モジュール
+const Mark = require( './Mark.js' );
 
 
 // ワールドクラス
@@ -20,6 +22,7 @@ module.exports = class World
          this.setPlayer = new Set();	// プレイヤーリスト
          this.setCard = new Set();	// カードリスト
          this.setNumber = new Set();	// カードリスト
+         this.setMark = new Set();	// カードリスト
         }
 
     // 更新処理
@@ -45,18 +48,12 @@ module.exports = class World
     // オブジェクトの座標値の更新
     updateObjects( fDeltaTime )
     {
-        // カードごとの処理
-        this.setCard.forEach(
-            ( card ) =>
-            {
-                card.update( fDeltaTime, card );
-            } );
-        // プレイヤーごとの処理
-        this.setPlayer.forEach(
-            ( player ) =>
-            {
-                player.update( player);
-            } );            
+        // // プレイヤーごとの処理
+        // this.setPlayer.forEach(
+        //     ( player ) =>
+        //     {
+        //         player.update( player);
+        //     } );            
     }
 
     // 衝突のチェック
@@ -86,16 +83,6 @@ module.exports = class World
         return player;
     }
 
-    // プレイヤーの破棄
-    destroyPlayer( player )
-    {
-        // プレイヤーリストリストからの削除
-        this.setPlayer.delete( player );
-
-        // 削除プレイヤーのクライアントにイベント'dead'を送信
-        this.io.to( player.strSocketID ).emit( 'dead' );
-    }
-
     // カードの生成
     createCard(cardId)
     {
@@ -114,6 +101,27 @@ module.exports = class World
         return number;
     }    
 
+    // マークの生成
+    createMark(markId)
+    {
+        // カードの生成
+        const mark = new Mark( markId );
+        this.setMark.add( mark );
+        return mark;
+    }   
+    
+
+    // プレイヤーの破棄
+    destroyPlayer( player )
+    {
+        // プレイヤーリストリストからの削除
+        this.setPlayer.delete( player );
+
+        // 削除プレイヤーのクライアントにイベント'dead'を送信
+        this.io.to( player.strSocketID ).emit( 'dead' );
+    }
+    
+
     // カードの削除
     destroyCard()
     {
@@ -126,10 +134,10 @@ module.exports = class World
         }
     }
 
-    // カードの削除
+    // ナンバーの削除
     destroyNumber()
     {
-        if (undefined !== this.setCard) {
+        if (undefined !== this.setNumber) {
             this.setNumber.forEach(
                 ( number ) =>
                 {
@@ -137,4 +145,16 @@ module.exports = class World
                 } );	
         }
     }
+
+    // マークの削除
+    destroyMark()
+    {
+        if (undefined !== this.setMark) {
+            this.setMark.forEach(
+                ( mark ) =>
+                {
+                    this.setMark.delete(mark);
+                } );	
+        }
+    }    
 }
