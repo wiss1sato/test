@@ -16,6 +16,9 @@ class Screen
         this.aCard = null;
         this.aNumber = null;
         this.aMark = null;
+        this.aTeban = null;
+        this.declaration = false;
+        this.aPassCnt = null;
         // ソケットの初期化
         this.initSocket();
 
@@ -72,12 +75,14 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, aCard, aNumber, aMark, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
                 this.aNumber = aNumber;
                 this.aMark = aMark;
+                this.aTeban = aTeban;
+                this.aPassCnt = aPassCnt;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -94,8 +99,16 @@ class Screen
             'deal-end',
             () =>
             {
-                this.socket.emit( 'declaration' );
-            } );    
+                this.aTeban = 1;
+                this.declaration = true;
+            } );
+
+            this.socket.on(
+                'declaration-end',
+                () =>
+                {
+                    this.declaration = false;
+                } );            
     }
 
     // アニメーション（無限ループ処理）
@@ -175,7 +188,6 @@ class Screen
                     RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
             }
         }
-
         this.context.restore();
     }
 
@@ -198,6 +210,39 @@ class Screen
             ctx.drawImage( this.assets.imageField,
                 player.fX - 150, player.fY + 165,
                 500,85
+                );	// 描画先領域の大きさ
+        }
+
+        // 手番の場合は、手番マークを表示
+        if (this.aTeban === player.playerNum) {
+            ctx.drawImage( this.assets.teban,
+                player.fX + 200, player.fY + 20,
+                60,40
+                );	// 描画先領域の大きさ
+        }
+
+        if (this.declaration && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
+            this.context.drawImage( this.assets.pass,
+                700, 350,
+                60,40
+                );	// 描画先領域の大きさ                
+            this.context.drawImage( this.assets.kettei,
+                770, 350,
+                60,40
+                );	// 描画先領域の大きさ
+        }
+
+
+        // 宣言用のOK/パス
+
+        // カード用のOK
+
+        //  カードがある場合は、ついでに,他プレイヤーのカードも隠す。
+        //  最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
+         if (this.socket.id === player.strSocketID) {
+            ctx.drawImage( this.assets.ok,
+                player.fX + 200, player.fY + 270,
+                60,40
                 );	// 描画先領域の大きさ
         }
 
@@ -226,6 +271,26 @@ class Screen
         let isNumberClicked = false;
         let isCardClicked = false;
         let isMarkClicked = false;
+
+        // 宣言フェーズ時
+        if (this.declaration) {
+            // パスを押されたとき
+            if ((700 <= x && x <= 760) 
+            &&
+            (350 <= y && y <= 390) 
+            ){
+                // サーバにクリックされたことを伝える
+                this.socket.emit( 'pass-clicked');                
+            }
+            // OKを押されたとき
+            if ((770 <= x && x <= 830) 
+            &&
+            (350 <= y && y <= 390) 
+            ){
+                this.socket.emit( 'kettei-clicked');  
+            }
+
+        } 
 
         // 宣言時の数字
         this.aNumber.forEach(
@@ -301,7 +366,7 @@ class Screen
                     }
                 } );   
             }
-            
+
         console.log("x:", x, "y:", y);
     }
     

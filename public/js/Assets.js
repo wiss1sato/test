@@ -14,6 +14,13 @@ class Assets
 
         this.back = new Image();
         this.back.src = '../images/back.png'
+        
+        this.ok = new Image();
+        this.ok.src = '../images/ok.png'
+        this.kettei = new Image();
+        this.kettei.src = '../images/kettei.png'
+        this.pass = new Image();
+        this.pass.src = '../images/pass.png'
 
         this.n11 = new Image();
         this.n11.src = '../images/11.png'

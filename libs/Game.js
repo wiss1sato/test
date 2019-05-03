@@ -21,6 +21,9 @@ module.exports = class Game
         let playerNum = 0;
         let cardId = null;
         let cardList =  this.createCardList();
+        let passCnt = 0;
+        let teban = 1; 
+
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
         // 　サーバーで、'connection'イベント
@@ -52,7 +55,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 5) {
+                                if (playerNum === 2) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -87,7 +90,7 @@ module.exports = class Game
                                     world.createCard('jo');
                                     // 数字を作成する
                                     let fX = 650;
-                                    let fY = 350;
+                                    let fY = 270;
                                     for (let i = 11; i <= 20; i++) {
                                         if (i === 16) {
                                             fX = 650;
@@ -107,7 +110,10 @@ module.exports = class Game
                                     mark = world.createMark('clover');
                                     mark.setPosition(875,150);
 
+                                    // ボタンを作成する
+
                                     io.emit( 'start-the-game');
+
                                 }                            
                             // 最新状況をクライアントに送信
                             // io.emit( 'enter-the-game', Array.from( world.setPlayer ));
@@ -214,7 +220,14 @@ module.exports = class Game
                                     m.markUnclicked();
                                 }
                             } );
-                    } );                     
+                    } );
+
+                    // ボタン押下時の処理
+                    socket.on( 'button-clicked',
+                    ( ) =>
+                    {
+                        
+                    } );                    
 
                     // カードを配る処理
                     socket.on( 'deal-card',
@@ -265,12 +278,24 @@ module.exports = class Game
                         io.emit( 'deal-end');
                     } );
 
-                    // 宣言フェーズ
-                    socket.on( 'declaration',
+                    // 宣言中にパスが押されたとき
+                    socket.on( 'pass-clicked',
                     () =>
                     {
-                        // io.emit( 'create-number');
+                        passCnt += 1;
+                        teban += 1;
+                        if (teban === 6) teban = 1;
+                        if (passCnt === 4) io.emit( 'declaration-end');
                     } );
+
+                    // 宣言中に決定が押されたとき
+                    socket.on( 'kettei-clicked',
+                    () =>
+                    {
+                        passCnt = 0;
+                        teban += 1;
+                        if (teban === 6) teban = 1;                        
+                    } );                    
 
                     // 宣言フェーズ
                     socket.on( 'deal-card',
@@ -305,6 +330,8 @@ module.exports = class Game
                     Array.from( world.setCard ),
                     Array.from( world.setNumber ),
                     Array.from( world.setMark ),
+                    teban,
+                    passCnt,
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]
