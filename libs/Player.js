@@ -39,16 +39,16 @@ module.exports = class Player extends GameObject
         // 初期位置
         if (playerNum === 1) {
             this.fX = 650;
-            this.fY = 600;
+            this.fY = 550;
         }
         
         if (playerNum === 2) {
-            this.fX = 250;
+            this.fX = 200;
             this.fY = 350;
         }
 
         if (playerNum === 3) {
-            this.fX = 250;
+            this.fX = 200;
             this.fY = 50;
         }
                 
@@ -77,7 +77,13 @@ module.exports = class Player extends GameObject
     {
         this.hasCards = cards;
     }
-    
+
+    // カード配布
+    returnCards()
+    {
+        return this.hasCards;
+    }
+
     // 更新
     update( fDeltaTime )
     {

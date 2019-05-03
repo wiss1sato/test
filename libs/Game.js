@@ -23,6 +23,9 @@ module.exports = class Game
         let cardList =  this.createCardList();
         let passCnt = 0;
         let teban = 1; 
+        let cards = null;
+        let leftCards = null;
+        
 
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
@@ -36,6 +39,7 @@ module.exports = class Game
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
                 let number = null;
                 let mark = null;
+                let napoleon = null;                
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
@@ -128,11 +132,11 @@ module.exports = class Game
                     () =>
                     {
                         console.log( 'disconnect : socket.id = %s', socket.id );
-                        playerNum = playerNum - 1;
                         if( !player )
                         {
                             return;
                         }
+                        playerNum = playerNum - 1;                        
                         world.destroyPlayer( player );
                         player = null;	// 自プレイヤーの解放
                         if (playerNum !== 5) {
@@ -141,7 +145,9 @@ module.exports = class Game
                             // カードを全部消す
                             world.destroyNumber();
                             // マークを全部消す
-                            world.destroyMark();                            
+                            world.destroyMark();
+                            passCnt = 0;
+                            teban = 1; 
                             // データはもう一回作る
                             cardList = this.createCardList()
                         }
@@ -197,7 +203,7 @@ module.exports = class Game
                             } );
                     } );
 
-                    // カードがクリックされた時の処理（ちょっと上にあげる）
+                    // マークがクリックされた時の処理(セレクト済みにする)
                     socket.on( 'mark-clicked',
                     ( mark ) =>
                     {
@@ -238,7 +244,7 @@ module.exports = class Game
                             return;
                         }
                         // プレイヤーにカードを配る
-                        let cards = cardList.splice(0,10);
+                        cards = cardList.splice(0,10);
                         player.dealCards(cards);
                         // 左端のカード（初期座標）
                         let fX = player.fX - 100;
@@ -253,22 +259,22 @@ module.exports = class Game
                                             c.setPosition(fX, fY, player.playerNum);
                                             fX = fX + 40;
                                         }
-                                    } );                                              
+                                    } );
                             } );
                         // 残ったカードを真ん中に配置する
                         if (cardList.length === 33) {
                             console.log(player);
-                            cards = cardList.splice(0,3);
+                            leftCards = cardList.splice(0,3);
                             // 左端のカード（初期座標）
                             let fX = 680;
                             let fY = 70;
                             world.setCard.forEach(
                                 ( c ) =>
                                 {
-                                    cards.forEach(
-                                        ( card ) =>
+                                    leftCards.forEach(
+                                        ( leftCard ) =>
                                         {
-                                            if(c.cardId === card) {
+                                            if(c.cardId === leftCard) {
                                                 c.setLeftCard(fX, fY);
                                                 fX = fX + 50;
                                             }
@@ -280,28 +286,82 @@ module.exports = class Game
 
                     // 宣言中にパスが押されたとき
                     socket.on( 'pass-clicked',
-                    () =>
+                    (mark, number) =>
                     {
                         passCnt += 1;
                         teban += 1;
-                        if (teban === 6) teban = 1;
-                        if (passCnt === 4) io.emit( 'declaration-end');
+                        if (teban === 3) teban = 1;
+                        if (passCnt === 1) io.emit( 'declaration-end' , mark , number, napoleon);
                     } );
 
                     // 宣言中に決定が押されたとき
                     socket.on( 'kettei-clicked',
-                    () =>
+                    (player) =>
                     {
                         passCnt = 0;
                         teban += 1;
-                        if (teban === 6) teban = 1;                        
+                        if (teban === 6) teban = 1;
+                        napoleon = player;
+                    } );
+
+                    // 副官札指定後に決定が押されたとき
+                    socket.on( 'kettei-clicked-designation',
+                    (designationCard) =>
+                    {
+                        // 元のプレイヤーの手札に3枚追加する
+                        cards = player.returnCards();
+                        cards.push(leftCards[0]);
+                        cards.push(leftCards[1]);
+                        cards.push(leftCards[2]);
+                        let fX = player.fX - 100;
+                        let fY = player.fY + 180;
+                        // 改めて、カードを配置し直す
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card) {
+                                            c.setPosition(fX, fY, player.playerNum);
+                                            fX = fX + 40;
+                                        }
+                                    } );
+                            } );
+                        io.emit( 'designation-end' , designationCard);
+                    } );
+
+                    // 交換時
+                    socket.on( 'change-discards',
+                    (cards) =>
+                    {
+                        let fX = 0;
+                        let fY = 0;                        
+                        // プレイヤーの位置で置く場所を変える
+                        if (player.playerNum === 1) {
+                            fX = 700;
+                            fY = 470;
+                        }
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card.cardId) {
+                                            c.setDiscard(fX, fY, card);
+                                            fX = fX + 40;
+                                        }
+                                    } );
+                            } );
                     } );                    
 
-                    // 宣言フェーズ
-                    socket.on( 'deal-card',
+
+                    // プレイヤーがカードを捨てる
+                    socket.on( 'discard',
                     () =>
                     {
-
+                        
                     } );                    
             } );
 

@@ -78,7 +78,7 @@ class Assets
         this.clover.src = '../images/clover.png'
         this.markSet = [];
 
-        this.markSet.push(this.spade,this.heart,this.diamond,this.clover); 
+        this.markSet.push(this.spade,this.heart,this.diamond,this.clover);
 
         this.cspade = new Image();
         this.cspade.src = '../images/spadec.png'
@@ -92,6 +92,9 @@ class Assets
         this.colorMarkSet.push(this.cspade,this.cheart,this.cdiamond,this.cclover); 
         
         this.playerIconList = [];
+
+        this.frame = new Image();
+        this.frame.src = '../images/frame.png'
 
         //　各トランプカード
         this.s1 = new Image();
@@ -205,10 +208,10 @@ class Assets
    }
 
    // カードを返却するメソッド
-   returnCard(card) {
+   returnCard(cardId) {
        var ret = this.cardSet.filter(
            function(c){
-                return (c.src.indexOf(card.cardId + '.png') > -1);
+                return (c.src.indexOf(cardId + '.png') > -1);
             }
            );
        return ret;

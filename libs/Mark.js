@@ -13,6 +13,7 @@ module.exports = class Mark extends GameObject
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.MARK_WIDTH, SharedSettings.MARK_HEIGHT );
         this.markId = markId;
+        this.player = null;
     }
 
     markClicked()
@@ -73,7 +74,8 @@ module.exports = class Mark extends GameObject
             super.toJSON(),
             {
                 markId: this.markId,
-                selected : this.selected
+                selected : this.selected,
+                player : this.player
             } );
     }
 };

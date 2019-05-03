@@ -51,6 +51,15 @@ module.exports = class Card extends GameObject
         this.left = true;
     }
 
+    // 残ったカードの処理
+    setDiscard(fX, fY, card)
+    {
+        let num = card.cardId.replace(/[^0-9]/g, '');
+        if (num >= 10 || num === 1) this.efuda = true;
+        this.fX = fX;
+        this.fY = fY;
+    }   
+
     // 更新
     // ※rectField : フィールド矩形は、オブジェクト中心と判定する。（OverlapTester.pointInRect()）
     //               オブジェクトの大きさ分狭めた(上下左右で、大きさの半分づつ狭めた）矩形が必要。
@@ -72,7 +81,8 @@ module.exports = class Card extends GameObject
                 cardId: this.cardId,
                 selected : this.selected,
                 playerNum : this.playerNum,
-                left : this.left
+                left : this.left,
+                efuda : this.efuda
             } );
     }
 };

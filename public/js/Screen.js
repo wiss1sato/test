@@ -18,7 +18,17 @@ class Screen
         this.aMark = null;
         this.aTeban = null;
         this.declaration = false;
+        this.designation = false;
+        this.change = false;
+        this.mainPhase = false;
         this.aPassCnt = null;
+        this.kirihuda = null;
+        this.maisuu = null;
+        this.napoleon = null;
+        this.fukukan = null;
+        this.designationCard = null;
+        this.frame = new Object();       
+
         // ソケットの初期化
         this.initSocket();
 
@@ -94,7 +104,7 @@ class Screen
                 this.socket.emit( 'deal-card' );
             } );
 
-        // カード配ったあとの宣言フェーズ
+        // カード配ったあと,宣言フェーズに以降
         this.socket.on(
             'deal-end',
             () =>
@@ -103,12 +113,27 @@ class Screen
                 this.declaration = true;
             } );
 
-            this.socket.on(
-                'declaration-end',
-                () =>
-                {
-                    this.declaration = false;
-                } );            
+        // 宣言フェーズが終わったら、副官札指定フェーズ
+        this.socket.on(
+            'declaration-end',
+            ( mark, number, napoleon ) =>
+            {
+                console.log('宣言マーク:' + mark.markId + ',宣言枚数:' + number.num, ',ナポレオン:' + napoleon);
+                this.kirihuda = mark.markId;
+                this.maisuu = number.num;
+                this.napoleon = napoleon;
+                this.declaration = false;
+                this.designation = true;
+            } );
+
+        this.socket.on(
+            'designation-end',
+            ( designationCard ) =>
+            {
+                console.log('宣言札:' + designationCard);
+                this.designation = false;
+                this.change = true;
+            } );
     }
 
     // アニメーション（無限ループ処理）
@@ -209,8 +234,8 @@ class Screen
         if (this.socket.id !== player.strSocketID && this.aCard.length > 0) {
             ctx.drawImage( this.assets.imageField,
                 player.fX - 150, player.fY + 165,
-                500,85
-                );	// 描画先領域の大きさ
+                580,85
+                );
         }
 
         // 手番の場合は、手番マークを表示
@@ -218,28 +243,86 @@ class Screen
             ctx.drawImage( this.assets.teban,
                 player.fX + 200, player.fY + 20,
                 60,40
-                );	// 描画先領域の大きさ
+                );
         }
 
+        // 宣言時に手番の場合、自分のエリアにボタン配置
         if (this.declaration && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
             this.context.drawImage( this.assets.pass,
                 700, 350,
                 60,40
-                );	// 描画先領域の大きさ                
+                );              
             this.context.drawImage( this.assets.kettei,
                 770, 350,
                 60,40
+                );
+        }
+
+        // 副官指定フェーズ中は、ナポレオンプレイヤーだけ副官指定札を表示する
+        if (this.napoleon === this.socket.id && this.designation) {
+            let img = this.assets.returnCard('s1')[0];
+            this.context.drawImage( img,
+                650, 350,
+                75,105
+                );
+            img = this.assets.returnCard('jo')[0];
+            this.context.drawImage( img,
+                725, 350,
+                75,105
+                );                
+            // 切り札が黒の場合
+            if (this.kirihuda === 'spade' || this.kirihuda === 'clover') {
+                img = this.assets.returnCard('s11')[0];
+                this.context.drawImage( img,
+                    800, 350,
+                    75,105
+                    );	// 描画先領域の大きさ
+                img = this.assets.returnCard('c11')[0];
+                this.context.drawImage( img,
+                    875, 350,
+                    75,105
+                    );	// 描画先領域の大きさ                                 
+            } else {
+                img = this.assets.returnCard('h11')[0];
+                this.context.drawImage( img,
+                    800, 350,
+                    75,105
+                    );	// 描画先領域の大きさ
+                img = this.assets.returnCard('d11')[0];
+                this.context.drawImage( img,
+                    875, 350,
+                    75,105
+                    );	// 描画先領域の大きさ  
+            }
+
+            // 決定ボタン
+            this.context.drawImage( this.assets.kettei,
+                770, 470,
+                60,40
                 );	// 描画先領域の大きさ
+
+            // 指定切り札の枠
+            if (!this.frame) return;
+            let frameImg = this.assets.frame;
+            this.context.drawImage( frameImg,
+                this.frame.fX, this.frame.fY,
+                75,105
+            );
         }
 
 
         // 宣言用のOK/パス
 
         // カード用のOK
+        if (this.change && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
+            ctx.drawImage( this.assets.ok,
+                player.fX + 200, player.fY + 270,
+                60,40
+                );	// 描画先領域の大きさ
+        }        
 
-        //  カードがある場合は、ついでに,他プレイヤーのカードも隠す。
-        //  最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
-         if (this.socket.id === player.strSocketID) {
+        // カード用のOK
+         if (this.mainPhase && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
                 player.fX + 200, player.fY + 270,
                 60,40
@@ -274,74 +357,32 @@ class Screen
 
         // 宣言フェーズ時
         if (this.declaration) {
-            // パスを押されたとき
-            if ((700 <= x && x <= 760) 
-            &&
-            (350 <= y && y <= 390) 
-            ){
-                // サーバにクリックされたことを伝える
-                this.socket.emit( 'pass-clicked');                
-            }
-            // OKを押されたとき
-            if ((770 <= x && x <= 830) 
-            &&
-            (350 <= y && y <= 390) 
-            ){
-                this.socket.emit( 'kettei-clicked');  
-            }
-
-        } 
-
-        // 宣言時の数字
-        this.aNumber.forEach(
-            ( number ) =>
-            {
-                if ((number.fX <= x && x <= number.fX + SharedSettings.NUMBER_WIDTH) 
-                    &&
-                    (number.fY <= y && y <= number.fY + SharedSettings.NUMBER_HEIGHT) 
-                    ){
-                        n = number;
-                        // サーバにクリックされたことを伝える
-                        this.socket.emit( 'number-clicked' , number );
-                        isNumberClicked = true;
-                }
-            } );
-        // 他のナンバーを全てクリックを外す
-        if (isNumberClicked) {
+        // 宣言時の数字が押されたとき
             this.aNumber.forEach(
                 ( number ) =>
                 {
-                    if (number !== n) {
-                        this.socket.emit( 'number-unclicked' , number );
+                    if ((number.fX <= x && x <= number.fX + SharedSettings.NUMBER_WIDTH) 
+                        &&
+                        (number.fY <= y && y <= number.fY + SharedSettings.NUMBER_HEIGHT) 
+                        ){
+                            n = number;
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'number-clicked' , number );
+                            isNumberClicked = true;
                     }
-                } );  
-        }
-
-        this.aCard.forEach(
-            ( card ) =>
-            {
-                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
-                    &&
-                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
-                    ){
-                        c = card;
-                        // サーバにクリックされたことを伝える
-                        this.socket.emit( 'card-clicked' , card );
-                        isCardClicked = true;
-                }
-            } );
-        if (isCardClicked){
-            // 他のカードを全てクリックを外す
-            this.aCard.forEach(
-                ( card ) =>
-                {
-                    if (card !== c) {
-                        // サーバにクリックされたことを伝える
-                        this.socket.emit( 'card-unclicked' , card );
-                    }
-                } );  
-        }
-
+                } );
+            // 他のナンバーを全てクリックを外す
+            if (isNumberClicked) {
+                this.aNumber.forEach(
+                    ( number ) =>
+                    {
+                        if (number !== n) {
+                            this.socket.emit( 'number-unclicked' , number );
+                        }
+                    } );  
+            }
+            
+            // マークをクリックした動き
             this.aMark.forEach(
                 ( mark ) =>
                 {
@@ -350,7 +391,7 @@ class Screen
                         (mark.fY <= y && y <= mark.fY + SharedSettings.MARK_HEIGHT) 
                         ){
                             m = mark;
-                            // サーバにクリックされたことを伝える
+                            // サーバにクリックされたことを伝える。ついでに、どのプレイヤーがクリックしたかが分かるようにソケットIDを入れる
                             this.socket.emit( 'mark-clicked' , mark );
                             isMarkClicked = true;
                     }
@@ -367,13 +408,166 @@ class Screen
                 } );   
             }
 
+            // パスを押されたとき
+            if ((700 <= x && x <= 760) 
+            &&
+            (350 <= y && y <= 390) 
+            ){
+                // 現在宣言されているナンバーとマークを取得する
+                this.aNumber.forEach(
+                    ( number ) =>
+                    {
+                        if (number.selected)  n = number;
+                    } );
+                this.aMark.forEach(
+                    ( mark ) =>
+                    {
+                        if (mark.selected)  m = mark;
+                    } );
+                // サーバにクリックされたことを伝える
+                this.socket.emit( 'pass-clicked' , m , n );                
+            }
+            // OKを押されたとき
+            if ((770 <= x && x <= 830) 
+            &&
+            (350 <= y && y <= 390) 
+            ){
+                this.socket.emit( 'kettei-clicked', this.socket.id);  
+            }
+        }
+
+        // 指名フェーズ時(大したことがないのでベタで書いちゃう)
+        if (this.designation) {
+            this.frame.fY = 350;
+            // マイティ
+            if ((650 <= x && x <= 725) 
+            &&
+            (350 <= y && y <= 455) 
+            ){
+                this.designationCard = 's1';
+                this.frame.fX = 650;
+            }
+            // jo
+            if ((725 <= x && x <= 800) 
+            &&
+            (350 <= y && y <= 455) 
+            ){
+                this.designationCard = 'jo';
+                this.frame.fX = 725;
+            }
+            // s11かh11
+            if ((800 <= x && x <= 875) 
+            &&
+            (350 <= y && y <= 455) 
+            ){
+                if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
+                    this.designationCard = 's11';
+                } else {
+                    this.designationCard = 'h11';
+                }
+                this.frame.fX = 800;
+            }
+            // s11かh11
+            if ((875 <= x && x <= 950) 
+            &&
+            (350 <= y && y <= 455) 
+            ){
+                if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
+                    this.designationCard = 'c11';
+                } else {
+                    this.designationCard = 'd11';
+                }
+            this.frame.fX = 875;
+            }
+
+            // 決定を押したとき
+            if ((770 <= x && x <= 830) 
+            &&
+            (470 <= y && y <= 510) 
+            ){
+                this.socket.emit( 'kettei-clicked-designation', this.designationCard);  
+            }            
+        }
+
+       // 交換フェーズ時
+       if (this.change) {
+        this.aCard.forEach(
+            ( card ) =>
+            {
+                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                    &&
+                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                    ){
+                        c = card;
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'card-clicked' , card );
+                        isCardClicked = true;
+                }
+            } );    
+            
+        // OKを押したとき
+        // 操作中のプレイヤーを取得する
+        let player = null;
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if(p.strSocketID === this.socket.id) player = p;
+            } );        
+        if ((player.fX + 200 <= x && x <= player.fX + 260) 
+        &&
+        (player.fY + 270 <= y && y <= player.fY + 310) 
+        ){
+            let selectedCnt = 0;
+            let discards = [];
+            this.aCard.forEach(
+                ( card ) =>
+                {
+                    if(card.selected) {
+                        selectedCnt += 1;
+                        discards.push (card)
+                    }
+                } ); 
+            if(selectedCnt === 3){
+                this.socket.emit( 'change-discards', discards);
+            }
+        }            
+     }
+
+        // メインフェーズ時
+        if (this.mainPhase) {
+            this.aCard.forEach(
+                ( card ) =>
+                {
+                    if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                        &&
+                        (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                        ){
+                            c = card;
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'card-clicked' , card );
+                            isCardClicked = true;
+                    }
+                } );
+            if (isCardClicked){
+                // 他のカードを全てクリックを外す
+                this.aCard.forEach(
+                    ( card ) =>
+                    {
+                        if (card !== c) {
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'card-unclicked' , card );
+                        }
+                    } );  
+            }
+         }
+
         console.log("x:", x, "y:", y);
     }
     
     renderCard( card )
     {
-        let img = this.assets.returnCard(card)[0];
-        if (card.left) {
+        let img = this.assets.returnCard(card.cardId)[0];
+        if (card.left || card.efuda) {
             img = this.assets.back;
         }
         this.context.save();
