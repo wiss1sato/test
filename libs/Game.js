@@ -31,7 +31,8 @@ module.exports = class Game
             {
                 console.log( 'connection : socket.id = %s', socket.id );
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
-                let card = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
+                let card = null;	// コネクションごとのカードオブジェクト。イベントをまたいで使用される。
+                let number = null;
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
@@ -51,7 +52,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 2) {
+                                if (playerNum === 5) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -81,9 +82,21 @@ module.exports = class Game
                                         if (i === 4) {
                                             card = world.createCard('c' + 1);
                                         }                                        
-                                    }
+                                    }                                 
                                     // ジョーカー
                                     card = world.createCard('jo');
+                                    // 数字を作成する
+                                    let fX = 650;
+                                    let fY = 350;
+                                    for (let i = 11; i <= 20; i++) {
+                                        if (i === 16) {
+                                            fX = 650;
+                                            fY = fY + 30;
+                                        }
+                                        number = world.createNumber(i);
+                                        number.setPosition(fX,fY);
+                                        fX = fX + 60;
+                                    }                                       
                                     io.emit( 'start-the-game');
                                 }                            
                             // 最新状況をクライアントに送信
@@ -109,6 +122,8 @@ module.exports = class Game
                         if (playerNum !== 5) {
                             // カードを全部消す
                             world.destroyCard();
+                            // カードを全部消す
+                            world.destroyNumber();
                             // データはもう一回作る
                             cardList = this.createCardList()
                         }
@@ -127,6 +142,18 @@ module.exports = class Game
                             } );
                     } );
 
+                    socket.on( 'number-clicked',
+                    ( number ) =>
+                    {
+                        world.setNumber.forEach(
+                            ( n ) =>
+                            {  
+                                if (n.num === number.num) {
+                                    n.numberClicked();
+                                }
+                            } );
+                    } );                    
+
                     // カードがクリックされた時の処理（ちょっと上にあげる）
                     socket.on( 'card-unclicked',
                     ( card ) =>
@@ -139,6 +166,18 @@ module.exports = class Game
                                 }
                             } );
                     } );
+
+                    socket.on( 'number-unclicked',
+                    ( number ) =>
+                    {
+                        world.setNumber.forEach(
+                            ( n ) =>
+                            {  
+                                if (n.num === number.num) {
+                                    n.numberUnclicked();
+                                }
+                            } );
+                    } );                    
 
                     // カードを配る処理
                     socket.on( 'deal-card',
@@ -166,12 +205,13 @@ module.exports = class Game
                                         }
                                     } );                                              
                             } );
+                        // 残ったカードを真ん中に配置する
                         if (cardList.length === 33) {
                             console.log(player);
                             cards = cardList.splice(0,3);
                             // 左端のカード（初期座標）
                             let fX = 680;
-                            let fY = 250;
+                            let fY = 170;
                             world.setCard.forEach(
                                 ( c ) =>
                                 {
@@ -187,11 +227,12 @@ module.exports = class Game
                         }
                         io.emit( 'deal-end');
                     } );
+
                     // 宣言フェーズ
                     socket.on( 'declaration',
                     () =>
                     {
-                        
+                        // io.emit( 'create-number');
                     } );
 
                     // 宣言フェーズ
@@ -224,7 +265,8 @@ module.exports = class Game
                 // 最新状況をクライアントに送信
                 io.emit( 'update',
                     Array.from( world.setPlayer ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
-                    Array.from( world.setCard ),  // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
+                    Array.from( world.setCard ),
+                    Array.from( world.setNumber ),
                     iNanosecDiff );	// 送信
             },
             1000 / GameSettings.FRAMERATE );	// 単位は[ms]。1000[ms] / FRAMERATE[回]
@@ -258,6 +300,11 @@ module.exports = class Game
             // 配列の数値を入れ替える
             [cardList[i], cardList[rand]] = [cardList[rand], cardList[i]]
         }
+        return cardList;
+    }
+
+    createNumbers() {
+
         return cardList;
     }
 }

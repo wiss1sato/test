@@ -6,49 +6,36 @@ const SharedSettings = require( '../public/js/SharedSettings.js' );
 const GameSettings = require( './GameSettings.js' );
 
 // カードクラス
-module.exports = class Card extends GameObject
+module.exports = class Number extends GameObject
 {
-    constructor( cardId )
+    constructor( num )
     {
         // 親クラスのコンストラクタ呼び出し
-        super( SharedSettings.CARD_WIDTH, SharedSettings.CARD_HEIGHT );
-        this.cardId = cardId;
+        super( SharedSettings.NUMBER_WIDTH, SharedSettings.NUMBER_HEIGHT );
+        this.num = num;
     }
 
-    cardClicked()
+    numberClicked()
     {
         if (this.selected) {
             this.selected = false;
-            this.fY = this.fY + 15;
         } else {
             this.selected = true;
-            this.fY = this.fY - 15;
         }
     }
 
-    cardUnclicked()
+    numberUnclicked()
     {
         if (this.selected) {
             this.selected = false;
-            this.fY = this.fY + 15;
         }
     }
 
-    // カードをプレイヤーに配置
-    setPosition(fX, fY, playerNum)
+    // ナンバーを配置
+    setPosition(fX, fY)
     {
         this.fX = fX;
         this.fY = fY;
-        this.playerNum = playerNum;
-        this.left = false;
-    }
-
-    // 残ったカードの処理
-    setLeftCard(fX, fY)
-    {
-        this.fX = fX;
-        this.fY = fY;
-        this.left = true;
     }
 
     // 更新
@@ -85,10 +72,9 @@ module.exports = class Card extends GameObject
         return Object.assign(
             super.toJSON(),
             {
-                cardId: this.cardId,
+                num: this.num,
                 selected : this.selected,
                 playerNum : this.playerNum,
-                left : this.left
             } );
     }
 };

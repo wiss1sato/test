@@ -14,6 +14,7 @@ class Screen
         this.canvas.width = SharedSettings.FIELD_WIDTH;
         this.canvas.height = SharedSettings.FIELD_HEIGHT;
         this.aCard = null;
+        this.aNumber = null;
         // ソケットの初期化
         this.initSocket();
 
@@ -73,10 +74,11 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, aCard, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, aNumber, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
+                this.aNumber = aNumber;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -88,13 +90,13 @@ class Screen
                 this.socket.emit( 'deal-card' );
             } );
 
-        // // カード配ったあとの
-        // this.socket.on(
-        //     'deal-end',
-        //     () =>
-        //     {
-        //         this.socket.emit( 'after-deal' );
-        //     } );    
+        // カード配ったあとの宣言フェーズ
+        this.socket.on(
+            'deal-end',
+            () =>
+            {
+                this.socket.emit( 'declaration' );
+            } );    
     }
 
     // アニメーション（無限ループ処理）
@@ -127,14 +129,23 @@ class Screen
         // プレイヤーの描画
         if( null !== this.aPlayer )
         {
-            const fTimeCurrentSec = iTimeCurrent * 0.001; // iTimeCurrentは、ミリ秒。秒に変換。
-            const iIndexFrame = parseInt( fTimeCurrentSec / 0.2 ) % 2;  // フレーム番号
             this.aPlayer.forEach(
                 ( player ) =>
                 {
                     this.renderPlayer( player );
                 } );
         }
+
+        // ナンバーの描画
+        if( null !== this.aNumber )
+        {
+            this.aNumber.forEach(
+                ( number ) =>
+                {
+                    this.renderNumber( number );
+                } );
+        }
+
     }
 
     renderField()
@@ -199,29 +210,57 @@ class Screen
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
+        let n = null;
+        let isClicked = false;
         // クリックした座標にカードが位置している場合、ちょっと上に上げる
-        this.aCard.forEach(
-            ( card ) =>
+
+        this.aNumber.forEach(
+            ( number ) =>
             {
-                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                if ((number.fX <= x && x <= number.fX + SharedSettings.NUMBER_WIDTH) 
                     &&
-                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                    (number.fY <= y && y <= number.fY + SharedSettings.NUMBER_HEIGHT) 
                     ){
-                        c = card;
+                        n = number;
                         // サーバにクリックされたことを伝える
-                        this.socket.emit( 'card-clicked' , card );
+                        this.socket.emit( 'number-clicked' , number );
+                        isClicked = true;
                 }
             } );
-
-        // カードしてない他のカードを全てクリックを外す
-        this.aCard.forEach(
-            ( card ) =>
-            {
-                if (card !== c) {
-                    // サーバにクリックされたことを伝える
-                    this.socket.emit( 'card-unclicked' , card );
-                }
-            } );            
+            // カードしてない他のナンバーを全てクリックを外す
+            this.aNumber.forEach(
+                ( number ) =>
+                {
+                    if (number !== n) {
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'number-unclicked' , number );
+                    }
+                } );              
+        
+        if (!isClicked){
+            this.aCard.forEach(
+                ( card ) =>
+                {
+                    if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                        &&
+                        (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                        ){
+                            c = card;
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'card-clicked' , card );
+                    }
+                } );
+    
+            // クリックしてない他のカードを全てクリックを外す
+            this.aCard.forEach(
+                ( card ) =>
+                {
+                    if (card !== c) {
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'card-unclicked' , card );
+                    }
+                } );  
+        }
 
         console.log("x:", x, "y:", y);
     }
@@ -231,12 +270,27 @@ class Screen
         let img = this.assets.returnCard(card)[0];
         if (card.left) {
             img = this.assets.back;
-        } 
+        }
         this.context.save();
         this.context.drawImage( img,
             card.fX, card.fY,
             SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
             SharedSettings.CARD_HEIGHT                  
+            );	// 描画先領域の大きさ
+        this.context.restore();
+    }
+
+    renderNumber( number )
+    {
+        let img = this.assets.returnNumber(number)[0];
+        if (number.selected) {
+            img = this.assets.returnColorNumber(number)[0];
+        }
+        this.context.save();
+        this.context.drawImage( img,
+            number.fX, number.fY,
+            SharedSettings.NUMBER_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.NUMBER_HEIGHT                  
             );	// 描画先領域の大きさ
         this.context.restore();
     }

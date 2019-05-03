@@ -2,6 +2,9 @@
 const Player = require( './Player.js' );
 // モジュール
 const Card = require( './Card.js' );
+// モジュール
+const Number = require( './Number.js' );
+
 
 // ワールドクラス
 // ・ゲーム内の各種要素を保持する
@@ -16,7 +19,8 @@ module.exports = class World
         this.io = io;   // socketIO
          this.setPlayer = new Set();	// プレイヤーリスト
          this.setCard = new Set();	// カードリスト
-    }
+         this.setNumber = new Set();	// カードリスト
+        }
 
     // 更新処理
     update( fDeltaTime )
@@ -101,6 +105,15 @@ module.exports = class World
         return card;
     }
 
+    // 数字の生成
+    createNumber(num)
+    {
+        // カードの生成
+        const number = new Number( num );
+        this.setNumber.add( number );
+        return number;
+    }    
+
     // カードの削除
     destroyCard()
     {
@@ -109,6 +122,18 @@ module.exports = class World
                 ( card ) =>
                 {
                     this.setCard.delete(card);
+                } );	
+        }
+    }
+
+    // カードの削除
+    destroyNumber()
+    {
+        if (undefined !== this.setCard) {
+            this.setNumber.forEach(
+                ( number ) =>
+                {
+                    this.setNumber.delete(number);
                 } );	
         }
     }

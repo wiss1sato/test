@@ -15,6 +15,52 @@ class Assets
         this.back = new Image();
         this.back.src = '../images/back.png'
 
+        this.n11 = new Image();
+        this.n11.src = '../images/11.png'
+        this.n12 = new Image();
+        this.n12.src = '../images/12.png'
+        this.n13 = new Image();
+        this.n13.src = '../images/13.png'
+        this.n14 = new Image();
+        this.n14.src = '../images/14.png'
+        this.n15 = new Image();
+        this.n15.src = '../images/15.png'
+        this.n16 = new Image();
+        this.n16.src = '../images/16.png'
+        this.n17 = new Image();
+        this.n17.src = '../images/17.png'
+        this.n18 = new Image();
+        this.n18.src = '../images/18.png'
+        this.n19 = new Image();
+        this.n19.src = '../images/19.png'
+        this.n20 = new Image();
+        this.n20.src = '../images/20.png'
+        this.numberSet = [];
+        this.numberSet.push(this.n11,this.n12,this.n13,this.n14,this.n15,this.n16,this.n17,this.n18,this.n19,this.n20);
+
+        this.c11 = new Image();
+        this.c11.src = '../images/11c.png'
+        this.c12 = new Image();
+        this.c12.src = '../images/12c.png'
+        this.c13 = new Image();
+        this.c13.src = '../images/13c.png'
+        this.c14 = new Image();
+        this.c14.src = '../images/14c.png'
+        this.c15 = new Image();
+        this.c15.src = '../images/15c.png'
+        this.c16 = new Image();
+        this.c16.src = '../images/16c.png'
+        this.c17 = new Image();
+        this.c17.src = '../images/17c.png'
+        this.c18 = new Image();
+        this.c18.src = '../images/18c.png'
+        this.c19 = new Image();
+        this.c19.src = '../images/19c.png'
+        this.c20 = new Image();
+        this.c20.src = '../images/20c.png'
+        this.colorNumberSet = [];
+        this.colorNumberSet.push(this.c11,this.c12,this.c13,this.c14,this.c15,this.c16,this.c17,this.c18,this.c19,this.c20);
+        
         this.playerIconList = [];
 
         //　各トランプカード
@@ -169,4 +215,24 @@ class Assets
         return icon;
    }
 
+
+   // ナンバーを返却するメソッド
+   returnNumber(number) {
+    var ret = this.numberSet.filter(
+        function(n){
+             return (n.src.indexOf(number.num + '.png') > -1);
+         }
+        );
+    return ret;
+    }
+
+   // ナンバーを返却するメソッド
+   returnColorNumber(number) {
+    var ret = this.colorNumberSet.filter(
+        function(c){
+             return (c.src.indexOf(number.num + 'c.png') > -1);
+         }
+        );
+    return ret;
+    }    
 }
