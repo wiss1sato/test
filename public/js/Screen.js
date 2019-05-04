@@ -26,6 +26,7 @@ class Screen
         this.maisuu = null;
         this.napoleon = null;
         this.fukukan = null;
+        this.reverse = null;
         this.designationCard = null;
         this.frame = new Object();       
 
@@ -223,6 +224,19 @@ class Screen
                 75,105
                 );
         }
+
+        // メインフェーズ時には周り順を表示する
+        if (this.mainGame) {
+            let img = this.assets.clockwise;
+            if (this.reverse) {
+                img = this.assets.reverse;
+            }
+            
+            this.context.drawImage( img,
+                700, 300,
+                120,120
+                );
+        }        
         this.context.restore();
     }
 
@@ -251,7 +265,7 @@ class Screen
         // 手番の場合は、手番マークを表示
         if (this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.teban,
-                player.fX + 200, player.fY + 20,
+                player.fX + 180, player.fY + 20,
                 60,40
                 );
         }

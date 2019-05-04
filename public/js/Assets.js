@@ -12,6 +12,11 @@ class Assets
         this.teban = new Image();
         this.teban.src = '../images/teban.png'
 
+        this.clockwise = new Image();
+        this.clockwise.src = '../images/clockwise.png'
+        this.reverse = new Image();
+        this.reverse.src = '../images/reverse.png'        
+
         this.back = new Image();
         this.back.src = '../images/back.png'
         
@@ -76,6 +81,7 @@ class Assets
         this.diamond.src = '../images/diamond.png'
         this.clover = new Image();
         this.clover.src = '../images/clover.png'
+        
         this.markSet = [];
 
         this.markSet.push(this.spade,this.heart,this.diamond,this.clover);

@@ -59,7 +59,7 @@ module.exports = class Game
                                     player.setPlayer(playerNum);
                                 } );
 
-                                if (playerNum === 2) {
+                                if (playerNum === 5) {
                                     // ゲーム開始を各プレイヤーに送信
                                     // カード生成
                                     for (let i = 1; i <= 4; i++) {
@@ -290,11 +290,11 @@ module.exports = class Game
                     {
                         passCnt += 1;
                         teban += 1;
-                        if (teban === 3) teban = 1;
+                        if (teban === 6) teban = 1;
                         // マークとナンバーが設定されてなかったらリターン
                         if (!mark || !number) return;
                         // 自分以外の人がパスしたら、宣言フェーズ終了
-                        if (passCnt === 1) {
+                        if (passCnt === 4) {
                             // 自分以外のマークを消す
                             world.destroyMark2(mark);
                             // 自分を配置する
@@ -330,7 +330,7 @@ module.exports = class Game
                         }
                         passCnt = 0;
                         teban += 1;
-                        if (teban === 3) teban = 1;
+                        if (teban === 6) teban = 1;
                         napoleon = player;
                     } );
 
@@ -420,7 +420,7 @@ module.exports = class Game
                                 }
                             } );
                         teban += 1;
-                        if (teban === 3) teban = 1;                    
+                        if (teban === 6) teban = 1;                    
                         io.emit( 'discard-end');                              
                     } );
                       
