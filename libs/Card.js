@@ -40,7 +40,7 @@ module.exports = class Card extends GameObject
         this.fX = fX;
         this.fY = fY;
         this.playerNum = playerNum;
-        this.left = false;
+        this.back = false;
     }
 
     // 残ったカードの処理
@@ -48,14 +48,14 @@ module.exports = class Card extends GameObject
     {
         this.fX = fX;
         this.fY = fY;
-        this.left = true;
+        this.back = true;
     }
 
     // 残ったカードの処理
     setDiscard(fX, fY, card)
     {
         let num = card.cardId.replace(/[^0-9]/g, '');
-        if (num >= 10 || num === 1) this.efuda = true;
+        if (num < 10 && num != 1) this.back = true;
         this.fX = fX;
         this.fY = fY;
     }   
@@ -81,7 +81,7 @@ module.exports = class Card extends GameObject
                 cardId: this.cardId,
                 selected : this.selected,
                 playerNum : this.playerNum,
-                left : this.left,
+                back : this.back,
                 efuda : this.efuda
             } );
     }

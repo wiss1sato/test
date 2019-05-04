@@ -10,11 +10,11 @@ class SharedSettings
     static get PLAYER_WIDTH() { return 150.0; }
     static get PLAYER_HEIGHT() { return 150.0; }
     // カード
-    static get CARD_WIDTH() { return 50.0; }
-    static get CARD_HEIGHT() { return 70.0; }
+    static get CARD_WIDTH() { return 62.0; }
+    static get CARD_HEIGHT() { return 90.0; }
     // 宣言フェーズのマーク
-    static get MARK_WIDTH() { return 75.0; }
-    static get MARK_HEIGHT() { return 105.0; }
+    static get MARK_WIDTH() { return 60.0; }
+    static get MARK_HEIGHT() { return 85.0; }
     // 宣言フェーズの数字
     static get NUMBER_WIDTH() { return 60.0; }
     static get NUMBER_HEIGHT() { return 30.0; }

@@ -39,7 +39,7 @@ module.exports = class Player extends GameObject
         // 初期位置
         if (playerNum === 1) {
             this.fX = 650;
-            this.fY = 550;
+            this.fY = 435;
         }
         
         if (playerNum === 2) {
@@ -53,12 +53,12 @@ module.exports = class Player extends GameObject
         }
                 
         if (playerNum === 4) {
-            this.fX = 1050;
+            this.fX = 1150;
             this.fY = 50;
         }
 
         if (playerNum === 5) {
-            this.fX = 1050;
+            this.fX = 1150;
             this.fY = 350;
         }
 

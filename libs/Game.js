@@ -106,13 +106,13 @@ module.exports = class Game
                                     }
                                     // マークを作成する
                                     mark = world.createMark('spade');
-                                    mark.setPosition(650,150);
+                                    mark.setPosition(650,175);
                                     mark = world.createMark('heart');
-                                    mark.setPosition(725,150);
+                                    mark.setPosition(725,175);
                                     mark = world.createMark('diamond');
-                                    mark.setPosition(800,150);
+                                    mark.setPosition(800,175);
                                     mark = world.createMark('clover');
-                                    mark.setPosition(875,150);
+                                    mark.setPosition(875,175);
 
                                     // ボタンを作成する
 
@@ -247,7 +247,7 @@ module.exports = class Game
                         cards = cardList.splice(0,10);
                         player.dealCards(cards);
                         // 左端のカード（初期座標）
-                        let fX = player.fX - 100;
+                        let fX = player.fX - 60;
                         let fY = player.fY + 180;
                         world.setCard.forEach(
                             ( c ) =>
@@ -257,7 +257,7 @@ module.exports = class Game
                                     {
                                         if(c.cardId === card) {
                                             c.setPosition(fX, fY, player.playerNum);
-                                            fX = fX + 40;
+                                            fX = fX + 20;
                                         }
                                     } );
                             } );
@@ -267,7 +267,7 @@ module.exports = class Game
                             leftCards = cardList.splice(0,3);
                             // 左端のカード（初期座標）
                             let fX = 680;
-                            let fY = 70;
+                            let fY = 80;
                             world.setCard.forEach(
                                 ( c ) =>
                                 {
@@ -303,7 +303,7 @@ module.exports = class Game
                                 {  
                                     if (m.markId === mark.markId) {
                                         m.markUnclicked();
-                                        m.setPosition(650,150);
+                                        m.setPosition(650,0);
                                     }
                                 } );                                
                             // 自分以外のナンバーを消す
@@ -313,7 +313,7 @@ module.exports = class Game
                                 ( n ) =>
                                 {  
                                     if (n.num === number.num) {
-                                        n.setPosition(740,150);
+                                        n.setPosition(740,0);
                                     }
                                 } );
                             io.emit( 'declaration-end' , mark , number, napoleon);
@@ -343,7 +343,7 @@ module.exports = class Game
                         cards.push(leftCards[0]);
                         cards.push(leftCards[1]);
                         cards.push(leftCards[2]);
-                        let fX = player.fX - 100;
+                        let fX = player.fX - 60;
                         let fY = player.fY + 180;
                         // 改めて、カードを配置し直す
                         world.setCard.forEach(
@@ -354,7 +354,7 @@ module.exports = class Game
                                     {
                                         if(c.cardId === card) {
                                             c.setPosition(fX, fY, player.playerNum);
-                                            fX = fX + 40;
+                                            fX = fX + 20;
                                         }
                                     } );
                             } );
@@ -373,7 +373,7 @@ module.exports = class Game
                                     ( card ) =>
                                     {
                                         if(c.cardId === card.cardId) {
-                                            c.setDiscard(fX, player.fY + 70, card);
+                                            c.setDiscard(fX, player.fY + 55, card);
                                             fX = fX + 40;
                                         }
                                     } );
@@ -393,29 +393,30 @@ module.exports = class Game
                         let fX = 0;
                         let fY = 0;
                         if (player.playerNum === 1) {
-                            fX = 700;
-                            fY = 450;
+                            fX = 730;
+                            fY = 330;
                         }
                         if (player.playerNum === 2) {
-                            fX = 530;
-                            fY = 375;
+                            fX = 590;
+                            fY = 270;
                         }
                         if (player.playerNum === 3) {
-                            fX = 530;
-                            fY = 125;
+                            fX = 590;
+                            fY = 140;
                         }
                         if (player.playerNum === 4) {
-                            fX = 1080;
-                            fY = 125;
+                            fX = 860;
+                            fY = 140;
                         }
                         if (player.playerNum === 5) {
-                            fX = 1080;
-                            fY = 375;
+                            fX = 860;
+                            fY = 270;
                         }
                         world.setCard.forEach(
                             ( c ) =>
                             {
                                 if(c.cardId === card.cardId) {
+                                    c.cardUnclicked();
                                     c.setPosition(fX, fY, player.playerNum);
                                 }
                             } );

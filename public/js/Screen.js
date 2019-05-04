@@ -220,7 +220,7 @@ class Screen
         if (this.mainGame || this.change) {
             let img = this.assets.returnCard(this.designationCard)[0];
             this.context.drawImage( img,
-                830, 150,
+                830, 0,
                 75,105
                 );
         }
@@ -231,9 +231,8 @@ class Screen
             if (this.reverse) {
                 img = this.assets.reverse;
             }
-            
             this.context.drawImage( img,
-                700, 300,
+                700, 170,
                 120,120
                 );
         }        
@@ -257,15 +256,15 @@ class Screen
          // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
         if (this.socket.id !== player.strSocketID && this.aCard.length > 0) {
             ctx.drawImage( this.assets.imageField,
-                player.fX - 150, player.fY + 165,
-                580,85
+                player.fX - 99, player.fY + 165,
+                340,105
                 );
         }
 
         // 手番の場合は、手番マークを表示
         if (this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.teban,
-                player.fX + 180, player.fY + 20,
+                player.fX + 180, player.fY + 10,
                 60,40
                 );
         }
@@ -286,42 +285,42 @@ class Screen
         if (this.napoleon === this.socket.id && this.designation) {
             let img = this.assets.returnCard('s1')[0];
             this.context.drawImage( img,
-                650, 350,
+                650, 240,
                 75,105
                 );
             img = this.assets.returnCard('jo')[0];
             this.context.drawImage( img,
-                725, 350,
+                725, 240,
                 75,105
                 );                
             // 切り札が黒の場合
             if (this.kirihuda === 'spade' || this.kirihuda === 'clover') {
                 img = this.assets.returnCard('s11')[0];
                 this.context.drawImage( img,
-                    800, 350,
+                    800, 240,
                     75,105
                     );	// 描画先領域の大きさ
                 img = this.assets.returnCard('c11')[0];
                 this.context.drawImage( img,
-                    875, 350,
+                    875, 240,
                     75,105
                     );	// 描画先領域の大きさ                                 
             } else {
                 img = this.assets.returnCard('h11')[0];
                 this.context.drawImage( img,
-                    800, 350,
+                    800, 240,
                     75,105
                     );	// 描画先領域の大きさ
                 img = this.assets.returnCard('d11')[0];
                 this.context.drawImage( img,
-                    875, 350,
+                    875, 240,
                     75,105
                     );	// 描画先領域の大きさ  
             }
 
             // 決定ボタン
             this.context.drawImage( this.assets.kettei,
-                770, 470,
+                770, 375,
                 60,40
                 );	// 描画先領域の大きさ
 
@@ -340,7 +339,7 @@ class Screen
         // カード用のOK
         if (this.change && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
-                player.fX + 200, player.fY + 270,
+                player.fX + 280, player.fY + 200,
                 60,40
                 );	// 描画先領域の大きさ
         }        
@@ -348,7 +347,7 @@ class Screen
         // カード用のOK
          if (this.mainGame && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
-                player.fX + 200, player.fY + 270,
+                player.fX + 280, player.fY + 200,
                 60,40
                 );	// 描画先領域の大きさ
         }
@@ -475,11 +474,11 @@ class Screen
 
         // 指名フェーズ時(大したことがないのでベタで書いちゃう)
         if (this.designation) {
-            this.frame.fY = 350;
+            this.frame.fY = 240;
             // マイティ
             if ((650 <= x && x <= 725) 
             &&
-            (350 <= y && y <= 455) 
+            (240 <= y && y <= 355) 
             ){
                 this.designationCard = 's1';
                 this.frame.fX = 650;
@@ -487,7 +486,7 @@ class Screen
             // jo
             if ((725 <= x && x <= 800) 
             &&
-            (350 <= y && y <= 455) 
+            (240 <= y && y <= 355) 
             ){
                 this.designationCard = 'jo';
                 this.frame.fX = 725;
@@ -495,7 +494,7 @@ class Screen
             // s11かh11
             if ((800 <= x && x <= 875) 
             &&
-            (350 <= y && y <= 455) 
+            (240 <= y && y <= 355) 
             ){
                 if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
                     this.designationCard = 's11';
@@ -507,7 +506,7 @@ class Screen
             // s11かh11
             if ((875 <= x && x <= 950) 
             &&
-            (350 <= y && y <= 455) 
+            (240 <= y && y <= 355) 
             ){
                 if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
                     this.designationCard = 'c11';
@@ -520,7 +519,7 @@ class Screen
             // 決定を押したとき
             if ((770 <= x && x <= 830) 
             &&
-            (470 <= y && y <= 510) 
+            (380 <= y && y <= 420) 
             ){
                 // 副官指定札が決まってるとき、'kettei-clicked-designation'をサーバに通知
                 if (this.designationCard) this.socket.emit( 'kettei-clicked-designation', this.designationCard);  
@@ -532,7 +531,7 @@ class Screen
         this.aCard.forEach(
             ( card ) =>
             {
-                if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                if ((card.fX <= x && x <= card.fX + 20) 
                     &&
                     (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                     ){
@@ -551,9 +550,9 @@ class Screen
             {
                 if(p.strSocketID === this.socket.id) player = p;
             } );
-        if ((player.fX + 200 <= x && x <= player.fX + 260) 
-        &&
-        (player.fY + 270 <= y && y <= player.fY + 310) 
+            if ((player.fX + 280 <= x && x <= player.fX + 340) 
+            &&
+            (player.fY + 200 <= y && y <= player.fY + 240) 
         ){
             let selectedCnt = 0;
             let discards = [];
@@ -576,7 +575,7 @@ class Screen
             this.aCard.forEach(
                 ( card ) =>
                 {
-                    if ((card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH) 
+                    if ((card.fX <= x && x <= card.fX + 20) 
                         &&
                         (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                         ){
@@ -605,9 +604,9 @@ class Screen
             {
                 if(p.strSocketID === this.socket.id) player = p;
             } );
-            if ((player.fX + 200 <= x && x <= player.fX + 260) 
+            if ((player.fX + 280 <= x && x <= player.fX + 340) 
             &&
-            (player.fY + 270 <= y && y <= player.fY + 310) 
+            (player.fY + 200 <= y && y <= player.fY + 240) 
             ){
                 let card = null;
                 this.aCard.forEach(
@@ -629,7 +628,7 @@ class Screen
     renderCard( card )
     {
         let img = this.assets.returnCard(card.cardId)[0];
-        if (card.left || card.efuda) {
+        if (card.back) {
             img = this.assets.back;
         }
         this.context.save();
