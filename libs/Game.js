@@ -25,7 +25,8 @@ module.exports = class Game
         let teban = 1; 
         let cards = null;
         let leftCards = null;
-        
+        let napoleon = null;                
+
 
         // 接続時の処理
         // ・サーバーとクライアントの接続が確立すると、
@@ -39,7 +40,6 @@ module.exports = class Game
                 let player = null;	// コネクションごとのプレイヤーオブジェクト。イベントをまたいで使用される。
                 let number = null;
                 let mark = null;
-                let napoleon = null;                
                 // ゲーム開始時の処理の指定
                 // ・クライアント側の接続確立時の「socket.emit( 'enter-the-game' );」に対する処理
                 socket.on( 'enter-the-game', ( objConfig ) =>
@@ -116,7 +116,7 @@ module.exports = class Game
 
                                     // ボタンを作成する
 
-                                    io.emit( 'start-the-game');
+                                    io.emit( 'start-the-game' );
 
                                 }                            
                             // 最新状況をクライアントに送信
@@ -281,7 +281,7 @@ module.exports = class Game
                                         } );
                                 } );
                         }
-                        io.emit( 'deal-end');
+                        io.emit( 'deal-end' );
                     } );
 
                     // 宣言中にパスが押されたとき
@@ -291,20 +291,50 @@ module.exports = class Game
                         passCnt += 1;
                         teban += 1;
                         if (teban === 3) teban = 1;
-                        if (passCnt === 1) io.emit( 'declaration-end' , mark , number, napoleon);
+                        // マークとナンバーが設定されてなかったらリターン
+                        if (!mark || !number) return;
+                        // 自分以外の人がパスしたら、宣言フェーズ終了
+                        if (passCnt === 1) {
+                            // 自分以外のマークを消す
+                            world.destroyMark2(mark);
+                            // 自分を配置する
+                            world.setMark.forEach(
+                                ( m ) =>
+                                {  
+                                    if (m.markId === mark.markId) {
+                                        m.markUnclicked();
+                                        m.setPosition(650,150);
+                                    }
+                                } );                                
+                            // 自分以外のナンバーを消す
+                            world.destroyNumber2(number);
+                            // 自分を配置する
+                            world.setNumber.forEach(
+                                ( n ) =>
+                                {  
+                                    if (n.num === number.num) {
+                                        n.setPosition(740,150);
+                                    }
+                                } );
+                            io.emit( 'declaration-end' , mark , number, napoleon);
+                        } 
                     } );
 
                     // 宣言中に決定が押されたとき
                     socket.on( 'kettei-clicked',
                     (player) =>
                     {
+                        if( !player )
+                        {
+                            return;
+                        }
                         passCnt = 0;
                         teban += 1;
-                        if (teban === 6) teban = 1;
+                        if (teban === 3) teban = 1;
                         napoleon = player;
                     } );
 
-                    // 副官札指定後に決定が押されたとき
+                    // 副官札指定後に決定が押されたとき(メインフェーズ開始時)
                     socket.on( 'kettei-clicked-designation',
                     (designationCard) =>
                     {
@@ -335,13 +365,7 @@ module.exports = class Game
                     socket.on( 'change-discards',
                     (cards) =>
                     {
-                        let fX = 0;
-                        let fY = 0;                        
-                        // プレイヤーの位置で置く場所を変える
-                        if (player.playerNum === 1) {
-                            fX = 700;
-                            fY = 470;
-                        }
+                        let fX = player.fX + 200;
                         world.setCard.forEach(
                             ( c ) =>
                             {
@@ -349,20 +373,57 @@ module.exports = class Game
                                     ( card ) =>
                                     {
                                         if(c.cardId === card.cardId) {
-                                            c.setDiscard(fX, fY, card);
+                                            c.setDiscard(fX, player.fY + 70, card);
                                             fX = fX + 40;
                                         }
                                     } );
                             } );
+                        io.emit( 'change-end');                            
                     } );                    
 
-
-                    // プレイヤーがカードを捨てる
+                    // カード捨てたとき
                     socket.on( 'discard',
-                    () =>
+                    (card) =>
                     {
-                        
-                    } );                    
+                        if( !player )
+                        {
+                            return;
+                        }                        
+                        // カードを捨てたプレイヤーによって座標を変える
+                        let fX = 0;
+                        let fY = 0;
+                        if (player.playerNum === 1) {
+                            fX = 700;
+                            fY = 450;
+                        }
+                        if (player.playerNum === 2) {
+                            fX = 530;
+                            fY = 375;
+                        }
+                        if (player.playerNum === 3) {
+                            fX = 530;
+                            fY = 125;
+                        }
+                        if (player.playerNum === 4) {
+                            fX = 1080;
+                            fY = 125;
+                        }
+                        if (player.playerNum === 5) {
+                            fX = 1080;
+                            fY = 375;
+                        }
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                if(c.cardId === card.cardId) {
+                                    c.setPosition(fX, fY, player.playerNum);
+                                }
+                            } );
+                        teban += 1;
+                        if (teban === 3) teban = 1;                    
+                        io.emit( 'discard-end');                              
+                    } );
+                      
             } );
 
         // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）

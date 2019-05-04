@@ -146,6 +146,18 @@ module.exports = class World
         }
     }
 
+    // ナンバーの削除(必要なのだけ残す)
+    destroyNumber2(number)
+    {
+        if (undefined !== this.setNumber) {
+            this.setNumber.forEach(
+                ( n ) =>
+                {
+                    if (number.num !== n.num) this.setNumber.delete(n);
+                } );	
+        }
+    }    
+
     // マークの削除
     destroyMark()
     {
@@ -156,5 +168,18 @@ module.exports = class World
                     this.setMark.delete(mark);
                 } );	
         }
+    }
+
+    // マークの削除(必要なのだけ残す)
+    destroyMark2(mark)
+    {
+        if (undefined !== this.setMark) {
+            this.setMark.forEach(
+                ( m ) =>
+                {
+                    if (mark.markId !== m.markId) this.setMark.delete(m);
+                } );	
+        }
     }    
+    
 }

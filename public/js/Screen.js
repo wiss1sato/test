@@ -20,7 +20,7 @@ class Screen
         this.declaration = false;
         this.designation = false;
         this.change = false;
-        this.mainPhase = false;
+        this.mainGame = false;
         this.aPassCnt = null;
         this.kirihuda = null;
         this.maisuu = null;
@@ -57,15 +57,7 @@ class Screen
             {
                 console.log( 'connect : socket.id = %s', socket.id );
             } );
-
-        // デッドしたらスタート画面に戻る
-        this.socket.on(
-            'dead',
-            () =>
-            {
-                $( '#start-screen' ).show();
-            } );
-
+            
         // デッドしたらスタート画面に戻る
         this.socket.on(
             'enter-the-game',
@@ -131,9 +123,19 @@ class Screen
             ( designationCard ) =>
             {
                 console.log('宣言札:' + designationCard);
+                this.designationCard = designationCard;
                 this.designation = false;
                 this.change = true;
             } );
+
+        // カードを配る
+        this.socket.on(
+            'change-end',
+            () =>
+            {
+                this.change = false;
+                this.mainGame = true;
+            } );            
     }
 
     // アニメーション（無限ループ処理）
@@ -212,6 +214,14 @@ class Screen
                     RenderingSettings.FIELDTILE_WIDTH,	// 描画先領域の大きさ
                     RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
             }
+        }
+        // 交換フェーズ、メインフェーズ時には副官指名札も表示する
+        if (this.mainGame || this.change) {
+            let img = this.assets.returnCard(this.designationCard)[0];
+            this.context.drawImage( img,
+                830, 150,
+                75,105
+                );
         }
         this.context.restore();
     }
@@ -322,7 +332,7 @@ class Screen
         }        
 
         // カード用のOK
-         if (this.mainPhase && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
+         if (this.mainGame && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
                 player.fX + 200, player.fY + 270,
                 60,40
@@ -427,12 +437,25 @@ class Screen
                 // サーバにクリックされたことを伝える
                 this.socket.emit( 'pass-clicked' , m , n );                
             }
-            // OKを押されたとき
+            // 決定を押されたとき
             if ((770 <= x && x <= 830) 
             &&
             (350 <= y && y <= 390) 
             ){
-                this.socket.emit( 'kettei-clicked', this.socket.id);  
+                // マークとナンバーが選択中じゃなかったら押せないようにする
+                this.aNumber.forEach(
+                    ( number ) =>
+                    {
+                        if (number.selected)  n = number;
+                    } );
+                this.aMark.forEach(
+                    ( mark ) =>
+                    {
+                        if (mark.selected)  m = mark;
+                    } );
+                if (n && m) {
+                    this.socket.emit( 'kettei-clicked', this.socket.id);
+                }
             }
         }
 
@@ -485,8 +508,9 @@ class Screen
             &&
             (470 <= y && y <= 510) 
             ){
-                this.socket.emit( 'kettei-clicked-designation', this.designationCard);  
-            }            
+                // 副官指定札が決まってるとき、'kettei-clicked-designation'をサーバに通知
+                if (this.designationCard) this.socket.emit( 'kettei-clicked-designation', this.designationCard);  
+            }
         }
 
        // 交換フェーズ時
@@ -512,7 +536,7 @@ class Screen
             ( p ) =>
             {
                 if(p.strSocketID === this.socket.id) player = p;
-            } );        
+            } );
         if ((player.fX + 200 <= x && x <= player.fX + 260) 
         &&
         (player.fY + 270 <= y && y <= player.fY + 310) 
@@ -530,11 +554,11 @@ class Screen
             if(selectedCnt === 3){
                 this.socket.emit( 'change-discards', discards);
             }
-        }            
+        }
      }
 
         // メインフェーズ時
-        if (this.mainPhase) {
+        if (this.mainGame) {
             this.aCard.forEach(
                 ( card ) =>
                 {
@@ -559,6 +583,30 @@ class Screen
                         }
                     } );  
             }
+        // OKを押したとき
+        // 操作中のプレイヤーを取得する
+        let player = null;
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if(p.strSocketID === this.socket.id) player = p;
+            } );
+            if ((player.fX + 200 <= x && x <= player.fX + 260) 
+            &&
+            (player.fY + 270 <= y && y <= player.fY + 310) 
+            ){
+                let card = null;
+                this.aCard.forEach(
+                    ( c ) =>
+                    {
+                        if(c.selected) {
+                            card = c;
+                        }
+                    } ); 
+                if(card){
+                    this.socket.emit( 'discard' , card);
+                }
+            }            
          }
 
         console.log("x:", x, "y:", y);
@@ -581,17 +629,32 @@ class Screen
 
     renderNumber( number )
     {
-        let img = this.assets.returnNumber(number)[0];
-        if (number.selected) {
-            img = this.assets.returnColorNumber(number)[0];
+        let img = null;
+        // 宣言フェーズ中のみナンバーを全て表示
+        if (this.declaration) {
+            img = this.assets.returnNumber(number)[0];
+            if (number.selected) {
+                img = this.assets.returnColorNumber(number)[0];
+            }
+            this.context.save();
+            this.context.drawImage( img,
+                number.fX, number.fY,
+                SharedSettings.NUMBER_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.NUMBER_HEIGHT                  
+                );	// 描画先領域の大きさ
+            this.context.restore();
+        // それ以外は大きく表示    
+        } else {
+            img = this.assets.returnNumber(number)[0];
+            this.context.save();
+            this.context.drawImage( img,
+                number.fX, number.fY,
+                SharedSettings.MARK_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.MARK_WIDTH                  
+                );	// 描画先領域の大きさ
+            this.context.restore();
         }
-        this.context.save();
-        this.context.drawImage( img,
-            number.fX, number.fY,
-            SharedSettings.NUMBER_WIDTH,	// 描画先領域の大きさ
-            SharedSettings.NUMBER_HEIGHT                  
-            );	// 描画先領域の大きさ
-        this.context.restore();
+
     }
 
     renderMark( mark )
