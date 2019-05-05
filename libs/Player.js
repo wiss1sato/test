@@ -84,6 +84,30 @@ module.exports = class Player extends GameObject
         return this.hasCards;
     }
 
+
+    // カード捨てる
+    discardChanges(changes)
+    {
+        for (let i = 0; i < this.hasCards.length; i++) {
+            for (let j = 0; j < changes.length; j++) {
+                if (this.hasCards[i] === changes[j].cardId) {
+                    this.hasCards.splice(i, 1);
+                }
+            }
+          }
+    }    
+
+    // カード捨てる
+    discard(card)
+    {
+        // 持っているカードから,捨てた分を減らす
+        for (let i = 0; i < this.hasCards.length; i++) {
+            if (this.hasCards[i] === card.cardId) {
+                this.hasCards.splice(i, 1);
+            }
+        }
+    }
+
     // 更新
     update( fDeltaTime )
     {

@@ -256,7 +256,7 @@ module.exports = class Game
                                     ( card ) =>
                                     {
                                         if(c.cardId === card) {
-                                            c.setPosition(fX, fY, player.playerNum);
+                                            c.setPosition(fX, fY, player);
                                             fX = fX + 20;
                                         }
                                     } );
@@ -353,7 +353,7 @@ module.exports = class Game
                                     ( card ) =>
                                     {
                                         if(c.cardId === card) {
-                                            c.setPosition(fX, fY, player.playerNum);
+                                            c.setPosition(fX, fY, player);
                                             fX = fX + 20;
                                         }
                                     } );
@@ -363,13 +363,14 @@ module.exports = class Game
 
                     // 交換時
                     socket.on( 'change-discards',
-                    (cards) =>
+                    (changes) =>
                     {
+                        cards = player.returnCards();
                         let fX = player.fX + 200;
                         world.setCard.forEach(
                             ( c ) =>
                             {
-                                cards.forEach(
+                                changes.forEach(
                                     ( card ) =>
                                     {
                                         if(c.cardId === card.cardId) {
@@ -378,13 +379,38 @@ module.exports = class Game
                                         }
                                     } );
                             } );
-                        io.emit( 'change-end');                            
+                        // 持っているカードから,交換で捨てた分を減らす
+                        for (let i = 0; i < cards.length; i++) {
+                            for (let j = 0; j < changes.length; j++) {
+                                if (cards[i] === changes[j].cardId) {
+                                    cards.splice(i, 1);
+                                }
+                            }
+                          }
+                        fX = player.fX - 60;
+                        let fY = player.fY + 180;                          
+                        // 改めて、カードを配置し直す
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card) {
+                                            c.setPosition(fX, fY, player);
+                                            fX = fX + 20;
+                                        }
+                                    } );
+                            } );
+                        player.discardChanges(changes);
+                        io.emit( 'change-end');
                     } );                    
 
                     // カード捨てたとき
                     socket.on( 'discard',
                     (card) =>
                     {
+                        cards = player.returnCards();
                         if( !player )
                         {
                             return;
@@ -417,9 +443,31 @@ module.exports = class Game
                             {
                                 if(c.cardId === card.cardId) {
                                     c.cardUnclicked();
-                                    c.setPosition(fX, fY, player.playerNum);
+                                    c.setPosition(fX, fY, player);
                                 }
                             } );
+                        // 持っているカードから,捨てた分を減らす
+                        for (let i = 0; i < cards.length; i++) {
+                            if (cards[i] === card.cardId) {
+                                cards.splice(i, 1);
+                            }
+                          }
+                        // 改めて、カードを配置し直す
+                        fX = player.fX - 60;
+                        fY = player.fY + 180;                        
+                        world.setCard.forEach(
+                            ( c ) =>
+                            {
+                                cards.forEach(
+                                    ( card ) =>
+                                    {
+                                        if(c.cardId === card) {
+                                            c.setPosition(fX, fY, player);
+                                            fX = fX + 20;
+                                        }
+                                    } );
+                            } );
+                        player.discard(card);                                                      
                         teban += 1;
                         if (teban === 6) teban = 1;                    
                         io.emit( 'discard-end');                              

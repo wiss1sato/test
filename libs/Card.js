@@ -35,11 +35,12 @@ module.exports = class Card extends GameObject
     }
 
     // カードをプレイヤーに配置
-    setPosition(fX, fY, playerNum)
+    setPosition(fX, fY, player)
     {
         this.fX = fX;
         this.fY = fY;
-        this.playerNum = playerNum;
+        this.playerNum = player.playerNum;
+        this.playerId = player.strSocketID;
         this.back = false;
     }
 
@@ -51,7 +52,7 @@ module.exports = class Card extends GameObject
         this.back = true;
     }
 
-    // 残ったカードの処理
+    // 交換時に捨てたカードの処理
     setDiscard(fX, fY, card)
     {
         let num = card.cardId.replace(/[^0-9]/g, '');
@@ -82,7 +83,7 @@ module.exports = class Card extends GameObject
                 selected : this.selected,
                 playerNum : this.playerNum,
                 back : this.back,
-                efuda : this.efuda
+                playerId : this.playerId
             } );
     }
 };

@@ -526,8 +526,8 @@ class Screen
             }
         }
 
-       // 交換フェーズ時
-       if (this.change) {
+       // 交換フェーズ時(ナポレオンのみ)
+       if (this.change && this.napoleon === this.socket.id) {
         this.aCard.forEach(
             ( card ) =>
             {
@@ -561,7 +561,7 @@ class Screen
                 {
                     if(card.selected) {
                         selectedCnt += 1;
-                        discards.push (card)
+                        discards.push (card);
                     }
                 } ); 
             if(selectedCnt === 3){
