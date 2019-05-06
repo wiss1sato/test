@@ -53,10 +53,12 @@ module.exports = class Card extends GameObject
     }
 
     // 交換時に捨てたカードの処理
-    setDiscard(fX, fY, card)
+    setChanges(fX, fY, change)
     {
-        let num = card.cardId.replace(/[^0-9]/g, '');
+        console.log(change);
+        let num = change.cardId.replace(/[^0-9]/g, '');
         if (num < 10 && num != 1) this.back = true;
+        this.selected = false;
         this.fX = fX;
         this.fY = fY;
     }   

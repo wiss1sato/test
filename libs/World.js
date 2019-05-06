@@ -134,6 +134,21 @@ module.exports = class World
         }
     }
 
+
+    // カードの削除
+    destroyCard2(card)
+    {
+        if (undefined !== this.setCard) {
+            this.setCard.forEach(
+                ( c ) =>
+                {
+                    if (c.cardId === card.cardId) {
+                        this.setCard.delete(c);
+                    }
+                } );	
+        }
+    }    
+
     // ナンバーの削除
     destroyNumber()
     {

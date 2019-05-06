@@ -26,7 +26,8 @@ class Screen
         this.maisuu = null;
         this.napoleon = null;
         this.fukukan = null;
-        this.reverse = null;
+        this.forceJoker = false;        
+        this.reverse = false;
         this.designationCard = null;
         this.frame = new Object();       
 
@@ -123,7 +124,7 @@ class Screen
             'designation-end',
             ( designationCard ) =>
             {
-                console.log('宣言札:' + designationCard);
+                console.log('副官札:' + designationCard);
                 this.designationCard = designationCard;
                 this.designation = false;
                 this.change = true;
@@ -136,7 +137,17 @@ class Screen
             {
                 this.change = false;
                 this.mainGame = true;
-            } );            
+            } );     
+
+        // カードを配る
+        this.socket.on(
+            'discard-end',
+            (forceJoker, reverse, fukukan) =>
+            {
+                this.forceJoker = forceJoker;
+                this.reverse = reverse;
+                this.fukukan = fukukan;
+            } );                      
     }
 
     // アニメーション（無限ループ処理）
@@ -285,38 +296,43 @@ class Screen
         if (this.napoleon === this.socket.id && this.designation) {
             let img = this.assets.returnCard('s1')[0];
             this.context.drawImage( img,
-                650, 240,
+                600, 240,
                 75,105
                 );
             img = this.assets.returnCard('jo')[0];
             this.context.drawImage( img,
-                725, 240,
+                676, 240,
                 75,105
                 );                
             // 切り札が黒の場合
             if (this.kirihuda === 'spade' || this.kirihuda === 'clover') {
                 img = this.assets.returnCard('s11')[0];
                 this.context.drawImage( img,
-                    800, 240,
+                    751, 240,
                     75,105
                     );	// 描画先領域の大きさ
                 img = this.assets.returnCard('c11')[0];
                 this.context.drawImage( img,
-                    875, 240,
+                    826, 240,
                     75,105
                     );	// 描画先領域の大きさ                                 
             } else {
                 img = this.assets.returnCard('h11')[0];
                 this.context.drawImage( img,
-                    800, 240,
+                    751, 240,
                     75,105
                     );	// 描画先領域の大きさ
                 img = this.assets.returnCard('d11')[0];
                 this.context.drawImage( img,
-                    875, 240,
+                    826, 240,
                     75,105
                     );	// 描画先領域の大きさ  
             }
+            img = this.assets.returnCard('h12')[0];
+            this.context.drawImage( img,
+                901, 240,
+                75,105
+                );                
 
             // 決定ボタン
             this.context.drawImage( this.assets.kettei,
@@ -476,23 +492,23 @@ class Screen
         if (this.designation) {
             this.frame.fY = 240;
             // マイティ
-            if ((650 <= x && x <= 725) 
+            if ((600 <= x && x <= 675) 
             &&
             (240 <= y && y <= 355) 
             ){
                 this.designationCard = 's1';
-                this.frame.fX = 650;
+                this.frame.fX = 600;
             }
             // jo
-            if ((725 <= x && x <= 800) 
+            if ((676 <= x && x <= 750) 
             &&
             (240 <= y && y <= 355) 
             ){
                 this.designationCard = 'jo';
-                this.frame.fX = 725;
+                this.frame.fX = 676;
             }
             // s11かh11
-            if ((800 <= x && x <= 875) 
+            if ((751 <= x && x <= 825) 
             &&
             (240 <= y && y <= 355) 
             ){
@@ -501,10 +517,10 @@ class Screen
                 } else {
                     this.designationCard = 'h11';
                 }
-                this.frame.fX = 800;
+                this.frame.fX = 751;
             }
-            // s11かh11
-            if ((875 <= x && x <= 950) 
+            // c11かd11
+            if ((826 <= x && x <= 900) 
             &&
             (240 <= y && y <= 355) 
             ){
@@ -513,7 +529,15 @@ class Screen
                 } else {
                     this.designationCard = 'd11';
                 }
-            this.frame.fX = 875;
+            this.frame.fX = 826;
+            }
+            // よろめき
+            if ((901 <= x && x <= 976) 
+            &&
+            (240 <= y && y <= 355) 
+            ){
+                this.designationCard = 'h12';
+                this.frame.fX = 901;
             }
 
             // 決定を押したとき
@@ -531,15 +555,15 @@ class Screen
         this.aCard.forEach(
             ( card ) =>
             {
-                if ((card.fX <= x && x <= card.fX + 20) 
+                console.log(card);
+                if ((card.fX <= x && x <= card.fX + 19) 
                     &&
                     (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                     ){
                         c = card;
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'card-clicked' , card );
-                        isCardClicked = true;
-                }
+                }             
             } );    
             
         // OKを押したとき
@@ -560,6 +584,7 @@ class Screen
                 ( card ) =>
                 {
                     if(card.selected) {
+                        console.log(card);
                         selectedCnt += 1;
                         discards.push (card);
                     }
@@ -575,7 +600,7 @@ class Screen
             this.aCard.forEach(
                 ( card ) =>
                 {
-                    if ((card.fX <= x && x <= card.fX + 20) 
+                    if ((card.fX <= x && x <= card.fX + 19) 
                         &&
                         (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
                         ){
