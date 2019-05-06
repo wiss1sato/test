@@ -29,7 +29,6 @@ module.exports = class Game {
     let fukukan = null;
     let changeCards = null;
     let phase = null;
-    let daifuda = null;
 
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
@@ -141,10 +140,12 @@ module.exports = class Game {
           passCnt = 0;
           teban = 1;
           fukukanCard = null;
+          fukukan = null;
           reverse = false;
           currentReverse = false;
           phase = null;
           fieldCards = [];
+          leftCards = null;
           turn = 0;                
           // データはもう一回作る
           cardList = this.createCardList()
@@ -361,6 +362,11 @@ module.exports = class Game {
           });
         player.discardChanges(changes);
         phase = 'mainGame';
+        // 全てのカードを出せるようにする
+        world.setCard.forEach(
+          (card) => {
+              card.setRequest();
+          });        
         io.emit('change-end');
       });
       // カード出したとき
@@ -423,8 +429,6 @@ module.exports = class Game {
           });
         player.discard(card);
         fieldCards.push(card);
-        // jo請求とリバースの判定入れる。
-        let forceJoker = this.judgeForceJoker(card, fieldCards.length);
         currentReverse = this.judgeReverse(card, kirifuda, currentReverse);
         if (!reverse) {
           teban += 1;
@@ -433,9 +437,68 @@ module.exports = class Game {
           teban -= 1;
           if (teban == 0) teban = GameSettings.PLAYER_NUM;
         }
-        // 場のカードが1枚のときに、台札を決める
+        // 場のカードが1枚のときに、台札を決め、すべてのプレイヤーが出せるカードを限定する
         if (fieldCards.length == 1) {
-          daifuda = fieldCards[0].cardId.slice(0,1);
+          let daifuda = fieldCards[0].cardId;
+            // まず、jo以外の全てのカードを出せなくする
+            world.setCard.forEach(
+              (c) => {
+                if (c.cardId !== 'jo') {
+                  c.setNotRequest();
+                }
+              });
+            // 台札のスートを見る
+            world.setPlayer.forEach(
+              (player) => {
+                let cards = player.returnCards();
+                let requestCards = cards.filter(function (c) {
+                  return (c.slice(0,1) === daifuda.slice(0,1));
+                });
+                // 出せるカードがある場合、それを出す
+                if(requestCards.length) {
+                  requestCards.forEach((rc) => {
+                    world.setCard.forEach(
+                      (c) => {
+                        if (c.cardId === rc) {
+                          c.setRequest();
+                        }
+                      });
+                  });
+                // 出せるカードがない場合は、全部出せる
+                } else {
+                  cards.forEach((card) => {
+                    world.setCard.forEach(
+                      (c) => {
+                        if (c.cardId === card) {
+                          c.setRequest();
+                        }
+                      });
+                  });
+                }
+              });
+            // 台札がjo請求のときだけ特別処理
+            if(daifuda === 'c3') {
+              // まず、joを持ってるプレーヤーを探す
+              world.setPlayer.forEach(
+                (player) => {
+                  let retCards = player.returnCards();
+                  let joFlg = retCards.indexOf("jo") >= 0;
+                  // joを持ってるプレーヤーの場合
+                  if (joFlg) {
+                    retCards.forEach((rc) => {
+                      // jo以外のカードを出せなくする
+                      world.setCard.forEach(
+                        (c) => {
+                          if (c.cardId === rc && rc !== 'jo') {
+                            c.setNotRequest();
+                          } else if(c.cardId === rc && rc === 'jo') {
+                            c.setRequest();
+                          }
+                        });
+                    });
+                  }
+                });
+            }
         }        
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
@@ -462,6 +525,7 @@ module.exports = class Game {
                 world.destroyCard2(changeCard)}
               );
           }
+          console.log('winner:' + winner + ', 絵札枚数:' + efuda)          
           // 勝者に絵札を渡す
           world.setPlayer.forEach(
             (player) => {
@@ -475,8 +539,13 @@ module.exports = class Game {
           changeCards = null;
           // 実際の周りもここで決める
           reverse = currentReverse;
+          // 全てのカードを出せるようにする
+          world.setCard.forEach(
+            (card) => {
+                card.setRequest();
+            });
         }
-        io.emit('discard-end', forceJoker, daifuda);
+        io.emit('discard-end');
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
@@ -538,13 +607,6 @@ module.exports = class Game {
     }
     // 何事もない場合は、そのまま
     return currentReverse;
-  }
-  judgeForceJoker(card, len) {
-    if (card === 'c3' && len == 1) {
-      return true;
-    } else {
-      return false;
-    }
   }
   judgeWinner(fieldCards, turn, kirifuda) {
     let mighty = false;
@@ -641,7 +703,6 @@ module.exports = class Game {
     let kirifudaCards = fieldCards.filter(function (f) {
       return (f.cardId.slice(0, 1) === kirifuda.slice(0, 1));
     });
-    console.log(kirifudaCards);
     // 切り札がある場合、切り札の中で一番強いカードを返却
     if (kirifudaCards.length){
         kirifudaCards.sort(function(val1,val2){

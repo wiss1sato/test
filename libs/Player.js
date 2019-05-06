@@ -13,7 +13,6 @@ module.exports = class Player extends GameObject
     {
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.PLAYER_WIDTH, SharedSettings.PLAYER_HEIGHT, 0.0, 0.0, 0.0 );
-
         this.iconName = iconName;
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;

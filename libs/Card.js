@@ -52,6 +52,17 @@ module.exports = class Card extends GameObject
         this.back = true;
     }
 
+    // 請求状態にする
+    setRequest()
+    {
+        this.request = true;
+    }    
+    // 非請求状態にする
+    setNotRequest()
+    {
+        this.request = false;
+    }        
+
     // 交換時に捨てたカードの処理
     setChanges(fX, fY, change)
     {
@@ -85,7 +96,8 @@ module.exports = class Card extends GameObject
                 selected : this.selected,
                 playerNum : this.playerNum,
                 back : this.back,
-                playerId : this.playerId
+                playerId : this.playerId,
+                request : this.request
             } );
     }
 };

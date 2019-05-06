@@ -22,13 +22,11 @@ class Screen
         this.maisuu = null;
         this.napoleon = null;
         this.fukukan = null;
-        this.forceJoker = false;        
         this.reverse = false;
         this.designationCard = null;
         this.frame = new Object();
         this.viewerSocketIdList = [];
         this.phase = null;
-        this.daifuda = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -144,10 +142,9 @@ class Screen
         // カード捨てたとき
         this.socket.on(
             'discard-end',
-            (forceJoker, daifuda) =>
+            () =>
             {
-                this.forceJoker = forceJoker;
-                this.daifuda = daifuda;
+
             } );                      
     }
 
@@ -635,6 +632,7 @@ class Screen
 
         // メインフェーズ時
         if (this.phase === 'mainGame') {
+            // 出せるカードが限定されてるとき
             this.aCard.forEach(
                 ( card ) =>
                 {
@@ -643,6 +641,8 @@ class Screen
                         card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT
                         &&
                         card.playerId === this.socket.id
+                        &&
+                        card.request
                         )
                         {
                             c = card;
@@ -700,19 +700,19 @@ class Screen
         this.context.save();
         this.context.drawImage( img,
             card.fX, card.fY,
-            SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+            SharedSettings.CARD_WIDTH,
             SharedSettings.CARD_HEIGHT                  
-            );	// 描画先領域の大きさ
+            );
 
-        // 台札が決まってるときは、出せるカードをの周りに枠をつける
-        if (this.daifuda && this.daifuda === card.cardId.slice(0,1)){
+        // 台札が決まってるときは、出せるカードの周りに枠をつける
+        if (card.request){
             img = this.assets.frame;
             this.context.drawImage( img,
                 card.fX, card.fY,
-                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.CARD_WIDTH,
                 SharedSettings.CARD_HEIGHT                  
-                );	// 描画先領域の大きさ
-        }            
+                );
+        }
         this.context.restore();
     }
 
