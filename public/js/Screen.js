@@ -17,10 +17,6 @@ class Screen
         this.aNumber = null;
         this.aMark = null;
         this.aTeban = null;
-        this.declaration = false;
-        this.designation = false;
-        this.change = false;
-        this.mainGame = false;
         this.aPassCnt = null;
         this.kirihuda = null;
         this.maisuu = null;
@@ -29,7 +25,9 @@ class Screen
         this.forceJoker = false;        
         this.reverse = false;
         this.designationCard = null;
-        this.frame = new Object();       
+        this.frame = new Object();
+        this.viewerSocketIdList = [];
+        this.phase = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -60,7 +58,7 @@ class Screen
                 console.log( 'connect : socket.id = %s', socket.id );
             } );
             
-        // デッドしたらスタート画面に戻る
+        // ゲーム入室時
         this.socket.on(
             'enter-the-game',
             ( aPlayer ) =>
@@ -71,6 +69,9 @@ class Screen
                 aPlayer.forEach(
                     ( player ) =>
                     {
+                        if (player.viewerMode && this.viewerSocketIdList.indexOf(player.strSocketID) == -1){
+                            this.viewerSocketIdList.push(player.strSocketID)                            
+                        }
                         this.assets.setPlayerIcon(player);
                     } );
             } );
@@ -79,7 +80,7 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
@@ -87,6 +88,9 @@ class Screen
                 this.aMark = aMark;
                 this.aTeban = aTeban;
                 this.aPassCnt = aPassCnt;
+                this.designationCard = designationCard;
+                this.reverse = reverse;
+                this.phase = phase;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -104,7 +108,6 @@ class Screen
             () =>
             {
                 this.aTeban = 1;
-                this.declaration = true;
             } );
 
         // 宣言フェーズが終わったら、副官札指定フェーズ
@@ -116,8 +119,6 @@ class Screen
                 this.kirihuda = mark.markId;
                 this.maisuu = number.num;
                 this.napoleon = napoleon;
-                this.declaration = false;
-                this.designation = true;
             } );
 
         this.socket.on(
@@ -126,8 +127,6 @@ class Screen
             {
                 console.log('副官札:' + designationCard);
                 this.designationCard = designationCard;
-                this.designation = false;
-                this.change = true;
             } );
 
         // カードを配る
@@ -135,8 +134,7 @@ class Screen
             'change-end',
             () =>
             {
-                this.change = false;
-                this.mainGame = true;
+                // this.mainGame = true;
             } );     
 
         // カードを配る
@@ -228,7 +226,7 @@ class Screen
             }
         }
         // 交換フェーズ、メインフェーズ時には副官指名札も表示する
-        if (this.mainGame || this.change) {
+        if (this.phase === 'mainGame' || this.phase === 'change') {
             let img = this.assets.returnCard(this.designationCard)[0];
             this.context.drawImage( img,
                 830, 0,
@@ -237,7 +235,7 @@ class Screen
         }
 
         // メインフェーズ時には周り順を表示する
-        if (this.mainGame) {
+        if (this.phase === 'mainGame') {
             let img = this.assets.clockwise;
             if (this.reverse) {
                 img = this.assets.reverse;
@@ -256,22 +254,24 @@ class Screen
         var img = this.assets.returnIcon(player.strSocketID);
         if (!img) return;
         var ctx = this.context;
-        ctx.save();
-        ctx.drawImage( img,
-            player.fX, player.fY,
-            SharedSettings.PLAYER_WIDTH,
-            SharedSettings.PLAYER_HEIGHT                  
-            );	
-
-         // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
-         // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
-        if (this.socket.id !== player.strSocketID && this.aCard.length > 0) {
-            ctx.drawImage( this.assets.imageField,
-                player.fX - 99, player.fY + 165,
-                340,105
-                );
-        }
-
+        if (!player.viewerMode){
+            ctx.save();
+            ctx.drawImage( img,
+                player.fX, player.fY,
+                SharedSettings.PLAYER_WIDTH,
+                SharedSettings.PLAYER_HEIGHT                  
+                );	
+            }
+             // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
+             // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
+            if (this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
+                if (this.socket.id !== player.strSocketID && this.aCard.length > 0 && !player.viewerMode) {
+                    ctx.drawImage( this.assets.imageField,
+                        player.fX - 99, player.fY + 165,
+                        340,105
+                        );
+                }
+            }
         // 手番の場合は、手番マークを表示
         if (this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.teban,
@@ -281,7 +281,7 @@ class Screen
         }
 
         // 宣言時に手番の場合、自分のエリアにボタン配置
-        if (this.declaration && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
+        if (this.phase === 'declaration' && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
             this.context.drawImage( this.assets.pass,
                 700, 350,
                 60,40
@@ -293,7 +293,7 @@ class Screen
         }
 
         // 副官指定フェーズ中は、ナポレオンプレイヤーだけ副官指定札を表示する
-        if (this.napoleon === this.socket.id && this.designation) {
+        if (this.napoleon === this.socket.id && this.phase === 'designation' && this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
             let img = this.assets.returnCard('s1')[0];
             this.context.drawImage( img,
                 600, 240,
@@ -353,7 +353,7 @@ class Screen
         // 宣言用のOK/パス
 
         // カード用のOK
-        if (this.change && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
+        if (this.phase === 'change' && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
                 player.fX + 280, player.fY + 200,
                 60,40
@@ -361,7 +361,7 @@ class Screen
         }        
 
         // カード用のOK
-         if (this.mainGame && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
+         if (this.phase === 'mainGame' && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.ok,
                 player.fX + 280, player.fY + 200,
                 60,40
@@ -395,7 +395,7 @@ class Screen
         let isMarkClicked = false;
 
         // 宣言フェーズ時
-        if (this.declaration) {
+        if (this.phase === 'declaration') {
         // 宣言時の数字が押されたとき
             this.aNumber.forEach(
                 ( number ) =>
@@ -489,7 +489,7 @@ class Screen
         }
 
         // 指名フェーズ時(大したことがないのでベタで書いちゃう)
-        if (this.designation) {
+        if (this.phase === 'designation') {
             this.frame.fY = 240;
             // マイティ
             if ((600 <= x && x <= 675) 
@@ -498,6 +498,7 @@ class Screen
             ){
                 this.designationCard = 's1';
                 this.frame.fX = 600;
+                this.socket.emit( 'designation-card-clicked', this.designationCard);                  
             }
             // jo
             if ((676 <= x && x <= 750) 
@@ -506,6 +507,7 @@ class Screen
             ){
                 this.designationCard = 'jo';
                 this.frame.fX = 676;
+                this.socket.emit( 'designation-card-clicked', this.designationCard);                  
             }
             // s11かh11
             if ((751 <= x && x <= 825) 
@@ -518,6 +520,7 @@ class Screen
                     this.designationCard = 'h11';
                 }
                 this.frame.fX = 751;
+                this.socket.emit( 'designation-card-clicked', this.designationCard);  
             }
             // c11かd11
             if ((826 <= x && x <= 900) 
@@ -529,6 +532,7 @@ class Screen
                 } else {
                     this.designationCard = 'd11';
                 }
+            this.socket.emit( 'designation-card-clicked', this.designationCard);                  
             this.frame.fX = 826;
             }
             // よろめき
@@ -538,6 +542,7 @@ class Screen
             ){
                 this.designationCard = 'h12';
                 this.frame.fX = 901;
+                this.socket.emit( 'designation-card-clicked', this.designationCard);  
             }
 
             // 決定を押したとき
@@ -551,7 +556,7 @@ class Screen
         }
 
        // 交換フェーズ時(ナポレオンのみ)
-       if (this.change && this.napoleon === this.socket.id) {
+       if (this.phase === 'change' && this.napoleon === this.socket.id) {
         this.aCard.forEach(
             ( card ) =>
             {
@@ -596,7 +601,7 @@ class Screen
      }
 
         // メインフェーズ時
-        if (this.mainGame) {
+        if (this.phase === 'mainGame') {
             this.aCard.forEach(
                 ( card ) =>
                 {
@@ -669,7 +674,7 @@ class Screen
     {
         let img = null;
         // 宣言フェーズ中のみナンバーを全て表示
-        if (this.declaration) {
+        if (this.phase === 'declaration') {
             img = this.assets.returnNumber(number)[0];
             if (number.selected) {
                 img = this.assets.returnColorNumber(number)[0];

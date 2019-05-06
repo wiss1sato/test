@@ -27,6 +27,7 @@ module.exports = class Game {
     let fukukanCard = null;
     let fukukan = null;
     let changeCards = null;
+    let phase = null;
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
     // 　サーバーで、'connection'イベント
@@ -43,6 +44,7 @@ module.exports = class Game {
         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる
         if (objConfig !== undefined) {
           player = world.createPlayer(socket.id, objConfig.strNickName, objConfig.iconName);
+          if (world.setPlayer.size >= 6) player.giveViewerMode();
           io.emit('enter-the-game', Array.from(world.setPlayer));
           playerNum = 0;
           world.setPlayer.forEach(
@@ -134,6 +136,9 @@ module.exports = class Game {
           world.destroyMark();
           passCnt = 0;
           teban = 1;
+          fukukanCard = null;
+          reverse = false;
+          phase = null;
           // データはもう一回作る
           cardList = this.createCardList()
         }
@@ -181,6 +186,12 @@ module.exports = class Game {
             }
           });
       });
+
+      // マークがクリックされた時の処理(セレクト済みにする)
+      socket.on('designation-card-clicked', (designationCard) => {
+        fukukanCard = designationCard;
+      });
+
       socket.on('mark-unclicked', (mark) => {
         world.setMark.forEach(
           (m) => {
@@ -213,7 +224,7 @@ module.exports = class Game {
               });
           });
         // 残ったカードを真ん中に配置する
-        if (cardList.length === 33) {
+        if (cardList.length === 3) {
           leftCards = cardList.splice(0, 3);
           // 左端のカード（初期座標）
           let fX = 680;
@@ -228,8 +239,9 @@ module.exports = class Game {
                   }
                 });
             });
+            phase = 'declaration';
+            io.emit('deal-end');
         }
-        io.emit('deal-end');
       });
       // 宣言中にパスが押されたとき
       socket.on('pass-clicked', (mark, number) => {
@@ -261,6 +273,7 @@ module.exports = class Game {
               }
             });
           console.log('ナポレオン:' + napoleon);
+          phase = 'designation';
           io.emit('declaration-end', mark, number, napoleon);
         }
       });
@@ -299,6 +312,7 @@ module.exports = class Game {
                 }
               });
           });
+          phase = 'change';
         io.emit('designation-end', designationCard);
       });
       // 交換時
@@ -338,6 +352,7 @@ module.exports = class Game {
               });
           });
         player.discardChanges(changes);
+        phase = 'mainGame';
         io.emit('change-end');
       });
       // カード出したとき
@@ -439,8 +454,8 @@ module.exports = class Game {
         const hrtimeDiff = process.hrtime(hrtime);
         const iNanosecDiff = hrtimeDiff[0] * 1e9 + hrtimeDiff[1];
         // 最新状況をクライアントに送信
-        io.emit('update', Array.from(world.setPlayer), // Setオブジェクトは送受信不可（SetにJSON変換が未定義だから？）。配列にして送信する。
-          Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, iNanosecDiff); // 送信
+        io.emit('update', Array.from(world.setPlayer),
+          Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, reverse, phase, iNanosecDiff); // 送信
       }, 1000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
   }
   createCardList() {
@@ -568,7 +583,7 @@ module.exports = class Game {
       return winner[0].playerNum;
     }
     //  1ターン目以外でセイムツーの場合
-    if (sameTwoFl && turn != 1) {
+    if (sameTwoFlg && turn != 1) {
       // 台札のスート
       winner = fieldCards.filter(function (f) {
         return (f.cardId === daifuda + '2');

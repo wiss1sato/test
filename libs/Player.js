@@ -18,6 +18,7 @@ module.exports = class Player extends GameObject
         this.strSocketID = strSocketID;
         this.strNickName = strNickName;
         this.hasCards = null;
+        this.viewerMode = false;
     }
 
     toJSON()
@@ -29,7 +30,8 @@ module.exports = class Player extends GameObject
                 strSocketID: this.strSocketID,
                 strNickName: this.strNickName,
                 hasCards: this.hasCards,
-                playerNum : this.playerNum
+                playerNum : this.playerNum,
+                viewerMode : this.viewerMode
             } );
     }
 
@@ -70,6 +72,12 @@ module.exports = class Player extends GameObject
     playCard()
     {
     }
+
+    // 観戦者モードにする
+    giveViewerMode()
+    {
+        this.viewerMode = true;
+    }    
 
     
     // カード配布
