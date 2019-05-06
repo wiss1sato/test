@@ -23,6 +23,7 @@ module.exports = class Game {
     let fieldCards = [];
     let kirifuda = null;
     let turn = 0;
+    let currentReverse = false;
     let reverse = false;
     let fukukanCard = null;
     let fukukan = null;
@@ -127,6 +128,7 @@ module.exports = class Game {
         playerNum = playerNum - 1;
         world.destroyPlayer(player);
         player = null; // 自プレイヤーの解放
+        // ゲームが終わったら、いろいろ初期化
         if (playerNum !== 5) {
           // カードを全部消す
           world.destroyCard();
@@ -138,7 +140,10 @@ module.exports = class Game {
           teban = 1;
           fukukanCard = null;
           reverse = false;
+          currentReverse = false;
           phase = null;
+          fieldCards = [];
+          turn = 0;                
           // データはもう一回作る
           cardList = this.createCardList()
         }
@@ -243,6 +248,16 @@ module.exports = class Game {
             io.emit('deal-end');
         }
       });
+      // 宣言中に決定が押されたとき
+      socket.on('kettei-clicked', (player) => {
+        if (!player) {
+          return;
+        }
+        passCnt = 0;
+        teban += 1;
+        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
+        napoleon = player;
+      });      
       // 宣言中にパスが押されたとき
       socket.on('pass-clicked', (mark, number) => {
         passCnt += 1;
@@ -259,7 +274,7 @@ module.exports = class Game {
             (m) => {
               if (m.markId === mark.markId) {
                 m.markUnclicked();
-                m.setPosition(650, 0);
+               m.setPosition(650, 0);
               }
             });
           kirifuda = mark.markId;
@@ -274,19 +289,10 @@ module.exports = class Game {
             });
           console.log('ナポレオン:' + napoleon);
           phase = 'designation';
-          io.emit('declaration-end', mark, number, napoleon);
+          io.emit('declaration-end', mark, number);
         }
       });
-      // 宣言中に決定が押されたとき
-      socket.on('kettei-clicked', (player) => {
-        if (!player) {
-          return;
-        }
-        passCnt = 0;
-        teban += 1;
-        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
-        napoleon = player;
-      });
+
       // 副官札指定後に決定が押されたとき(メインフェーズ開始時)
       socket.on('kettei-clicked-designation', (designationCard) => {
         // 副官カードを指定
@@ -369,7 +375,7 @@ module.exports = class Game {
         let fY = 0;
         if (player.playerNum === 1) {
           fX = 730;
-          fY = 330;
+          fY = 310;
         }
         if (player.playerNum === 2) {
           fX = 590;
@@ -417,9 +423,15 @@ module.exports = class Game {
         fieldCards.push(card);
         // jo請求とリバースの判定を入れる。
         let forceJoker = this.judgeForceJoker(card, fieldCards.length);
-        reverse = this.judgeReverse(card, kirifuda, reverse);
-        teban += 1;
-        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
+        currentReverse = this.judgeReverse(card, kirifuda, currentReverse);
+        if (!reverse) {
+          teban += 1;
+          if (teban == GameSettings.PLAYER_NUM + 1) teban = 1;
+        } else {
+          teban -= 1;
+          if (teban == 0) teban = GameSettings.PLAYER_NUM;
+        }
+
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
           turn = turn + 1;
@@ -435,8 +447,10 @@ module.exports = class Game {
           // 最初に出したカードがあったら、それも消す
           // 初期化する
           fieldCards = [];
+          // 実際の周りもここで決める
+          reverse = currentReverse;
         }
-        io.emit('discard-end', forceJoker, reverse);
+        io.emit('discard-end', forceJoker, currentReverse);
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
@@ -455,7 +469,8 @@ module.exports = class Game {
         const iNanosecDiff = hrtimeDiff[0] * 1e9 + hrtimeDiff[1];
         // 最新状況をクライアントに送信
         io.emit('update', Array.from(world.setPlayer),
-          Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, reverse, phase, iNanosecDiff); // 送信
+          Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, currentReverse, phase,
+           napoleon, fukukan, iNanosecDiff); // 送信
       }, 1000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
   }
   createCardList() {
@@ -488,15 +503,15 @@ module.exports = class Game {
     }
     return cardList;
   }
-  judgeReverse(card, kirifuda, reverse) {
+  judgeReverse(card, kirifuda, currentReverse) {
     if (kirifuda === 'spade' || kirifuda === 'clover') {
-      if (card.cardId === 'd11' || card.cardId === 'h11') return !reverse;
+      if (card.cardId === 'd11' || card.cardId === 'h11') return !currentReverse;
     }
     if (kirifuda === 'heart' || kirifuda === 'diamond') {
-      if (card.cardId === 's11' || card.cardId === 'c11') return !reverse;
+      if (card.cardId === 's11' || card.cardId === 'c11') return !currentReverse;
     }
     // 何事もない場合は、そのまま
-    return reverse;
+    return currentReverse;
   }
   judgeForceJoker(card, len) {
     if (card === 'c3' && len == 1) {

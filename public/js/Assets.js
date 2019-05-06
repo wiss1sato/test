@@ -12,6 +12,11 @@ class Assets
         this.teban = new Image();
         this.teban.src = '../images/teban.png'
 
+        this.napoleon = new Image();
+        this.napoleon.src = '../images/napoleon.png'
+        this.fukukan = new Image();
+        this.fukukan.src = '../images/fukukan.png'                
+
         this.clockwise = new Image();
         this.clockwise.src = '../images/clockwise.png'
         this.reverse = new Image();

@@ -80,7 +80,8 @@ class Screen
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
         this.socket.on(
             'update',
-            ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase, iProcessingTimeNanoSec ) =>
+            ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase,
+                napoleon, fukukan,  iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
@@ -91,6 +92,8 @@ class Screen
                 this.designationCard = designationCard;
                 this.reverse = reverse;
                 this.phase = phase;
+                this.napoleon = napoleon;
+                this.fukukan = fukukan;                
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -137,7 +140,7 @@ class Screen
                 // this.mainGame = true;
             } );     
 
-        // カードを配る
+        // カード捨てたとき
         this.socket.on(
             'discard-end',
             (forceJoker, reverse, fukukan) =>
@@ -263,7 +266,7 @@ class Screen
                 );	
             }
              // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
-             // 最終的に、ソケットがプレイヤーじゃない場合は隠さないようにする
+             // 観戦者は隠さない
             if (this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
                 if (this.socket.id !== player.strSocketID && this.aCard.length > 0 && !player.viewerMode) {
                     ctx.drawImage( this.assets.imageField,
@@ -367,7 +370,23 @@ class Screen
                 60,40
                 );	// 描画先領域の大きさ
         }
+        ctx.restore();
 
+        // ナポの表示
+        if (player.strSocketID === this.napoleon) {
+            ctx.drawImage( this.assets.napoleon,
+                player.fX - 100, player.fY,
+                90, 55
+                );	// 描画先領域の大きさ
+        }
+
+        // 副官の表示
+        if (player.strSocketID === this.fukukan) {
+            ctx.drawImage( this.assets.fukukan,
+                player.fX - 100, player.fY + 60,
+                90, 55
+                );	// 描画先領域の大きさ
+        }
         ctx.restore();
 
         // ニックネーム
@@ -376,7 +395,9 @@ class Screen
         ctx.textAlign = 'center';
         ctx.font = RenderingSettings.NICKNAME_FONT;
         ctx.fillStyle = RenderingSettings.NICKNAME_COLOR;
-        ctx.fillText( player.strNickName, player.fX + 80, player.fY - 20);
+        ctx.fillText( player.strNickName, player.fX + 80, player.fY - 5);
+        // 絵札の枚数
+        ctx.fillText( player.efuda + '枚', player.fX -60, player.fY + 145);
         ctx.restore();
         ctx.restore();  
     }
@@ -393,7 +414,17 @@ class Screen
         let isNumberClicked = false;
         let isCardClicked = false;
         let isMarkClicked = false;
-
+        // 手番プレイヤーの確認
+        let tebanPlayerFlg = false;
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if (p.strSocketID === this.socket.id) {
+                   if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
+                }
+            } );
+        // 手番ではないプレイヤーのクリックは受け付けない
+        if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
         if (this.phase === 'declaration') {
         // 宣言時の数字が押されたとき
@@ -452,7 +483,7 @@ class Screen
             &&
             (350 <= y && y <= 390) 
             ){
-                // 現在宣言されているナンバーとマークを取得する
+                // 現在選択されているナンバーとマークを取得する
                 this.aNumber.forEach(
                     ( number ) =>
                     {
@@ -561,9 +592,11 @@ class Screen
             ( card ) =>
             {
                 console.log(card);
-                if ((card.fX <= x && x <= card.fX + 19) 
+                if (card.fX <= x && x <= card.fX + 19
                     &&
-                    (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
+                    card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT 
+                    &&
+                    card.playerId === this.socket.id
                     ){
                         c = card;
                         // サーバにクリックされたことを伝える
@@ -605,10 +638,13 @@ class Screen
             this.aCard.forEach(
                 ( card ) =>
                 {
-                    if ((card.fX <= x && x <= card.fX + 19) 
+                    if (card.fX <= x && x <= card.fX + 19
                         &&
-                        (card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT) 
-                        ){
+                        card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT
+                        &&
+                        card.playerId === this.socket.id
+                        )
+                        {
                             c = card;
                             // サーバにクリックされたことを伝える
                             this.socket.emit( 'card-clicked' , card );

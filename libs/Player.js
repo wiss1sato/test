@@ -19,6 +19,7 @@ module.exports = class Player extends GameObject
         this.strNickName = strNickName;
         this.hasCards = null;
         this.viewerMode = false;
+        this.efuda = 0;
     }
 
     toJSON()
@@ -31,7 +32,8 @@ module.exports = class Player extends GameObject
                 strNickName: this.strNickName,
                 hasCards: this.hasCards,
                 playerNum : this.playerNum,
-                viewerMode : this.viewerMode
+                viewerMode : this.viewerMode,
+                efuda : this.efuda
             } );
     }
 
