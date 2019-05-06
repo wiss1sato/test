@@ -29,6 +29,8 @@ module.exports = class Game {
     let fukukan = null;
     let changeCards = null;
     let phase = null;
+    let daifuda = null;
+
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
     // 　サーバーで、'connection'イベント
@@ -421,7 +423,7 @@ module.exports = class Game {
           });
         player.discard(card);
         fieldCards.push(card);
-        // jo請求とリバースの判定を入れる。
+        // jo請求とリバースの判定入れる。
         let forceJoker = this.judgeForceJoker(card, fieldCards.length);
         currentReverse = this.judgeReverse(card, kirifuda, currentReverse);
         if (!reverse) {
@@ -431,26 +433,50 @@ module.exports = class Game {
           teban -= 1;
           if (teban == 0) teban = GameSettings.PLAYER_NUM;
         }
-
+        // 場のカードが1枚のときに、台札を決める
+        if (fieldCards.length == 1) {
+          daifuda = fieldCards[0].cardId.slice(0,1);
+        }        
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
           turn = turn + 1;
           let winner = this.judgeWinner(fieldCards, turn, kirifuda);
+          // 判定のために14にしたものがある場合、1に戻す
+          for (let i = 0; i < fieldCards.length; i++ ) {
+            let num = fieldCards[i].cardId.replace(/[^0-9]/g, '');
+            if (num == 14) fieldCards[i].cardId = fieldCards[i].cardId.slice(0, 1) + 1;
+          }          
           teban = winner;
-          // 場からカードを消す
-          fieldCards.forEach(
-            (fieldCard) => world.destroyCard2(fieldCard));
-            if(changeCards) {
-                changeCards.forEach(
-                (changeCard) => world.destroyCard2(changeCard));
-            }
+          // 場からカードを消す。ついでに絵札の枚数をカウントする
+          let efuda = 0;
+          fieldCards.forEach((fieldCard) => {
+            let num = fieldCard.cardId.replace(/[^0-9]/g, '');
+            if (num >= 10 || num == 1) efuda += 1;
+            world.destroyCard2(fieldCard)
+          });
+          if(changeCards) {
+              changeCards.forEach(
+              (changeCard) => {
+                let num = changeCard.cardId.replace(/[^0-9]/g, '');
+                if (num >= 10 || num == 1) efuda += 1;                  
+                world.destroyCard2(changeCard)}
+              );
+          }
+          // 勝者に絵札を渡す
+          world.setPlayer.forEach(
+            (player) => {
+              if (player.playerNum === winner) {
+                player.increaseEfuda(efuda);
+              }
+            });          
           // 最初に出したカードがあったら、それも消す
           // 初期化する
           fieldCards = [];
+          changeCards = null;
           // 実際の周りもここで決める
           reverse = currentReverse;
         }
-        io.emit('discard-end', forceJoker, currentReverse);
+        io.emit('discard-end', forceJoker, daifuda);
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
@@ -530,7 +556,7 @@ module.exports = class Game {
     let prevMark = null;
     let sameTwoFlg = true;
     let winner = null;
-    let daifuda = fieldCards[0].cardId.slice(0, 1)    
+    let daifuda = fieldCards[0].cardId.slice(0, 1)
     fieldCards.forEach(
       // 役札を確認する
       (fieldCard) => {
@@ -603,8 +629,38 @@ module.exports = class Game {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === daifuda + '2');
       });
-      if (winner) return winner[0].playerNum;
+      if (winner.length) return winner[0].playerNum;
     }
     // それ以外の場合
+    // Aのカードがある場合、強さ判定のために数字を14にする
+    for (let i = 0; i < fieldCards.length; i++ ) {
+      let num = fieldCards[i].cardId.replace(/[^0-9]/g, '');
+      if (num == 1) fieldCards[i].cardId = fieldCards[i].cardId.slice(0, 1) + 14;
+    }
+    // 切り札を探す
+    let kirifudaCards = fieldCards.filter(function (f) {
+      return (f.cardId.slice(0, 1) === kirifuda.slice(0, 1));
+    });
+    console.log(kirifudaCards);
+    // 切り札がある場合、切り札の中で一番強いカードを返却
+    if (kirifudaCards.length){
+        kirifudaCards.sort(function(val1,val2){
+          var val1 = val1.cardId;
+          var val2 = val2.cardId;
+          return val2.match(/\d+/) - val1.match(/\d+/);
+      });
+      return kirifudaCards[0].playerNum;
+    }
+      // 切り札がない場合、台札の中で一番強いカードを返却
+      // 台札を探す
+      let daifudaCards = fieldCards.filter(function (f) {
+        return (f.cardId.slice(0, 1) === daifuda);
+      });      
+      daifudaCards.sort(function(val1,val2){
+        var val1 = val1.cardId;
+        var val2 = val2.cardId;
+        return val2.match(/\d+/) - val1.match(/\d+/);
+      });
+      return daifudaCards[0].playerNum;
   }
 }

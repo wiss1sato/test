@@ -28,6 +28,7 @@ class Screen
         this.frame = new Object();
         this.viewerSocketIdList = [];
         this.phase = null;
+        this.daifuda = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -143,11 +144,10 @@ class Screen
         // カード捨てたとき
         this.socket.on(
             'discard-end',
-            (forceJoker, reverse, fukukan) =>
+            (forceJoker, daifuda) =>
             {
                 this.forceJoker = forceJoker;
-                this.reverse = reverse;
-                this.fukukan = fukukan;
+                this.daifuda = daifuda;
             } );                      
     }
 
@@ -703,6 +703,16 @@ class Screen
             SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
             SharedSettings.CARD_HEIGHT                  
             );	// 描画先領域の大きさ
+
+        // 台札が決まってるときは、出せるカードをの周りに枠をつける
+        if (this.daifuda && this.daifuda === card.cardId.slice(0,1)){
+            img = this.assets.frame;
+            this.context.drawImage( img,
+                card.fX, card.fY,
+                SharedSettings.CARD_WIDTH,	// 描画先領域の大きさ
+                SharedSettings.CARD_HEIGHT                  
+                );	// 描画先領域の大きさ
+        }            
         this.context.restore();
     }
 

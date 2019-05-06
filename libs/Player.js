@@ -94,6 +94,12 @@ module.exports = class Player extends GameObject
         return this.hasCards;
     }
 
+    // 絵札を増やす
+    increaseEfuda(efuda)
+    {
+       this.efuda = this.efuda+ efuda;
+    } 
+
 
     // カード捨てる
     discardChanges(changes)
