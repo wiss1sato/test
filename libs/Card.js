@@ -74,6 +74,7 @@ module.exports = class Card extends GameObject
         this.fX = fX;
         this.fY = fY;
         this.change = true;
+        this.playerId = null;
     }   
 
     // 更新

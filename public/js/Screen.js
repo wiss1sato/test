@@ -631,7 +631,7 @@ class Screen
                         c = card;
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'card-clicked' , card );
-                }             
+                }
             } );    
             
         // OKを押したとき
@@ -725,6 +725,33 @@ class Screen
                             // サーバにクリックされたことを伝える
                             this.socket.emit( 'card-clicked' , card );
                             isCardClicked = true;
+                    // カードの全領域をクリックされたとき（＝最後のカード）の判定
+                    } else if (card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH
+                        &&
+                        card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT
+                        &&
+                        card.playerId === this.socket.id
+                        &&
+                        card.request
+                        &&
+                        !card.change
+                        )
+                        {
+                            let pNum = 0;
+                            let lastCard = null;
+                            for(let i = this.aCard.length - 1; i >= 0; i--) {
+                                if (this.aCard[i].playerId === this.socket.id){
+                                    lastCard = this.aCard[i];
+                                    break;
+                                } 
+                            }
+                        // 全部見えてるカードのときは、条件によっては全部の領域クリックを許す
+                        if (card === lastCard) {
+                            c = card;
+                            // サーバにクリックされたことを伝える
+                            this.socket.emit( 'card-clicked' , card );
+                            isCardClicked = true;
+                        }
                     }
                 } );
             if (isCardClicked){
