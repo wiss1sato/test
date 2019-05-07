@@ -281,20 +281,20 @@ class Assets
     }    
 
    // ナンバーを返却するメソッド
-   returnMark(mark) {
+   returnMark(markId) {
     var ret = this.markSet.filter(
         function(m){
-             return (m.src.indexOf(mark.markId + '.png') > -1);
+             return (m.src.indexOf(markId + '.png') > -1);
          }
         );
     return ret;
     }
 
    // ナンバーを返却するメソッド(色付き)
-   returnColorMark(mark) {
+   returnColorMark(markId) {
     var ret = this.colorMarkSet.filter(
         function(m){
-             return (m.src.indexOf(mark.markId + 'c.png') > -1);
+             return (m.src.indexOf(markId + 'c.png') > -1);
          }
         );
     return ret;

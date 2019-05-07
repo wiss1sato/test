@@ -29,6 +29,7 @@ class Screen
         this.phase = null;
         this.fieldCardLength = null;
         this.daifudaJoker = false;
+        this.daifudaJokerMark = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -149,6 +150,13 @@ class Screen
             {
                 this.daifudaJoker = true;
             } );
+        // ジョーカーが台札だったときの特別な処理
+        this.socket.on(
+            'daifuda-joker-mark',
+            (mark) =>
+            {
+                this.daifudaJokerMark = mark;
+            } );            
         // ジョーカーが台札だったときの特別な処理(終了)
         this.socket.on(
             'daifuda-joker-end',
@@ -811,6 +819,14 @@ class Screen
             SharedSettings.CARD_WIDTH,
             SharedSettings.CARD_HEIGHT                  
             );
+        // 台札ジョーカーのときだけ、カードの上にマークを描画
+        if(card.cardId === 'jo' && this.daifudaJokerMark) {
+            img = this.assets.returnMark(this.daifudaJokerMark)[0];
+            this.context.drawImage( img,
+                card.fX + 42, card.fY + 5,
+                20,20                  
+            );
+        }
 
         // 台札が決まってるときは、出せるカードの周りに枠をつける
         if (card.request && card.playerNum == this.aTeban){
@@ -856,9 +872,9 @@ class Screen
 
     renderMark( mark )
     {
-        let img = this.assets.returnMark(mark)[0];
+        let img = this.assets.returnMark(mark.markId)[0];
         if (mark.selected) {
-            img = this.assets.returnColorMark(mark)[0];
+            img = this.assets.returnColorMark(mark.markId)[0];
         }
         this.context.save();
         this.context.drawImage( img,

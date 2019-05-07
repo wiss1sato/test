@@ -444,7 +444,10 @@ module.exports = class Game {
         if (fieldCards.length == 1) {
           let daifuda = fieldCards[0].cardId;
           // マークが渡ってきたら（=ジョーカーが来てたら)、台札のマークをそれにする。
-          if(mark) daifuda = mark.slice(0,1);
+          if(mark){
+            daifuda = mark.slice(0,1);
+            io.emit('daifuda-joker-mark' , mark);
+          } 
             // まず、jo以外の全てのカードを出せなくする
             world.setCard.forEach(
               (c) => {
@@ -550,8 +553,8 @@ module.exports = class Game {
                 card.setRequest();
             });
         }
-        io.emit('discard-end');
         if(mark) io.emit('daifuda-joker-end');
+        io.emit('discard-end');
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
