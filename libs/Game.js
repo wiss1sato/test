@@ -326,6 +326,11 @@ module.exports = class Game {
       });
       // 交換時
       socket.on('change-discards', (changes) => {
+        // はじめに、全てのカードを出せるようにする
+        world.setCard.forEach(
+          (card) => {
+              card.setRequest();
+          });        
         changeCards = changes;
         let fX = player.fX + 200;
         world.setCard.forEach(
@@ -362,11 +367,6 @@ module.exports = class Game {
           });
         player.discardChanges(changes);
         phase = 'mainGame';
-        // 全てのカードを出せるようにする
-        world.setCard.forEach(
-          (card) => {
-              card.setRequest();
-          });        
         io.emit('change-end');
       });
       socket.on('daifuda-joker', () => {
