@@ -369,8 +369,11 @@ module.exports = class Game {
           });        
         io.emit('change-end');
       });
+      socket.on('daifuda-joker', () => {
+        io.emit('daifuda-joker-true');
+      });          
       // カード出したとき
-      socket.on('discard', (card) => {
+      socket.on('discard', (card, mark) => {
         if (card.cardId === fukukanCard) {
           fukukan = card.playerId;
         }
@@ -440,6 +443,8 @@ module.exports = class Game {
         // 場のカードが1枚のときに、台札を決め、すべてのプレイヤーが出せるカードを限定する
         if (fieldCards.length == 1) {
           let daifuda = fieldCards[0].cardId;
+          // マークが渡ってきたら（=ジョーカーが来てたら)、台札のマークをそれにする。
+          if(mark) daifuda = mark.slice(0,1);
             // まず、jo以外の全てのカードを出せなくする
             world.setCard.forEach(
               (c) => {
@@ -454,7 +459,7 @@ module.exports = class Game {
                 let requestCards = cards.filter(function (c) {
                   return (c.slice(0,1) === daifuda.slice(0,1));
                 });
-                // 出せるカードがある場合、それを出す
+                // 出せるカードがある場合、それしか出せない
                 if(requestCards.length) {
                   requestCards.forEach((rc) => {
                     world.setCard.forEach(
@@ -546,6 +551,7 @@ module.exports = class Game {
             });
         }
         io.emit('discard-end');
+        if(mark) io.emit('daifuda-joker-end');
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
@@ -565,7 +571,7 @@ module.exports = class Game {
         // 最新状況をクライアントに送信
         io.emit('update', Array.from(world.setPlayer),
           Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, currentReverse, phase,
-           napoleon, fukukan, iNanosecDiff); // 送信
+           napoleon, fukukan, fieldCards.length, iNanosecDiff); // 送信
       }, 1000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
   }
   createCardList() {

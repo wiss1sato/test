@@ -27,6 +27,8 @@ class Screen
         this.frame = new Object();
         this.viewerSocketIdList = [];
         this.phase = null;
+        this.fieldCardLength = null;
+        this.daifudaJoker = false;
 
         // ソケットの初期化
         this.initSocket();
@@ -80,7 +82,7 @@ class Screen
         this.socket.on(
             'update',
             ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase,
-                napoleon, fukukan,  iProcessingTimeNanoSec ) =>
+                napoleon, fukukan, fieldCardLength, iProcessingTimeNanoSec ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
@@ -92,7 +94,8 @@ class Screen
                 this.reverse = reverse;
                 this.phase = phase;
                 this.napoleon = napoleon;
-                this.fukukan = fukukan;                
+                this.fukukan = fukukan;
+                this.fieldCardLength = fieldCardLength;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -139,13 +142,20 @@ class Screen
                 // this.mainGame = true;
             } );     
 
-        // カード捨てたとき
+        // ジョーカーが台札だったときの特別な処理
         this.socket.on(
-            'discard-end',
+            'daifuda-joker-true',
             () =>
             {
-
-            } );                      
+                this.daifudaJoker = true;
+            } );
+        // ジョーカーが台札だったときの特別な処理(終了)
+        this.socket.on(
+            'daifuda-joker-end',
+            () =>
+            {
+                this.daifudaJoker = false;
+            } );               
     }
 
     // アニメーション（無限ループ処理）
@@ -244,7 +254,30 @@ class Screen
                 700, 170,
                 120,120
                 );
-        }        
+        }  
+        
+     if (this.daifudaJoker) {
+            let img = this.assets.spade;
+            this.context.drawImage( img,
+                670, 240,
+                50,70
+                );
+            img = this.assets.heart;
+            this.context.drawImage( img,
+                730, 240,
+                50,70
+                );
+            img = this.assets.diamond;
+            this.context.drawImage( img,
+                790, 240,
+                50,70
+                );
+            img = this.assets.clover;
+            this.context.drawImage( img,
+                850, 240,
+                50,70
+                );
+        }
         this.context.restore();
     }
 
@@ -632,7 +665,48 @@ class Screen
 
         // メインフェーズ時
         if (this.phase === 'mainGame') {
-            // 出せるカードが限定されてるとき
+
+            // 台札ジョーカーのときだけ特別処理
+            if(this.daifudaJoker) {
+                let mark2 = null;
+                // スペード
+                if ((670 <= x && x <= 720) 
+                &&
+                (240 <= y && y <= 310) 
+                ){
+                    mark2 = 'spade'              
+                } else if ((730 <= x && x <= 780) 
+                &&
+                (240 <= y && y <= 310) 
+                ){
+                    mark2 = 'heart'              
+                }
+                else if ((790 <= x && x <= 840) 
+                &&
+                (240 <= y && y <= 310) 
+                ){
+                    mark2 = 'diamond'              
+                }
+                else if ((850 <= x && x <= 900) 
+                &&
+                (240 <= y && y <= 310) 
+                ){
+                    mark2 = 'clover'              
+                }
+                // ここで他の場所クリックされると壊れるので、returnする。 
+                else {
+                    return;
+                }
+                // jo探す
+                let joker = null;
+                this.aCard.forEach(
+                    ( card ) =>
+                    {
+                        if(card.cardId === ('jo')) joker = card;
+                    } );
+                    this.socket.emit( 'discard' , joker,  mark2);
+            }
+            // カードの選択時
             this.aCard.forEach(
                 ( card ) =>
                 {
@@ -643,6 +717,8 @@ class Screen
                         card.playerId === this.socket.id
                         &&
                         card.request
+                        &&
+                        !card.change
                         )
                         {
                             c = card;
@@ -683,7 +759,12 @@ class Screen
                         }
                     } ); 
                 if(card){
-                    this.socket.emit( 'discard' , card);
+                    // joが台札のときだけ超特殊処理
+                    if(card.cardId === 'jo' && this.fieldCardLength == 0) {
+                        this.socket.emit( 'daifuda-joker' );
+                    } else {
+                        this.socket.emit( 'discard' , card);
+                    }
                 }
             }            
          }
@@ -705,7 +786,7 @@ class Screen
             );
 
         // 台札が決まってるときは、出せるカードの周りに枠をつける
-        if (card.request){
+        if (card.request && card.playerNum == this.aTeban){
             img = this.assets.frame;
             this.context.drawImage( img,
                 card.fX, card.fY,

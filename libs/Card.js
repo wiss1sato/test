@@ -13,6 +13,7 @@ module.exports = class Card extends GameObject
         // 親クラスのコンストラクタ呼び出し
         super( SharedSettings.CARD_WIDTH, SharedSettings.CARD_HEIGHT );
         this.cardId = cardId;
+        this.change = false;
     }
 
     cardClicked()
@@ -72,6 +73,7 @@ module.exports = class Card extends GameObject
         this.selected = false;
         this.fX = fX;
         this.fY = fY;
+        this.change = true;
     }   
 
     // 更新
@@ -97,7 +99,8 @@ module.exports = class Card extends GameObject
                 playerNum : this.playerNum,
                 back : this.back,
                 playerId : this.playerId,
-                request : this.request
+                request : this.request,
+                change : this.change
             } );
     }
 };
