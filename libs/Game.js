@@ -547,7 +547,7 @@ module.exports = class Game {
           changeCards = null;
           // 実際の周りもここで決める
           reverse = currentReverse;
-          // 全てのカードを出せるようにする
+          // 全てのカードを出せるようにする 
           world.setCard.forEach(
             (card) => {
                 card.setRequest();
