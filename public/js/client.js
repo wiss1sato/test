@@ -59,7 +59,7 @@ $(document).on('click', '#start-button',
             icNm = 'default.png';
         }
         let extension = icNm.split('.').pop();
-        if (extension !== 'png' && extension !== 'img') {
+        if (extension !== 'png' && extension !== 'jpg') {
             alert('png形式かjpg形式のファイルを選択してください！');
             return;
         }
