@@ -518,6 +518,7 @@ module.exports = class Game {
             if (num == 14) fieldCards[i].cardId = fieldCards[i].cardId.slice(0, 1) + 1;
           }          
           teban = winner;
+          setTimeout(() => {
           // 場からカードを消す。ついでに絵札の枚数をカウントする
           let efuda = 0;
           fieldCards.forEach((fieldCard) => {
@@ -552,7 +553,8 @@ module.exports = class Game {
             (card) => {
                 card.setRequest();
             });
-        }
+          }, 2000);
+          }
         if(mark) io.emit('daifuda-joker-end');
         io.emit('discard-end');
       });

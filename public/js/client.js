@@ -56,9 +56,36 @@ $(document).on('click', '#start-button',
         if ($('#iconName').prop('files')[0] !== undefined) {
             icNm = $('#iconName').prop('files')[0].name;
         } else {
-            icNm = 'default.png'
+            icNm = 'default.png';
         }
-        const objConfig = { strNickName: $( '#nickname' ).val(), iconName: icNm };
-        socket.emit( 'enter-the-game', objConfig );
-        $( '#start-screen' ).hide();
+        let extension = icNm.split('.').pop();
+        if (extension !== 'png' && extension !== 'img') {
+            alert('png形式かjpg形式のファイルを選択してください！');
+            return;
+        }
+
+        let filePath = '../images/' + icNm;
+
+        is_file(filePath,function(res){
+			if(res==true){
+                const objConfig = { strNickName: $( '#nickname' ).val(), iconName: icNm };
+                socket.emit( 'enter-the-game', objConfig );
+                $( '#start-screen' ).hide();        
+			}else{
+                alert('選択されたファイルはアップロードされていません！');
+                return;
+			}
+		});
     } );
+
+	function is_file(fp,callback){
+		$.ajax({
+			url: fp,
+			cache: false
+		}).done(function(data) {
+			callback(true);
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			callback(false);
+		});
+	}

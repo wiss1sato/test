@@ -308,7 +308,7 @@ class Screen
             if (this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
                 if (this.socket.id !== player.strSocketID && this.aCard.length > 0 && !player.viewerMode) {
                     ctx.drawImage( this.assets.imageField,
-                        player.fX - 99, player.fY + 165,
+                        player.fX - 70, player.fY + 180,
                         340,105
                         );
                 }

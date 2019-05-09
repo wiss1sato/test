@@ -38,7 +38,7 @@ app.post('/file_upload', function (req, res) {
                 };
             }
             console.log(response);
-            res.json({'result': 'success!'});
+            res.json({'result': 'ファイルアップロードに成功しました！ブラウザバックして、ゲーム開始してください。'});
         });
     });
 });
