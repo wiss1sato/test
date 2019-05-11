@@ -168,7 +168,7 @@ module.exports = class World
             this.setNumber.forEach(
                 ( n ) =>
                 {
-                    if (number.num !== n.num) this.setNumber.delete(n);
+                    if (number !== n.num) this.setNumber.delete(n);
                 } );	
         }
     }    
@@ -192,7 +192,7 @@ module.exports = class World
             this.setMark.forEach(
                 ( m ) =>
                 {
-                    if (mark.markId !== m.markId) this.setMark.delete(m);
+                    if (mark !== m.markId) this.setMark.delete(m);
                 } );	
         }
     }    

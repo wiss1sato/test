@@ -264,7 +264,7 @@ class Assets
    returnNumber(number) {
     var ret = this.numberSet.filter(
         function(n){
-             return (n.src.indexOf(number.num + '.png') > -1);
+             return (n.src.indexOf(number + '.png') > -1);
          }
         );
     return ret;
@@ -274,7 +274,7 @@ class Assets
    returnColorNumber(number) {
     var ret = this.colorNumberSet.filter(
         function(c){
-             return (c.src.indexOf(number.num + 'c.png') > -1);
+             return (c.src.indexOf(number + 'c.png') > -1);
          }
         );
     return ret;

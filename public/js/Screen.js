@@ -30,6 +30,8 @@ class Screen
         this.fieldCardLength = null;
         this.daifudaJoker = false;
         this.daifudaJokerMark = null;
+        this.declarationNumber = null;
+        this.declarationMark = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -100,7 +102,8 @@ class Screen
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
-        // カードを配る
+        // カードを配る。
+        // もろもろを初期化する
         this.socket.on(
             'start-the-game',
             () =>
@@ -116,8 +119,9 @@ class Screen
                 this.phase = null;
                 this.fieldCardLength = null;
                 this.daifudaJoker = false;
-                this.daifudaJokerMark = null;                
-                // もろもろを初期化する
+                this.daifudaJokerMark = null;
+                this.declarationNumber = null;
+                this.declarationMark = null;
                 this.socket.emit( 'deal-card' );
             } );
 
@@ -128,6 +132,15 @@ class Screen
             {
                 this.aTeban = 1;
             } );
+
+        // 宣言フェーズ中、他プレイヤーが選択したマークを受け取る
+        this.socket.on(
+            'send-mark-num',
+            (decNum, decMark) =>
+            {
+                this.declarationNumber = decNum;
+                this.declarationMark = decMark;
+            } );            
 
         // 宣言フェーズが終わったら、副官札指定フェーズ
         this.socket.on(
@@ -306,45 +319,6 @@ class Screen
             this.context.fillText( '観戦者モード', 1150, 750);
         }
 
-
-        this.context.restore();
-    }
-
-    //　プレイヤー描写
-    renderPlayer( player )
-    {
-        var img = this.assets.returnIcon(player.strSocketID);
-        if (!img) return;
-        var ctx = this.context;
-        if (!player.viewerMode){
-            ctx.save();
-            ctx.drawImage( img,
-                player.fX, player.fY,
-                SharedSettings.PLAYER_WIDTH,
-                SharedSettings.PLAYER_HEIGHT                  
-                );	
-            }
-
-        // 手番の場合は、手番マークを表示
-        if (this.aTeban === player.playerNum) {
-            ctx.drawImage( this.assets.teban,
-                player.fX + 180, player.fY + 10,
-                60,40
-                );
-        }
-
-        // 宣言時に手番の場合、自分のエリアにボタン配置
-        if (this.phase === 'declaration' && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
-            this.context.drawImage( this.assets.pass,
-                700, 350,
-                60,40
-                );              
-            this.context.drawImage( this.assets.kettei,
-                770, 350,
-                60,40
-                );
-        }
-
         // 副官指定フェーズ中は、ナポレオンプレイヤーだけ副官指定札を表示する
         if (this.napoleon === this.socket.id && this.phase === 'designation' && this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
             let img = this.assets.returnCard('s1')[0];
@@ -402,7 +376,43 @@ class Screen
             );
         }
 
+        this.context.restore();
+    }
 
+    //　プレイヤー描写
+    renderPlayer( player )
+    {
+        var img = this.assets.returnIcon(player.strSocketID);
+        if (!img) return;
+        var ctx = this.context;
+        if (!player.viewerMode){
+            ctx.save();
+            ctx.drawImage( img,
+                player.fX, player.fY,
+                SharedSettings.PLAYER_WIDTH,
+                SharedSettings.PLAYER_HEIGHT                  
+                );	
+            }
+
+        // 手番の場合は、手番マークを表示
+        if (this.aTeban === player.playerNum) {
+            ctx.drawImage( this.assets.teban,
+                player.fX + 180, player.fY + 10,
+                60,40
+                );
+        }
+
+        // 宣言時に手番の場合、自分のエリアにボタン配置
+        if (this.phase === 'declaration' && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
+            this.context.drawImage( this.assets.pass,
+                700, 350,
+                60,40
+                );              
+            this.context.drawImage( this.assets.kettei,
+                770, 350,
+                60,40
+                );
+        }
         // 宣言用のOK/パス
 
         // カード用のOK
@@ -423,12 +433,25 @@ class Screen
         ctx.restore();
 
         // ナポの表示
-        if (player.strSocketID === this.napoleon) {
+        if (player.strSocketID === this.napoleon && this.phase !== 'declaration') {
             ctx.drawImage( this.assets.napoleon,
                 player.fX - 100, player.fY,
                 90, 55
                 );	// 描画先領域の大きさ
         }
+        if(this.phase === 'declaration' && player.strSocketID === this.napoleon) {
+            let mark = this.assets.returnMark(this.declarationMark)[0];
+            let num = this.assets.returnNumber(this.declarationNumber)[0];
+            ctx.drawImage( mark,
+                player.fX - 100, player.fY,
+                45, 55
+                );	// 描画先領域の大きさ
+            ctx.drawImage( num,
+                player.fX - 55, player.fY,
+                45, 55
+                );	// 描画先領域の大きさ                            
+        }
+        
 
         // 副官の表示
         if (player.strSocketID === this.fukukan) {
@@ -511,7 +534,7 @@ class Screen
                         (mark.fY <= y && y <= mark.fY + SharedSettings.MARK_HEIGHT) 
                         ){
                             m = mark;
-                            // サーバにクリックされたことを伝える。ついでに、どのプレイヤーがクリックしたかが分かるようにソケットIDを入れる
+                            // サーバにクリックされたことを伝える
                             this.socket.emit( 'mark-clicked' , mark );
                             isMarkClicked = true;
                     }
@@ -533,19 +556,8 @@ class Screen
             &&
             (350 <= y && y <= 390) 
             ){
-                // 現在選択されているナンバーとマークを取得する
-                this.aNumber.forEach(
-                    ( number ) =>
-                    {
-                        if (number.selected)  n = number;
-                    } );
-                this.aMark.forEach(
-                    ( mark ) =>
-                    {
-                        if (mark.selected)  m = mark;
-                    } );
                 // サーバにクリックされたことを伝える
-                this.socket.emit( 'pass-clicked' , m , n );                
+                this.socket.emit( 'pass-clicked');                
             }
             // 決定を押されたとき
             if ((770 <= x && x <= 830) 
@@ -564,7 +576,27 @@ class Screen
                         if (mark.selected)  m = mark;
                     } );
                 if (n && m) {
-                    this.socket.emit( 'kettei-clicked', this.socket.id);
+                    if( n.num > this.declarationNumber) {
+                        this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
+                    }
+                    // 数値が一緒の場合,現在宣言中のマークと照合する
+                    if( n.num == this.declarationNumber) {
+                        // 選択されているのがクローバーの場合、ダイヤ、ハート、スペードのみ上書き可能・・・というようにする
+                        if (this.declarationMark === 'clover') {
+                            if (m.markId === 'diamond' || m.markId === 'heart' || m.markId === 'spade') {
+                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
+                            } 
+                        } else if (this.declarationMark === 'diamond') {
+                            if (m.markId === 'heart' || m.markId === 'spade') {
+                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
+                            } 
+                        } else if (this.declarationMark === 'heart') {
+                            if (m.markId === 'spade') {
+                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
+                            } 
+                        }
+                    }
+                        // スペードは上書き不可だからこのままでいいや
                 }
             }
         }
@@ -887,9 +919,9 @@ class Screen
         let img = null;
         // 宣言フェーズ中のみナンバーを全て表示
         if (this.phase === 'declaration') {
-            img = this.assets.returnNumber(number)[0];
+            img = this.assets.returnNumber(number.num)[0];
             if (number.selected) {
-                img = this.assets.returnColorNumber(number)[0];
+                img = this.assets.returnColorNumber(number.num)[0];
             }
             this.context.save();
             this.context.drawImage( img,
@@ -900,7 +932,7 @@ class Screen
             this.context.restore();
         // それ以外は大きく表示    
         } else {
-            img = this.assets.returnNumber(number)[0];
+            img = this.assets.returnNumber(number.num)[0];
             this.context.save();
             this.context.drawImage( img,
                 number.fX, number.fY,

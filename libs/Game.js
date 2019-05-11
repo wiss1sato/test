@@ -29,6 +29,8 @@ module.exports = class Game {
     let fukukan = null;
     let changeCards = null;
     let phase = null;
+    let decMark = null;
+    let decNum = null;
 
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
@@ -146,9 +148,10 @@ module.exports = class Game {
           phase = null;
           fieldCards = [];
           leftCards = null;
-          turn = 0;                
+          turn = 0;
+          napoleon = null;
           // データはもう一回作る
-          cardList = this.createCardList()
+          cardList = this.createCardList();
         }
       });
       // カードがクリックされた時の処理（ちょっと上にあげる）
@@ -252,23 +255,43 @@ module.exports = class Game {
         }
       });
       // 宣言中に決定が押されたとき
-      socket.on('kettei-clicked', (player) => {
+      socket.on('kettei-clicked', (player, num, mark) => {
+        decNum = num.num;
+        decMark = mark.markId;
         if (!player) {
           return;
         }
+        world.setMark.forEach(
+          (m) => {
+            if (m.markId === decMark) {
+              m.markUnclicked();
+            }
+          });        
+          world.setNumber.forEach(
+            (n) => {
+              if (n.num === decNum) {
+                n.numberUnclicked();
+              }
+            });
         passCnt = 0;
         teban += 1;
         if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
         napoleon = player;
+        io.emit('send-mark-num' , decNum , decMark);
       });      
       // 宣言中にパスが押されたとき
-      socket.on('pass-clicked', (mark, number) => {
+      socket.on('pass-clicked', () => {
         passCnt += 1;
         teban += 1;
-        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
-        // マークとナンバーが設定されてなかったらリターン
-        if (!mark || !number) return;
-        
+        world.setMark.forEach(
+          (m) => {
+              m.markUnclicked();
+          });        
+          world.setNumber.forEach(
+            (n) => {
+                n.numberUnclicked();
+            });        
+        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;        
         if(!napoleon && passCnt === GameSettings.PLAYER_NUM) {
           teban = 1;
           passCnt = 0;
@@ -277,28 +300,28 @@ module.exports = class Game {
         // ナポレオンが決まってて自分以外の人がパスしたら、宣言フェーズ終了
         if (napoleon && passCnt === GameSettings.PLAYER_NUM - 1) {
           // 自分以外のマークを消す
-          world.destroyMark2(mark);
+          world.destroyMark2(decMark);
           // 自分を配置する
           world.setMark.forEach(
             (m) => {
-              if (m.markId === mark.markId) {
+              if (m.markId === decMark) {
                 m.markUnclicked();
                m.setPosition(650, 0);
               }
             });
-          kirifuda = mark.markId;
+          kirifuda = decMark;
           // 自分以外のナンバーを消す
-          world.destroyNumber2(number);
+          world.destroyNumber2(decNum);
           // 自分を配置する
           world.setNumber.forEach(
             (n) => {
-              if (n.num === number.num) {
+              if (n.num === decNum) {
                 n.setPosition(740, 0);
               }
             });
           console.log('ナポレオン:' + napoleon);
           phase = 'designation';
-          io.emit('declaration-end', mark, number);
+          io.emit('declaration-end', decMark, decNum);
         }
       });
 
@@ -528,44 +551,50 @@ module.exports = class Game {
           }          
           teban = winner;
           setTimeout(() => {
-          // 場からカードを消す。ついでに絵札の枚数をカウントする
-          let efuda = 0;
-          fieldCards.forEach((fieldCard) => {
-            let num = fieldCard.cardId.replace(/[^0-9]/g, '');
-            if (num >= 10 || num == 1) efuda += 1;
-            world.destroyCard2(fieldCard)
-          });
-          if(changeCards) {
-              changeCards.forEach(
-              (changeCard) => {
-                let num = changeCard.cardId.replace(/[^0-9]/g, '');
-                if (num >= 10 || num == 1) efuda += 1;                  
-                world.destroyCard2(changeCard)}
-              );
-          }
-          console.log('winner:' + winner + ', 絵札枚数:' + efuda)          
-          // 勝者に絵札を渡す
-          world.setPlayer.forEach(
-            (player) => {
-              if (player.playerNum === winner) {
-                player.increaseEfuda(efuda);
-              }
-            });          
-          // 最初に出したカードがあったら、それも消す
-          // 初期化する
-          fieldCards = [];
-          changeCards = null;
-          // 実際の周りもここで決める
-          reverse = currentReverse;
-          // 全てのカードを出せるようにする 
-          world.setCard.forEach(
-            (card) => {
-                card.setRequest();
+            // 場からカードを消す。ついでに絵札の枚数をカウントする
+            let efuda = 0;
+            fieldCards.forEach((fieldCard) => {
+              let num = fieldCard.cardId.replace(/[^0-9]/g, '');
+              if (num >= 10 || num == 1) efuda += 1;
+              world.destroyCard2(fieldCard)
             });
+            if(changeCards) {
+                changeCards.forEach(
+                (changeCard) => {
+                  let num = changeCard.cardId.replace(/[^0-9]/g, '');
+                  if (num >= 10 || num == 1) efuda += 1;                  
+                  world.destroyCard2(changeCard)}
+                );
+            }
+            console.log('winner:' + winner + ', 絵札枚数:' + efuda)          
+            // 勝者に絵札を渡す
+            world.setPlayer.forEach(
+              (player) => {
+                if (player.playerNum === winner) {
+                  player.increaseEfuda(efuda);
+                }
+              });          
+            // 最初に出したカードがあったら、それも消す
+            // 初期化する
+            fieldCards = [];
+            changeCards = null;
+            // 実際の周りもここで決める
+            reverse = currentReverse;
+            // 全てのカードを出せるようにする 
+            world.setCard.forEach(
+              (card) => {
+                  card.setRequest();
+              });
+
+              // 最後のターンの場合、ゲームエンドを知らせて、色々初期化する
+              if(turn == 10) {
+
+                io.emit('game-end');
+              }
+
           }, 2000);
           }
         if(mark) io.emit('daifuda-joker-end');
-        io.emit('discard-end');
       });
     });
     // 周期的処理（1秒間にFRAMERATE回の場合、delayは、1000[ms]/FRAMERATE[回]）
