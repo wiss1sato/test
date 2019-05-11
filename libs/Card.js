@@ -35,6 +35,11 @@ module.exports = class Card extends GameObject
         }
     }
 
+    setPlayerIdNull()
+    {
+        this.playerId = null;
+    }
+
     // カードをプレイヤーに配置
     setPosition(fX, fY, player)
     {

@@ -227,7 +227,7 @@ module.exports = class Game {
               (card) => {
                 if (c.cardId === card) {
                   c.setPosition(fX, fY, player);
-                  fX = fX + 20;
+                  fX = fX + 25;
                 }
               });
           });
@@ -268,8 +268,14 @@ module.exports = class Game {
         if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
         // マークとナンバーが設定されてなかったらリターン
         if (!mark || !number) return;
-        // 自分以外の人がパスしたら、宣言フェーズ終了
-        if (passCnt === GameSettings.PLAYER_NUM - 1) {
+        
+        if(!napoleon && passCnt === GameSettings.PLAYER_NUM) {
+          teban = 1;
+          passCnt = 0;
+          return;
+        }
+        // ナポレオンが決まってて自分以外の人がパスしたら、宣言フェーズ終了
+        if (napoleon && passCnt === GameSettings.PLAYER_NUM - 1) {
           // 自分以外のマークを消す
           world.destroyMark2(mark);
           // 自分を配置する
@@ -317,7 +323,7 @@ module.exports = class Game {
               (card) => {
                 if (c.cardId === card) {
                   c.setPosition(fX, fY, player);
-                  fX = fX + 20;
+                  fX = fX + 22;
                 }
               });
           });
@@ -361,7 +367,7 @@ module.exports = class Game {
               (card) => {
                 if (c.cardId === card) {
                   c.setPosition(fX, fY, player);
-                  fX = fX + 20;
+                  fX = fX + 25;
                 }
               });
           });
@@ -409,6 +415,7 @@ module.exports = class Game {
             if (c.cardId === card.cardId) {
               c.cardUnclicked();
               c.setPosition(fX, fY, player);
+              c.setPlayerIdNull();
             }
           });
         // 持っているカードから,捨てた分を減らす
@@ -426,7 +433,7 @@ module.exports = class Game {
               (card) => {
                 if (c.cardId === card) {
                   c.setPosition(fX, fY, player);
-                  fX = fX + 20;
+                  fX = fX + 25;
                 }
               });
           });
@@ -458,6 +465,7 @@ module.exports = class Game {
             // 台札のスートを見る
             world.setPlayer.forEach(
               (player) => {
+                if (player.playerNum > GameSettings.PLAYER_NUM) return;
                 let cards = player.returnCards();
                 let requestCards = cards.filter(function (c) {
                   return (c.slice(0,1) === daifuda.slice(0,1));
@@ -489,6 +497,7 @@ module.exports = class Game {
               // まず、joを持ってるプレーヤーを探す
               world.setPlayer.forEach(
                 (player) => {
+                  if (player.playerNum > GameSettings.PLAYER_NUM) return;
                   let retCards = player.returnCards();
                   let joFlg = retCards.indexOf("jo") >= 0;
                   // joを持ってるプレーヤーの場合

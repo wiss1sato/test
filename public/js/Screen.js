@@ -105,6 +105,19 @@ class Screen
             'start-the-game',
             () =>
             {
+                this.kirihuda = null;
+                this.maisuu = null;
+                this.napoleon = null;
+                this.fukukan = null;
+                this.reverse = false;
+                this.designationCard = null;
+                this.frame = new Object();
+                this.viewerSocketIdList = [];
+                this.phase = null;
+                this.fieldCardLength = null;
+                this.daifudaJoker = false;
+                this.daifudaJokerMark = null;                
+                // もろもろを初期化する
                 this.socket.emit( 'deal-card' );
             } );
 
@@ -286,6 +299,14 @@ class Screen
                 50,70
                 );
         }
+
+        // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
+        // 観戦者は隠さない
+        if (this.viewerSocketIdList.indexOf(this.socket.id) == 0) {
+            this.context.fillText( '観戦者モード', 1150, 750);
+        }
+
+
         this.context.restore();
     }
 
@@ -303,16 +324,7 @@ class Screen
                 SharedSettings.PLAYER_HEIGHT                  
                 );	
             }
-             // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
-             // 観戦者は隠さない
-            if (this.viewerSocketIdList.indexOf(this.socket.id) == - 1) {
-                if (this.socket.id !== player.strSocketID && this.aCard.length > 0 && !player.viewerMode) {
-                    ctx.drawImage( this.assets.imageField,
-                        player.fX - 70, player.fY + 180,
-                        340,105
-                        );
-                }
-            }
+
         // 手番の場合は、手番マークを表示
         if (this.aTeban === player.playerNum) {
             ctx.drawImage( this.assets.teban,
@@ -630,7 +642,7 @@ class Screen
             ( card ) =>
             {
                 console.log(card);
-                if (card.fX <= x && x <= card.fX + 19
+                if (card.fX <= x && x <= card.fX + 21
                     &&
                     card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT 
                     &&
@@ -639,6 +651,26 @@ class Screen
                         c = card;
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'card-clicked' , card );
+                } else if (card.fX <= x && x <= card.fX + SharedSettings.CARD_WIDTH
+                    &&
+                    card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT
+                    &&
+                    card.playerId === this.socket.id
+                    )
+                    {
+                        let lastCard = null;
+                        for(let i = this.aCard.length - 1; i >= 0; i--) {
+                            if (this.aCard[i].playerId === this.socket.id){
+                                lastCard = this.aCard[i];
+                                break;
+                            } 
+                        }
+                    // 全部見えてるカードのときは、条件によっては全部の領域クリックを許す
+                    if (card === lastCard) {
+                        c = card;
+                        // サーバにクリックされたことを伝える
+                        this.socket.emit( 'card-clicked' , card );
+                    }
                 }
             } );    
             
@@ -718,7 +750,7 @@ class Screen
             this.aCard.forEach(
                 ( card ) =>
                 {
-                    if (card.fX <= x && x <= card.fX + 19
+                    if (card.fX <= x && x <= card.fX + 21
                         &&
                         card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT
                         &&
@@ -745,7 +777,6 @@ class Screen
                         !card.change
                         )
                         {
-                            let pNum = 0;
                             let lastCard = null;
                             for(let i = this.aCard.length - 1; i >= 0; i--) {
                                 if (this.aCard[i].playerId === this.socket.id){
@@ -809,17 +840,28 @@ class Screen
     
     renderCard( card )
     {
+        
+        if((card.playerId) && card.playerId !== this.socket.id && this.viewerSocketIdList.indexOf(this.socket.id) == - 1) return;
+
         let img = this.assets.returnCard(card.cardId)[0];
         if (card.back) {
             img = this.assets.back;
         }
         this.context.save();
-        this.context.drawImage( img,
-            card.fX, card.fY,
-            SharedSettings.CARD_WIDTH,
-            SharedSettings.CARD_HEIGHT                  
-            );
-        // 台札ジョーカーのときだけ、カードの上にマークを描画
+
+        if(card.playerId) {
+            this.context.drawImage( img,
+                card.fX, card.fY,
+                SharedSettings.CARD_WIDTH,
+                SharedSettings.CARD_HEIGHT                  
+                );
+        } else {
+            this.context.drawImage( img,
+                card.fX, card.fY,
+                SharedSettings.CARD_WIDTH + 15,
+                SharedSettings.CARD_HEIGHT + 23              
+                );
+        }        // 台札ジョーカーのときだけ、カードの上にマークを描画
         if(card.cardId === 'jo' && this.daifudaJokerMark) {
             img = this.assets.returnMark(this.daifudaJokerMark)[0];
             this.context.drawImage( img,
