@@ -132,7 +132,7 @@ module.exports = class Game {
         world.destroyPlayer(player);
         player = null; // 自プレイヤーの解放
         // ゲームが終わったら、いろいろ初期化 
-        if (playerNum !== 5) {
+        if (playerNum < 5) {
           // カードを全部消す
           world.destroyCard();
           // カードを全部消す

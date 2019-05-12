@@ -18,7 +18,7 @@ class Screen
         this.aMark = null;
         this.aTeban = null;
         this.aPassCnt = null;
-        this.kirihuda = null;
+        this.kirifuda = null;
         this.maisuu = null;
         this.napoleon = null;
         this.fukukan = null;
@@ -108,7 +108,7 @@ class Screen
             'start-the-game',
             () =>
             {
-                this.kirihuda = null;
+                this.kirifuda = null;
                 this.maisuu = null;
                 this.napoleon = null;
                 this.fukukan = null;
@@ -147,9 +147,9 @@ class Screen
             'declaration-end',
             ( mark, number, napoleon ) =>
             {
-                console.log('宣言マーク:' + mark.markId + ',宣言枚数:' + number.num, ',ナポレオン:' + napoleon);
-                this.kirihuda = mark.markId;
-                this.maisuu = number.num;
+                console.log('宣言マーク:' + mark + ',宣言枚数:' + number, ',ナポレオン:' + napoleon);
+                this.kirifuda = mark;
+                this.maisuu = number;
                 this.napoleon = napoleon;
             } );
 
@@ -315,7 +315,7 @@ class Screen
 
         // カードがある場合は、ついでに,他プレイヤーのカードも隠す。
         // 観戦者は隠さない
-        if (this.viewerSocketIdList.indexOf(this.socket.id) == 0) {
+        if (this.viewerSocketIdList.indexOf(this.socket.id) >= 0) {
             this.context.fillText( '観戦者モード', 1150, 750);
         }
 
@@ -332,7 +332,7 @@ class Screen
                 75,105
                 );                
             // 切り札が黒の場合
-            if (this.kirihuda === 'spade' || this.kirihuda === 'clover') {
+            if (this.kirifuda === 'spade' || this.kirifuda === 'clover') {
                 img = this.assets.returnCard('s11')[0];
                 this.context.drawImage( img,
                     751, 240,
@@ -611,7 +611,7 @@ class Screen
             ){
                 this.designationCard = 's1';
                 this.frame.fX = 600;
-                this.socket.emit( 'designation-card-clicked', this.designationCard);                  
+                this.socket.emit( 'designation-card-clicked', this.designationCard);
             }
             // jo
             if ((676 <= x && x <= 750) 
@@ -627,7 +627,7 @@ class Screen
             &&
             (240 <= y && y <= 355) 
             ){
-                if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
+                if (this.kirifuda === 'spade' || this.kirifuda === 'clover' ){
                     this.designationCard = 's11';
                 } else {
                     this.designationCard = 'h11';
@@ -640,7 +640,7 @@ class Screen
             &&
             (240 <= y && y <= 355) 
             ){
-                if (this.kirihuda === 'spade' || this.kirihuda === 'clover' ){
+                if (this.kirifuda === 'spade' || this.kirifuda === 'clover' ){
                     this.designationCard = 'c11';
                 } else {
                     this.designationCard = 'd11';
