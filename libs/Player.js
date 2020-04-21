@@ -99,6 +99,12 @@ module.exports = class Player extends GameObject
        this.efuda = this.efuda+ efuda;
     } 
 
+    
+    // 絵札を0にする(初期化)
+    resetEfuda()
+    {
+       this.efuda = 0;
+    } 
 
     // カード捨てる
     discardChanges(changes)
