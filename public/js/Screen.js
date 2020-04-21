@@ -478,7 +478,6 @@ class Screen
     //　クリックされた時の処理
     
     onClick(e) {
-        console.log("click");
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
@@ -673,7 +672,6 @@ class Screen
         this.aCard.forEach(
             ( card ) =>
             {
-                console.log(card);
                 if (card.fX <= x && x <= card.fX + 21
                     &&
                     card.fY <= y && y <= card.fY + SharedSettings.CARD_HEIGHT 
@@ -724,7 +722,6 @@ class Screen
                 ( card ) =>
                 {
                     if(card.selected) {
-                        console.log(card);
                         selectedCnt += 1;
                         discards.push (card);
                     }
@@ -866,8 +863,6 @@ class Screen
                 }
             }            
          }
-
-        console.log("x:", x, "y:", y);
     }
     
     renderCard( card )
