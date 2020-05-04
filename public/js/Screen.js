@@ -476,6 +476,10 @@ class Screen
     }
 
     //　クリックされた時の処理
+
+    onTouch(e) {
+        onClick(e);   
+    }
     
     onClick(e) {
         var x = e.clientX - canvas.offsetLeft;
