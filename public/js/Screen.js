@@ -45,6 +45,7 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener("touchstart", this.onClick.bind(this), false);
 
     }
 
@@ -477,10 +478,6 @@ class Screen
 
     //　クリックされた時の処理
 
-    onTouch(e) {
-        onClick(e);   
-    }
-    
     onClick(e) {
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
