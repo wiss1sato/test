@@ -45,7 +45,6 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        canvas.addEventListener("touchstart", this.onClick.bind(this), false);
 
     }
 
