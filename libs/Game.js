@@ -31,6 +31,7 @@ module.exports = class Game {
     let phase = null;
     let decMark = null;
     let decNum = null;
+    let isPlayng = false;
 
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
@@ -48,19 +49,37 @@ module.exports = class Game {
         // 何故かheroku上だとenter-the-gameしていないのにここが動いてしまいobjConfigがundefinedって怒られるので条件文を入れる
         if (objConfig !== undefined) {
           player = world.createPlayer(socket.id, objConfig.strNickName, objConfig.iconName);
-          if (world.setPlayer.size >= 6) player.giveViewerMode();
+          if (world.setPlayer.size >= 6){
+            player.giveViewerMode();
+          } 
+          let activePlayerCnt = 0;
+          world.setPlayer.forEach(
+            (player) => {
+              if (!player.viewerMode) {
+                activePlayerCnt++;
+              }
+            });
+          // 誰かがゲーム離脱後、観戦中の人がいてもスムーズに再試合が出来るように、後から入ってきた人にplayerNumを割り当てる
+          if (activePlayerCnt != 5 && world.setPlayer.size >= 6) {
+            player.viewerMode = false;
+          }
           io.emit('enter-the-game', Array.from(world.setPlayer));
           playerNum = 0;
           world.setPlayer.forEach(
             // プレイヤー採番(一旦適当)
             (player) => {
-              playerNum = playerNum + 1;
-              // 採番ごとに配置する
-              player.setPlayer(playerNum);
+              if (!player.viewerMode) {
+                playerNum = playerNum + 1;
+                player.setPlayer(playerNum);
+                // 採番ごとに配置する
+              } else {
+                player.setPlayer(99);
+              }
             });
-          if (playerNum === GameSettings.PLAYER_NUM) {
+          if (playerNum === GameSettings.PLAYER_NUM && !isPlayng) {
             // ゲーム開始を各プレイヤーに送信
             // カード生成
+            isPlayng = true;
             for (let i = 1; i <= 4; i++) {
               for (let j = 2; j <= 13; j++) {
                 if (i === 1) {
@@ -130,13 +149,20 @@ module.exports = class Game {
         }
         playerNum = playerNum - 1;
         world.destroyPlayer(player);
+        let activePlayerCnt = 0;
+        world.setPlayer.forEach(
+          (player) => {
+            if (!player.viewerMode) {
+              activePlayerCnt++;
+            }
+          });
         player = null; // 自プレイヤーの解放
         // ゲームが終わったら、いろいろ初期化 
-        if (playerNum < 5) {
+        if (activePlayerCnt < 5) {
           world.setPlayer.forEach(
             (player) => {
               player.resetEfuda();
-            });    
+            });
           // カードを全部消す
           world.destroyCard();
           // カードを全部消す
@@ -154,6 +180,7 @@ module.exports = class Game {
           leftCards = null;
           turn = 0;
           napoleon = null;
+          isPlayng = false;          
           // データはもう一回作る
           cardList = this.createCardList();
         }
@@ -220,6 +247,10 @@ module.exports = class Game {
       // カードを配る処理
       socket.on('deal-card', () => {
         if (!player) {
+          return;
+        }
+        // 観戦者モードには配らない
+        if (player.viewerMode) {
           return;
         }
         // プレイヤーにカードを配る

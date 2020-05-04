@@ -115,7 +115,6 @@ class Screen
                 this.reverse = false;
                 this.designationCard = null;
                 this.frame = new Object();
-                this.viewerSocketIdList = [];
                 this.phase = null;
                 this.fieldCardLength = null;
                 this.daifudaJoker = false;
