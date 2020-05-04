@@ -54,11 +54,9 @@ module.exports = class Game {
           world.setPlayer.forEach(
             // プレイヤー採番(一旦適当)
             (player) => {
-              if (playerNum < GameSettings.PLAYER_NUM) {
-                playerNum = playerNum + 1;
-                // 採番ごとに配置する
-                player.setPlayer(playerNum);
-              }
+              playerNum = playerNum + 1;
+              // 採番ごとに配置する
+              player.setPlayer(playerNum);
             });
           if (playerNum === GameSettings.PLAYER_NUM) {
             // ゲーム開始を各プレイヤーに送信
