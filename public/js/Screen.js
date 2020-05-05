@@ -469,7 +469,7 @@ class Screen
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         if (this.isSmartPhone()) {
-            x = x + 450;
+            this.socket.emit( 'smartPhone-touched' , x, y );
         }
         let c = null;
         let n = null;
