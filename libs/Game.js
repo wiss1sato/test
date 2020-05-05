@@ -229,11 +229,6 @@ module.exports = class Game {
           });
       });
 
-      socket.on('smartPhone-touched', (x, y) => {
-        console.log(`x:${x}`)
-        console.log(`y:${y}`)
-      });
-
       // マークがクリックされた時の処理(セレクト済みにする)
       socket.on('designation-card-clicked', (designationCard) => {
         fukukanCard = designationCard;
