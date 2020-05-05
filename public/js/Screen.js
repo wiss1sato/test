@@ -468,6 +468,9 @@ class Screen
     onClick(e) {
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
+        if (this.isSmartPhone()) {
+            x = x - 300;
+        }
         let c = null;
         let n = null;
         let m = null;
@@ -926,6 +929,14 @@ class Screen
         }
 
     }
+
+    isSmartPhone() {  
+        if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {  
+          return true;  
+        } else {  
+          return false;  
+        }  
+      }  
 
     renderMark( mark )
     {
