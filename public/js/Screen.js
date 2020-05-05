@@ -253,21 +253,10 @@ class Screen
     renderField()
     {
         this.context.save();
-        let iCountX = parseInt( SharedSettings.FIELD_WIDTH / RenderingSettings.FIELDTILE_WIDTH );
-        let iCountY = parseInt( SharedSettings.FIELD_HEIGHT / RenderingSettings.FIELDTILE_HEIGHT );
-        for( let iIndexY = 0; iIndexY < iCountY; iIndexY++ )
-        {
-            for( let iIndexX = 0; iIndexX < iCountX; iIndexX++ )
-            {
-                this.context.drawImage( this.assets.imageField,
-                    this.assets.rectFieldInFieldImage.sx, this.assets.rectFieldInFieldImage.sy,	// 描画元画像の右上座標
-                    this.assets.rectFieldInFieldImage.sw, this.assets.rectFieldInFieldImage.sh,	// 描画元画像の大きさ
-                    iIndexX * RenderingSettings.FIELDTILE_WIDTH,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-                    iIndexY * RenderingSettings.FIELDTILE_HEIGHT,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
-                    RenderingSettings.FIELDTILE_WIDTH,	// 描画先領域の大きさ
-                    RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
-            }
-        }
+        this.context.drawImage( this.assets.imageField,
+        this.assets.rectFieldInFieldImage.sx, this.assets.rectFieldInFieldImage.sy,	// 描画元画像の右上座標
+        this.assets.rectFieldInFieldImage.sw, this.assets.rectFieldInFieldImage.sh,	// 描画元画像の大きさ
+        );	// 描画先領域の大きさ
         // 交換フェーズ、メインフェーズ時には副官指名札も表示する
         if (this.phase === 'mainGame' || this.phase === 'change') {
             let img = this.assets.returnCard(this.designationCard)[0];

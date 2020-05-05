@@ -7,7 +7,7 @@ class Assets
         // 背景画像
         this.imageField = new Image();
         this.imageField.src = '../images/grass01.png'
-        this.rectFieldInFieldImage = { sx: 0, sy: 0, sw: 512, sh: 512 };
+        this.rectFieldInFieldImage = { sx: 0, sy: 0, sw: 1500, sh: 1500 };
 
         this.teban = new Image();
         this.teban.src = '../images/teban.png'
