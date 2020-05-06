@@ -61,11 +61,11 @@ class Screen
         // 手番ではないプレイヤーのクリックは受け付けない
         if (tebanPlayerFlg){
             if (this.reverse) {
-                this.teban += 1;
-                if (this.teban == 6) this.teban = 1;
+                this.aTeban += 1;
+                if (this.aTeban == 6) this.aTeban = 1;
               } else {
-                this.teban -= 1;
-                if (this.teban == 0) this.teban = 5;
+                this.aTeban -= 1;
+                if (this.aTeban == 0) this.aTeban = 5;
               }    
         }
     }
