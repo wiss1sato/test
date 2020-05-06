@@ -32,7 +32,6 @@ class Screen
         this.daifudaJokerMark = null;
         this.declarationNumber = null;
         this.declarationMark = null;
-        this.cancelFlag = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -465,13 +464,6 @@ class Screen
     //　クリックされた時の処理
 
     onClick(e) {
-        if( this.cancelFlag == 1 ){
-            return;
-        }
-        this.cancelFlag = 1;
-        setTimeout(function(){
-            this.cancelFlag = 0;
-        },1000);     
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
