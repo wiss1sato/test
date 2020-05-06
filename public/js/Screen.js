@@ -32,6 +32,7 @@ class Screen
         this.daifudaJokerMark = null;
         this.declarationNumber = null;
         this.declarationMark = null;
+        this.doubleClickFlg = false;
 
         // ソケットの初期化
         this.initSocket();
@@ -46,9 +47,7 @@ class Screen
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
         canvas.addEventListener('dblclick', function(e){
-            console.log("double clicked!!")
-            e.preventDefault();
-            return;
+            this.doubleClickFlg = true;
         });
 
     }
@@ -471,6 +470,10 @@ class Screen
     //　クリックされた時の処理
 
     onClick(e) {
+        if (this.doubleClickFlg) {
+            this.doubleClickFlg = false;
+            return;
+        }
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
