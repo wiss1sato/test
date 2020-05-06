@@ -49,7 +49,7 @@ class Screen
         canvas.addEventListener('mousedown', this.mouseDown.bind(this), false);
     }
 
-    mousedown() {
+    mouseDown() {
         console.log('mouse down')
     }
 
