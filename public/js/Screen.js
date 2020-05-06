@@ -32,7 +32,7 @@ class Screen
         this.daifudaJokerMark = null;
         this.declarationNumber = null;
         this.declarationMark = null;
-        this.clickCnt = 0;
+        this.cancelFlag = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -46,30 +46,7 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        canvas.addEventListener('dblclick', this.onDoubleClick.bind(this), false);
     }
-
-    onDoubleClick() {
-        let tebanPlayerFlg = false;
-        this.aPlayer.forEach(
-            ( p ) =>
-            {
-                if (p.strSocketID === this.socket.id) {
-                   if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
-                }
-            } );
-        // 手番ではないプレイヤーのクリックは受け付けない
-        if (tebanPlayerFlg){
-            if (this.reverse) {
-                this.aTeban += 1;
-                if (this.aTeban == 6) this.aTeban = 1;
-              } else {
-                this.aTeban -= 1;
-                if (this.aTeban == 0) this.aTeban = 5;
-              }    
-        }
-    }
-
     // ソケットの初期化
     initSocket()
     {
@@ -488,8 +465,13 @@ class Screen
     //　クリックされた時の処理
 
     onClick(e) {
-        console.log('onClick');
-        this.clickCnt++;
+        if( this.cancelFlag == 1 ){
+            return;
+        }
+        this.cancelFlag = 1;
+        setTimeout(function(){
+            this.cancelFlag = 0;
+        },1000);     
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
