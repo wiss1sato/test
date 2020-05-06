@@ -32,7 +32,6 @@ class Screen
         this.daifudaJokerMark = null;
         this.declarationNumber = null;
         this.declarationMark = null;
-        this.clickCnt = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -45,7 +44,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
     }
 
     // ソケットの初期化
@@ -100,10 +99,6 @@ class Screen
                 this.fukukan = fukukan;
                 this.fieldCardLength = fieldCardLength;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                if (this.clickCnt > 1) {
-                    console.log("cnt!>1")                    
-                }
-                this.clickCnt = 0;
             } );
 
         // カードを配る。
@@ -469,17 +464,7 @@ class Screen
 
     //　クリックされた時の処理
 
-    onDoubleClick(e) {
-        console.log("doubleclick")
-        this.doubleClickFlg = true;
-    }
     onClick(e) {
-        if (this.clickCnt > 1) {
-            console.log("cnt!>1")                    
-            return;
-        }
-        console.log(this.clickCnt);
-        this.clickCnt++;
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
