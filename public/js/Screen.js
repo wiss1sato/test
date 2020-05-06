@@ -100,10 +100,6 @@ class Screen
                 this.fukukan = fukukan;
                 this.fieldCardLength = fieldCardLength;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                if (this.clickCnt > 1) {
-                    console.log("cnt!>1")                    
-                }
-                this.clickCnt = 0;
             } );
 
         // カードを配る。
@@ -471,7 +467,7 @@ class Screen
 
     onClick(e) {
         if (this.clickCnt > 1) {
-            console.log("cnt!>1")                    
+            this.clickCnt = 0;
             return;
         }
         console.log(this.clickCnt);
