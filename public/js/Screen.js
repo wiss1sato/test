@@ -45,6 +45,11 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('dblclick', function(e){
+            console.log("double clicked!!")
+            e.preventDefault();
+            return;
+        });
 
     }
 
