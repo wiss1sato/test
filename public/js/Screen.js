@@ -46,11 +46,28 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        canvas.addEventListener('mousedown', this.mouseDown.bind(this), false);
+        canvas.addEventListener('dblclick', this.onDoubleClick.bind(this), false);
     }
 
-    mouseDown() {
-        console.log('mouse down')
+    onDoubleClick() {
+        let tebanPlayerFlg = false;
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if (p.strSocketID === this.socket.id) {
+                   if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
+                }
+            } );
+        // 手番ではないプレイヤーのクリックは受け付けない
+        if (tebanPlayerFlg){
+            if (this.reverse) {
+                this.teban += 1;
+                if (this.teban == 6) this.teban = 1;
+              } else {
+                this.teban -= 1;
+                if (this.teban == 0) this.teban = 5;
+              }    
+        }
     }
 
     // ソケットの初期化
