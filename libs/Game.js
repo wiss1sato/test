@@ -440,7 +440,6 @@ module.exports = class Game {
       });          
       // カード出したとき
       socket.on('discard', (card, mark) => {
-        winnerString = null;
         if (card.cardId === fukukanCard) {
           fukukan = card.playerId;
         }
@@ -584,6 +583,9 @@ module.exports = class Game {
           let winnerArray = this.judgeWinner(fieldCards, turn, kirifuda);
           let winner = winnerArray[0];
           winnerString = winnerArray[1];
+          setTimeout(() => {
+            winnerString = null;
+          }, 2000);
           // 判定のために14にしたものがある場合、1に戻す
           for (let i = 0; i < fieldCards.length; i++ ) {
             let num = fieldCards[i].cardId.replace(/[^0-9]/g, '');
