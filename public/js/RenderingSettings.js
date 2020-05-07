@@ -15,5 +15,5 @@ class RenderingSettings
 
     // ニックネーム
     static get NICKNAME_FONT() { return '30px Bold Arial'; }
-    static get NICKNAME_COLOR() { return 'blue'; }
+    static get NICKNAME_COLOR() { return 'yellow'; }
 }

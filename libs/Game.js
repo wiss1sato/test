@@ -32,6 +32,7 @@ module.exports = class Game {
     let decMark = null;
     let decNum = null;
     let isPlayng = false;
+    let winnerString = null;
 
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
@@ -180,6 +181,7 @@ module.exports = class Game {
           leftCards = null;
           turn = 0;
           napoleon = null;
+          winnerString = null;
           isPlayng = false;          
           // データはもう一回作る
           cardList = this.createCardList();
@@ -438,6 +440,7 @@ module.exports = class Game {
       });          
       // カード出したとき
       socket.on('discard', (card, mark) => {
+        winnerString = null;
         if (card.cardId === fukukanCard) {
           fukukan = card.playerId;
         }
@@ -578,7 +581,9 @@ module.exports = class Game {
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
           turn = turn + 1;
-          let winner = this.judgeWinner(fieldCards, turn, kirifuda);
+          let winnerArray = this.judgeWinner(fieldCards, turn, kirifuda);
+          let winner = winnerArray[0];
+          winnerString = winnerArray[1];
           // 判定のために14にしたものがある場合、1に戻す
           for (let i = 0; i < fieldCards.length; i++ ) {
             let num = fieldCards[i].cardId.replace(/[^0-9]/g, '');
@@ -623,7 +628,6 @@ module.exports = class Game {
 
               // 最後のターンの場合、ゲームエンドを知らせて、色々初期化する
               if(turn == 10) {
-
                 io.emit('game-end');
               }
 
@@ -649,7 +653,7 @@ module.exports = class Game {
         // 最新状況をクライアントに送信
         io.emit('update', Array.from(world.setPlayer),
           Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, currentReverse, phase,
-           napoleon, fukukan, fieldCards.length, iNanosecDiff); // 送信
+           napoleon, fukukan, fieldCards.length, iNanosecDiff, winnerString); // 送信
       }, 1000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
   }
   createCardList() {
@@ -703,6 +707,7 @@ module.exports = class Game {
     let sameTwoFlg = true;
     let winner = null;
     let daifuda = fieldCards[0].cardId.slice(0, 1)
+    let winnerString = '';
     fieldCards.forEach(
       // 役札を確認する
       (fieldCard) => {
@@ -739,35 +744,40 @@ module.exports = class Game {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === 'h12');
       });
-      return winner[0].playerNum;
+      winnerString = 'よろめき';
+      return [winner[0].playerNum, winnerString];
     }
     //  マイティのみの場合
     if (mighty && !yoromeki) {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === 's1');
       });
-      return winner[0].playerNum;
+      winnerString = 'オールマイティ';      
+      return [winner[0].playerNum, winnerString];
     }
     //  joの場合
     if (joker) {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === 'jo');
       });
-      return winner[0].playerNum;
+      winnerString =  'ジョーカー';
+      return [winner[0].playerNum, winnerString];
     }
     //  正ジャックの場合
     if (trueJack) {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === trueJack);
       });
-      return winner[0].playerNum;
+      winnerString =  '正ジャック';      
+      return [winner[0].playerNum, winnerString];
     }
     //  裏ジャックの場合
     if (falseJack) {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === falseJack);
       });
-      return winner[0].playerNum;
+      winnerString =  '裏ジャック';      
+      return [winner[0].playerNum, winnerString];
     }
     //  1ターン目以外でセイムツーの場合
     if (sameTwoFlg && turn != 1) {
@@ -775,7 +785,10 @@ module.exports = class Game {
       winner = fieldCards.filter(function (f) {
         return (f.cardId === daifuda + '2');
       });
-      if (winner.length) return winner[0].playerNum;
+      if (winner.length) {
+        winnerString =  'セイムツー';
+        return [winner[0].playerNum, winnerString];
+      } 
     }
     // それ以外の場合
     // Aのカードがある場合、強さ判定のために数字を14にする
@@ -794,7 +807,8 @@ module.exports = class Game {
           var val2 = val2.cardId;
           return val2.match(/\d+/) - val1.match(/\d+/);
       });
-      return kirifudaCards[0].playerNum;
+      winnerString =  '切り札';      
+      return [kirifudaCards[0].playerNum, winnerString];
     }
       // 切り札がない場合、台札の中で一番強いカードを返却
       // 台札を探す
@@ -806,6 +820,7 @@ module.exports = class Game {
         var val2 = val2.cardId;
         return val2.match(/\d+/) - val1.match(/\d+/);
       });
-      return daifudaCards[0].playerNum;
+      winnerString = '台札';      
+      return [daifudaCards[0].playerNum, winnerString];
   }
 }

@@ -32,6 +32,7 @@ class Screen
         this.daifudaJokerMark = null;
         this.declarationNumber = null;
         this.declarationMark = null;
+        this.winnerString = null;
 
         // ソケットの初期化
         this.initSocket();
@@ -80,10 +81,12 @@ class Screen
 
         // サーバーからの状態通知に対する処理
         // ・サーバー側の周期的処理の「io.sockets.emit( 'update', ・・・ );」に対する処理
+
+
         this.socket.on(
             'update',
             ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase,
-                napoleon, fukukan, fieldCardLength, iProcessingTimeNanoSec ) =>
+                napoleon, fukukan, fieldCardLength, iProcessingTimeNanoSec, winnerString ) =>
             {
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
@@ -97,6 +100,7 @@ class Screen
                 this.napoleon = napoleon;
                 this.fukukan = fukukan;
                 this.fieldCardLength = fieldCardLength;
+                this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
             } );
 
@@ -246,6 +250,16 @@ class Screen
                 } );
         }
 
+        // 勝ち札の描画
+        if( null !== this.winnerString )
+        {
+            this.renderWinnerString( this.winnerString );
+        }        
+
+    }
+
+    renderWinnerString(winnerString) {
+        this.context.fillText(winnerString, 730, 140);
     }
 
     renderField()
@@ -853,7 +867,7 @@ class Screen
     
     renderCard( card )
     {
-        
+
         if((card.playerId) && card.playerId !== this.socket.id && this.viewerSocketIdList.indexOf(this.socket.id) == - 1) return;
 
         let img = this.assets.returnCard(card.cardId)[0];
