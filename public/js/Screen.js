@@ -474,10 +474,13 @@ class Screen
         ctx.restore();
         ctx.restore();  
     }
-
+    timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
     //　クリックされた時の処理
 
-    onClick(e) {
+    async onClick(e) {
+        await this.timeout(200);
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
@@ -556,7 +559,7 @@ class Screen
             (350 <= y && y <= 390) 
             ){
                 // サーバにクリックされたことを伝える
-                this.socket.emit( 'pass-clicked');                
+                this.socket.emit( 'pass-clicked');
             }
             // 決定を押されたとき
             if ((770 <= x && x <= 830) 
