@@ -474,13 +474,8 @@ class Screen
         ctx.restore();
         ctx.restore();  
     }
-    timeout(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
     //　クリックされた時の処理
-
     async onClick(e) {
-        await this.timeout(400);
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
