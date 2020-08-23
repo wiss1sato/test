@@ -480,7 +480,7 @@ class Screen
     //　クリックされた時の処理
 
     async onClick(e) {
-        await this.timeout(200);
+        await this.timeout(400);
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
