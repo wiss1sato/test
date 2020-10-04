@@ -1,6 +1,6 @@
 'use strict';	// 厳格モードとする
 
-// モジュール
+// モジュールa
 const express = require( 'express' );
 const http = require( 'http' );
 const socketIO = require( 'socket.io' );
