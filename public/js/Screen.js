@@ -1,7 +1,7 @@
 // スクリーンクラス
 class Screen
 {
-    // コンストラクタa
+    // コンストラクタaa
     constructor( socket, canvas )
     {
         this.socket = socket;
