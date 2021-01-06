@@ -496,7 +496,7 @@ class Screen
                    if (p.playerNum == this.aTeban && !this.isClicked) tebanPlayerFlg = true;
                 }
             } );
-        this.isClicked = true;
+        this.aTeban = -1
         // 手番ではないプレイヤーのクリックは受け付けない
         if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
