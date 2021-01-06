@@ -493,10 +493,12 @@ class Screen
             {
                 if (p.strSocketID === this.socket.id) {
                     console.log(this.aTeban);
-                   if (p.playerNum == this.aTeban && !this.isClicked) tebanPlayerFlg = true;
+                   if (p.playerNum == this.aTeban && !this.isClicked) {
+                        tebanPlayerFlg = true;
+                        this.isClicked = true;
+                   } 
                 }
             } );
-        this.aTeban = -1
         // 手番ではないプレイヤーのクリックは受け付けない
         if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
