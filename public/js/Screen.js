@@ -492,6 +492,7 @@ class Screen
             ( p ) =>
             {
                 if (p.strSocketID === this.socket.id) {
+                    console.log(this.isClicked);
                    if (p.playerNum == this.aTeban && !this.isClicked) tebanPlayerFlg = true;
                 }
             } );
