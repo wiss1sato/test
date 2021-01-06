@@ -46,6 +46,7 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('dblclick', this.onDbClick.bind(this), false);
     }
     // ソケットの初期化
     initSocket()
@@ -473,6 +474,9 @@ class Screen
         ctx.fillText( player.efuda + '枚', player.fX -60, player.fY + 145);
         ctx.restore();
         ctx.restore();  
+    }
+    async onDbClick(e) {
+        this.aTeban = -1
     }
     //　クリックされた時の処理
     async onClick(e) {
