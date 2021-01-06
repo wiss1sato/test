@@ -33,7 +33,6 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.canClick = false;
 
         // ソケットの初期化
         this.initSocket();
@@ -103,17 +102,6 @@ class Screen
                 this.fieldCardLength = fieldCardLength;
                 this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                this.canClick = false;
-                // 手番プレイヤーの確認
-                this.aPlayer.forEach(
-                    ( p ) =>
-                    {
-                        if (p.strSocketID === this.socket.id) {
-                        if (p.playerNum == this.aTeban) {
-                            this.canClick = true;
-                        } 
-                        }
-                    } );
             } );
 
         // カードを配る。
@@ -488,9 +476,6 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        if(!this.canClick) {
-            return
-        }
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
@@ -499,8 +484,17 @@ class Screen
         let isNumberClicked = false;
         let isCardClicked = false;
         let isMarkClicked = false;
-
+        // 手番プレイヤーの確認
+        let tebanPlayerFlg = false;
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if (p.strSocketID === this.socket.id) {
+                   if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
+                }
+            } );
         // 手番ではないプレイヤーのクリックは受け付けない
+        if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
         if (this.phase === 'declaration') {
         // 宣言時の数字が押されたとき
