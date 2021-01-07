@@ -8,6 +8,7 @@ const canvas = document.querySelector( '#canvas-2d' );
 
 // キャンバスオブジェクト
 const screen = new Screen( socket, canvas);
+let clicked = false
 
 // キャンバスの描画開始
 screen.animate( 0 );
@@ -21,36 +22,14 @@ $( window ).on(
     } );
 // キーの入力（キーダウン、キーアップ）の処理
 let objMovement = {};	// 動作
-$( document ).on(
-    'keydown keyup',
-    ( event ) =>
-    {
-        const KeyToCommand = {
-            'ArrowUp': 'forward',
-            'ArrowDown': 'back',
-            'ArrowLeft': 'left',
-            'ArrowRight': 'right',
-        };
-        const command = KeyToCommand[event.key];
-        if( command )
-        {
-            if( event.type === 'keydown' )
-            {
-                objMovement[command] = true;
-            }
-            else // if( event.type === 'keyup' )
-            {
-                objMovement[command] = false;
-            }
-            // サーバーに イベント名'change-my-movement'と、objMovementオブジェクトを送信
-            socket.emit( 'change-my-movement', objMovement );
-        }
-    } );
-
 // スタートボタン
 $(document).on('click', '#start-button',
     () => 
     {
+        if(clicked) {
+            return
+        }
+        clicked = true;
         // サーバーに'enter-the-game'を送信
         let icNm = '';
         if ($('#iconName').prop('files')[0] !== undefined) {
