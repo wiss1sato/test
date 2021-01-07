@@ -197,6 +197,13 @@ module.exports = class Game {
           });
       });
       // カードがクリックされた時の処理（ちょっと上にあげる）
+      socket.on('double-clicked', () => {
+        teban -= 1;
+        if(teban == 0) {
+          teban = 5
+        }
+      });
+      // カードがクリックされた時の処理（ちょっと上にあげる）
       socket.on('card-unclicked', (card) => {
         world.setCard.forEach(
           (c) => {

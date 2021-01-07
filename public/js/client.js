@@ -9,6 +9,7 @@ const canvas = document.querySelector( '#canvas-2d' );
 // キャンバスオブジェクト
 const screen = new Screen( socket, canvas);
 let clicked = false
+let canvasClicked = false
 
 // キャンバスの描画開始
 screen.animate( 0 );
@@ -57,6 +58,18 @@ $(document).on('click', '#start-button',
 		});
     } );
 
+	function is_file(fp,callback){
+		$.ajax({
+			url: fp,
+			cache: false
+		}).done(function(data) {
+			callback(true);
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			callback(false);
+		});
+    }
+    
 	function is_file(fp,callback){
 		$.ajax({
 			url: fp,

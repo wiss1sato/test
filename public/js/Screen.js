@@ -46,6 +46,19 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('dblclick', this.onDblClick.bind(this), false);
+    }
+    onDblClick() {
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if (p.strSocketID === this.socket.id) {
+                   if (p.playerNum == this.aTeban) {
+                    this.socket.emit( 'double-clicked' );
+                   }
+                }
+            } );
+        // 手番ではないプレイヤーのクリックは受け付けない
     }
     // ソケットの初期化
     initSocket()
