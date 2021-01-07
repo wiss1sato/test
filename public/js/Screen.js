@@ -476,6 +476,8 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
+        setTimeout(() => {
+
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
@@ -861,6 +863,7 @@ class Screen
                 }
             }            
          }
+        }, 100);
     }
     
     renderCard( card )
