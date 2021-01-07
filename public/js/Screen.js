@@ -33,6 +33,7 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
+        this.clickCnt = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -46,19 +47,6 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        canvas.addEventListener('dblclick', this.onDblClick.bind(this), false);
-    }
-    onDblClick() {
-        this.aPlayer.forEach(
-            ( p ) =>
-            {
-                if (p.strSocketID === this.socket.id) {
-                   if (p.playerNum == this.aTeban) {
-                    this.socket.emit( 'double-clicked' );
-                   }
-                }
-            } );
-        // 手番ではないプレイヤーのクリックは受け付けない
     }
     // ソケットの初期化
     initSocket()
@@ -115,6 +103,7 @@ class Screen
                 this.fieldCardLength = fieldCardLength;
                 this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
+                this.clickCnt = 0;
             } );
 
         // カードを配る。
@@ -489,6 +478,10 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
+        this.clickCnt++;
+        if (this.clickCnt != 1) {
+            return
+        }
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
