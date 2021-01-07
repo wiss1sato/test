@@ -89,6 +89,7 @@ class Screen
             ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase,
                 napoleon, fukukan, fieldCardLength, iProcessingTimeNanoSec, winnerString ) =>
             {
+                console.log('updated');
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
                 this.aNumber = aNumber;
