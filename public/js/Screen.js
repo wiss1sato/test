@@ -104,7 +104,7 @@ class Screen
                 this.fieldCardLength = fieldCardLength;
                 this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                this.clickCnt = 0;
+                this.clickCnt =1;
             } );
 
         // カードを配る。
