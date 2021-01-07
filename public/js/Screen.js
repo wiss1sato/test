@@ -88,7 +88,6 @@ class Screen
             ( aPlayer, aCard, aNumber, aMark, aTeban, aPassCnt, designationCard, reverse, phase,
                 napoleon, fukukan, fieldCardLength, iProcessingTimeNanoSec, winnerString ) =>
             {
-                console.log('updated');
                 this.aPlayer = aPlayer;
                 this.aCard = aCard;
                 this.aNumber = aNumber;
@@ -477,7 +476,6 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        console.log(e.detail);
         if(e.detail != 1) {
             e.preventDefault()
             return
