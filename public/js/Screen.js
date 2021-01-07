@@ -37,7 +37,7 @@ class Screen
         // ソケットの初期化
         this.initSocket();
 
-        // コンテキストの初期化
+        // コンテキストの初期化a
         // アンチエイリアスの抑止（画像がぼやけるのの防止）以下４行
         // →カードの画質が悪くなるのでコメントアウト
         // this.context.mozImageSmoothingEnabled = false;
