@@ -69,15 +69,3 @@ $(document).on('click', '#start-button',
 			callback(false);
 		});
     }
-    
-	function is_file(fp,callback){
-		$.ajax({
-			url: fp,
-			cache: false
-		}).done(function(data) {
-			callback(true);
-		})
-		.fail(function(jqXHR, textStatus, errorThrown) {
-			callback(false);
-		});
-	}
