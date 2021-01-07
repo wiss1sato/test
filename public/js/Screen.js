@@ -479,6 +479,7 @@ class Screen
     //　クリックされた時の処理
     async onClick(e) {
         this.clickCnt++;
+        console.log(this.clickCnt);
         if (this.clickCnt != 1) {
             return
         }
