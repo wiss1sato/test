@@ -45,7 +45,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
+        canvas.addEventListener('click', this.onClick.bind(this), false);
     }
     // ソケットの初期化
     initSocket()
@@ -477,9 +477,10 @@ class Screen
     //　クリックされた時の処理
     async onClick(e) {
         if(e.detail != 1) {
-            e.preventDefault()
             return
         }
+        console.log(e.detail);
+        console.log(this.aTeban);
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
