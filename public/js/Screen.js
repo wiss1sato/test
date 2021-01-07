@@ -33,7 +33,7 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.clickCnt = 1;
+        this.clickCnt = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -104,7 +104,7 @@ class Screen
                 this.fieldCardLength = fieldCardLength;
                 this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                this.clickCnt =1;
+                this.clickCnt = 0;
             } );
 
         // カードを配る。

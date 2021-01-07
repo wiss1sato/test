@@ -656,7 +656,7 @@ module.exports = class Game {
         io.emit('update', Array.from(world.setPlayer),
           Array.from(world.setCard), Array.from(world.setNumber), Array.from(world.setMark), teban, passCnt, fukukanCard, currentReverse, phase,
            napoleon, fukukan, fieldCards.length, iNanosecDiff, winnerString); // 送信
-      }, 4000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
+      }, 10000 / GameSettings.FRAMERATE); // 単位は[ms]。1000[ms] / FRAMERATE[回]
   }
   createCardList() {
     let cardId = '';
