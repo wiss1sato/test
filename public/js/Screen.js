@@ -33,7 +33,7 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.clickCnt = 0;
+        this.clickCnt = 1;
 
         // ソケットの初期化
         this.initSocket();
