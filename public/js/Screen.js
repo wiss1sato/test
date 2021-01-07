@@ -33,7 +33,6 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.clickCnt = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -104,7 +103,6 @@ class Screen
                 this.fieldCardLength = fieldCardLength;
                 this.winnerString = winnerString;
                 this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
-                this.clickCnt = 0;
             } );
 
         // カードを配る。
@@ -479,9 +477,9 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        this.clickCnt++;
-        console.log(this.clickCnt);
-        if (this.clickCnt != 1) {
+        console.log(e.detail);
+        if(e.detail != 1) {
+            e.preventDefault()
             return
         }
         var x = e.clientX - canvas.offsetLeft;
