@@ -45,7 +45,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
     }
     // ソケットの初期化
     initSocket()
