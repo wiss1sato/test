@@ -48,7 +48,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mouseup', this.onMouseDown.bind(this), false);
+        canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
         canvas.addEventListener('click', this.onClick.bind(this), false);
     }
 
