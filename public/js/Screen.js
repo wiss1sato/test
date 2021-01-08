@@ -33,12 +33,11 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.isClicked = false;
 
         // ソケットの初期化
         this.initSocket();
 
-        // コンテキストの初期化a
+        // コンテキストの初期化
         // アンチエイリアスの抑止（画像がぼやけるのの防止）以下４行
         // →カードの画質が悪くなるのでコメントアウト
         // this.context.mozImageSmoothingEnabled = false;
@@ -46,17 +45,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mouseup', this.onMouseUp.bind(this), false);
-        canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-        canvas.addEventListener('click', this.onClick.bind(this), false);        
-    }
-    onMouseUp(e) {
-        console.log("mouse up");
-        this.isClicked = true;
-    }
-    onClick(e) {
-        console.log("click");
-        this.isClicked = false;
+        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
     }
     // ソケットの初期化
     initSocket()
@@ -486,13 +475,11 @@ class Screen
         ctx.restore();  
     }
     //　クリックされた時の処理
-    async onMouseDown(e) {
-        console.log("mouse down");
-        if(this.isClicked) {
+    async onClick(e) {
+        if(e.detail != 1) {
+            e.preventDefault()
             return
         }
-        console.log(e.detail);
-        console.log(this.aTeban);
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
@@ -510,7 +497,6 @@ class Screen
                    if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
                 }
             } );
-        this.isClicked = false
         // 手番ではないプレイヤーのクリックは受け付けない
         if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
