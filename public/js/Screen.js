@@ -33,7 +33,9 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.mouseMoveCnt = 0;
+        this.prevX = 0;
+        this.prevY = 0;
+
 
         // ソケットの初期化
         this.initSocket();
@@ -46,17 +48,16 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-        canvas.addEventListener('click', this.onClick.bind(this), false);
         canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-    }
-    onMouseDown() {
-        this.mouseMoveCnt = 0;
+        canvas.addEventListener('click', this.onClick.bind(this), false);
     }
 
-    onMouseMove() {
-        this.mouseMoveCnt++ ;
+    onMouseDown(e) {
+        this.prevX = e.x;
+        this.prevY = e.y;
     }
+
+    
     // ソケットの初期化
     initSocket()
     {
@@ -486,13 +487,11 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        console.log(e.detail);
-        if(e.detail != 1 || this.mouseMoveCnt > 0) {
+        console.log(e.movementX);
+        if(e.detail != 1 || this.prevX != e.x || this.prevY != e.y ) {
             e.preventDefault()
-            console.log("e.detail != 1なのでダブルクリック");
             return
         }
-        console.log("e.detail = 1のときに動いてます");
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
