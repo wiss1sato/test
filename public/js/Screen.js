@@ -49,7 +49,6 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-        canvas.addEventListener('mouseup', this.onMouseUp.bind(this), false);        
         canvas.addEventListener('click', this.onClick.bind(this), false);
     }
 
@@ -58,14 +57,6 @@ class Screen
         this.prevY = e.y;
     }
 
-    onMouseUp(e) {
-        if(this.prevX != e.x || this.prevY != e.y) {
-            return e.preventDefault();
-        }
-    }
-
-
-    
     // ソケットの初期化
     initSocket()
     {
@@ -495,8 +486,8 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        if(e.detail != 1) {
-            e.preventDefault()
+        if(e.detail != 1 || this.prevX != e.x || this.prevY != e.y) {
+            e.stopPropagation()
             return
         }
         var x = e.clientX - canvas.offsetLeft;
