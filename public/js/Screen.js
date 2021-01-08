@@ -49,6 +49,7 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+        canvas.addEventListener('mouseup', this.onMouseUp.bind(this), false);        
         canvas.addEventListener('click', this.onClick.bind(this), false);
     }
 
@@ -56,6 +57,13 @@ class Screen
         this.prevX = e.x;
         this.prevY = e.y;
     }
+
+    onMouseUp(e) {
+        if(this.prevX != e.x || this.prevY != e.y) {
+            return e.preventDefault();
+        }
+    }
+
 
     
     // ソケットの初期化
@@ -487,8 +495,7 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        console.log(e.movementX);
-        if(e.detail != 1 || this.prevX != e.x || this.prevY != e.y ) {
+        if(e.detail != 1) {
             e.preventDefault()
             return
         }
