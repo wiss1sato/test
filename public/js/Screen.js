@@ -476,9 +476,13 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
+        console.log(e.detail);
         if(e.detail != 1) {
+            e.preventDefault()
+            console.log("e.detail != 1なのでダブルクリック");
             return
         }
+        console.log("e.detail = 1のときに動いてます");
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
