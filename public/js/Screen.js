@@ -33,6 +33,7 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
+        this.isTebanPlayer = false
 
         // ソケットの初期化
         this.initSocket();
@@ -45,7 +46,22 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
+        canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+        canvas.addEventListener('click', this.onClick.bind(this), false);
+    }
+    onMouseDown(e) {
+        this.aPlayer.forEach(
+            ( p ) =>
+            {
+                if (p.strSocketID === this.socket.id) {
+                   if (p.playerNum == this.aTeban) {
+                    this.isTebanPlayer = true
+                }   else {
+                    this.isTebanPlayer = false
+                }
+                }
+            } );
+
     }
     // ソケットの初期化
     initSocket()
@@ -476,8 +492,7 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        if(e.detail != 1) {
-            e.preventDefault()
+        if(!this.isTebanPlayer) {
             return
         }
         var x = e.clientX - canvas.offsetLeft;
@@ -489,16 +504,7 @@ class Screen
         let isCardClicked = false;
         let isMarkClicked = false;
         // 手番プレイヤーの確認
-        let tebanPlayerFlg = false;
-        this.aPlayer.forEach(
-            ( p ) =>
-            {
-                if (p.strSocketID === this.socket.id) {
-                   if (p.playerNum == this.aTeban) tebanPlayerFlg = true;
-                }
-            } );
         // 手番ではないプレイヤーのクリックは受け付けない
-        if (!tebanPlayerFlg) return;
         // 宣言フェーズ時
         if (this.phase === 'declaration') {
         // 宣言時の数字が押されたとき
