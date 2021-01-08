@@ -486,8 +486,10 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
+        if(this.prevX != e.x || this.prevY != e.y) {
+            console.log("動かしちゃダメだよ～");
+        }
         if(e.detail != 1 || this.prevX != e.x || this.prevY != e.y) {
-            e.stopPropagation()
             return
         }
         var x = e.clientX - canvas.offsetLeft;
