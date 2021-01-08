@@ -33,7 +33,7 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.mouthMoveCnt = 0
+        this.mouseMoveCnt = 0;
 
         // ソケットの初期化
         this.initSocket();
@@ -47,10 +47,15 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-        canvas.addEventListener('mousedown', this.onClick.bind(this), false);
+        canvas.addEventListener('click', this.onClick.bind(this), false);
+        canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
     }
-    onMouseMove(e) {
-        this.mouthMoveCnt++
+    onMouseDown() {
+        this.mouseMoveCnt = 0;
+    }
+
+    onMouseMove() {
+        this.mouseMoveCnt++ ;
     }
     // ソケットの初期化
     initSocket()
@@ -482,11 +487,12 @@ class Screen
     //　クリックされた時の処理
     async onClick(e) {
         console.log(e.detail);
-        if(e.detail != 1 || this.mouthMoveCnt > 0) {
+        if(e.detail != 1 || this.mouseMoveCnt > 0) {
             e.preventDefault()
+            console.log("e.detail != 1なのでダブルクリック");
             return
         }
-        this.mouthMoveCnt = 0
+        console.log("e.detail = 1のときに動いてます");
         var x = e.clientX - canvas.offsetLeft;
         var y = e.clientY - canvas.offsetTop - 21;
         let c = null;
