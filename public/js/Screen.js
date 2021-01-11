@@ -48,13 +48,7 @@ class Screen
         // this.context.msImageSmoothingEnabled = false;
         // this.context.imageSmoothingEnabled = false;
 
-        canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
         canvas.addEventListener('click', this.onClick.bind(this), false);
-    }
-
-    onMouseDown(e) {
-        this.prevX = e.x;
-        this.prevY = e.y;
     }
 
     // ソケットの初期化
@@ -486,10 +480,7 @@ class Screen
     }
     //　クリックされた時の処理
     async onClick(e) {
-        if(this.prevX != e.x || this.prevY != e.y) {
-            console.log("動かしちゃダメだよ～");
-        }
-        if(e.detail != 1 || this.prevX != e.x || this.prevY != e.y) {
+        if(e.detail != 1) {
             return
         }
         var x = e.clientX - canvas.offsetLeft;
