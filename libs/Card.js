@@ -1,4 +1,4 @@
-// モジュール
+// モジュールa
 const GameObject = require( './GameObject.js' );
 
 // 設定
