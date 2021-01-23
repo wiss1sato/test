@@ -33,9 +33,9 @@ class Screen
         this.declarationNumber = null;
         this.declarationMark = null;
         this.winnerString = null;
-        this.prevX = 0;
-        this.prevY = 0;
-
+        this.offsetX=0
+        this.offsetY=0
+        
 
         // ソケットの初期化
         this.initSocket();
@@ -49,7 +49,11 @@ class Screen
         // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
+        window.addEventListener('resize', this.reOffset.bind(this), false);
+        window.addEventListener('scroll', this.reOffset.bind(this), false);
     }
+    
+
 
     // ソケットの初期化
     initSocket()
@@ -478,13 +482,21 @@ class Screen
         ctx.restore();
         ctx.restore();  
     }
+
+    reOffset(){
+        var BB=canvas.getBoundingClientRect();
+        this.offsetX=BB.left;
+        this.offsetY=BB.top;        
+    }
+        
     //　クリックされた時の処理
     async onClick(e) {
         if(e.detail != 1) {
             return
         }
-        var x = e.clientX - canvas.offsetLeft;
-        var y = e.clientY - canvas.offsetTop - 21;
+        console.log(e.clientX - canvas.offsetLeft);
+        var x = e.clientX - canvas.offsetLeft - this.offsetX;
+        var y = e.clientY - canvas.offsetTop - 21 - this.offsetY;;
         let c = null;
         let n = null;
         let m = null;
