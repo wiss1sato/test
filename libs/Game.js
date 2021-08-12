@@ -314,7 +314,7 @@ module.exports = class Game {
         teban += 1;
         if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
         napoleon = player;
-        io.emit('send-mark-num' , decNum , decMark);
+        io.emit('send-mark-num' , decNum , decMark, teban);
       });      
       // 宣言中にパスが押されたとき
       socket.on('pass-clicked', () => {
@@ -328,11 +328,11 @@ module.exports = class Game {
             (n) => {
                 n.numberUnclicked();
             });        
-        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;        
+        if (teban === GameSettings.PLAYER_NUM + 1) teban = 1;
         if(!napoleon && passCnt === GameSettings.PLAYER_NUM) {
           teban = 1;
           passCnt = 0;
-          return;
+          io.emit('pass-end', teban);
         }
         // ナポレオンが決まってて自分以外の人がパスしたら、宣言フェーズ終了
         if (napoleon && passCnt === GameSettings.PLAYER_NUM - 1) {
@@ -359,6 +359,8 @@ module.exports = class Game {
           console.log('ナポレオン:' + napoleon);
           phase = 'designation';
           io.emit('declaration-end', decMark, decNum);
+        } else {
+          io.emit('pass-end', teban);
         }
       });
 

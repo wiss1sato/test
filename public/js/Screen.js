@@ -35,27 +35,96 @@ class Screen
         this.winnerString = null;
         this.offsetX=0
         this.offsetY=0
-        
-
+        this.number = null;
+        this.mark = null;
+        this.passButton= document.createElement("button");
+        this.passButton.innerText = "パス";
+        this.passButton.style.position = "absolute";
+        this.passButton.style.left       = Math.floor(700)+"px"
+        this.passButton.style.top        = Math.floor(350)+"px";
+        this.passButton.style.zIndex = 100
+        this.passButton.style.visibility = 'hidden'
+        this.desicionButton= document.createElement("button");
+        this.desicionButton.innerText = "決定";
+        this.desicionButton.style.position = "absolute";
+        this.desicionButton.style.left       = Math.floor(770)+"px"
+        this.desicionButton.style.top        = Math.floor(350)+"px";
+        this.desicionButton.style.zIndex = 100
+        this.desicionButton.style.visibility = 'hidden'
+        this.okButton= document.createElement("button");
+        this.okButton.innerText = "OK";
+        this.okButton.style.position = "absolute";
+        this.okButton.style.zIndex = 100
+        this.okButton.style.visibility = 'hidden'
+        var area= document.getElementById("area");
+        area.appendChild(this.desicionButton)
+        area.appendChild(this.passButton)
+        area.appendChild(this.okButton)
+        this.passButton.onclick = this.pass.bind(this);
+        this.desicionButton.onclick = this.decision.bind(this);
         // ソケットの初期化
         this.initSocket();
-
-        // コンテキストの初期化
-        // アンチエイリアスの抑止（画像がぼやけるのの防止）以下４行
-        // →カードの画質が悪くなるのでコメントアウト
-        // this.context.mozImageSmoothingEnabled = false;
-        // this.context.webkitImageSmoothingEnabled = false;
-        // this.context.msImageSmoothingEnabled = false;
-        // this.context.imageSmoothingEnabled = false;
 
         canvas.addEventListener('click', this.onClick.bind(this), false);
         window.addEventListener('resize', this.reOffset.bind(this), false);
         window.addEventListener('scroll', this.reOffset.bind(this), false);
     }
+
+    pass() {
+        this.passButton.style.visibility = 'hidden'
+        this.desicionButton.style.visibility = 'hidden'
+        this.socket.emit( 'pass-clicked');
+    }
+
+    decision() 
+        {
+            // マークとナンバーが選択中じゃなかったら押せないようにする
+            this.aNumber.forEach(
+                ( number ) =>
+                {
+                    if (number.selected) {
+                        this.number = number;
+                    }
+                } );
+            this.aMark.forEach(
+                ( mark ) =>
+                {
+                    if (mark.selected)  this.mark = mark;
+                } );
+            if (this.number && this.mark) {
+                if( this.number.num > this.declarationNumber) {
+                    this.passButton.style.visibility = 'hidden'
+                    this.desicionButton.style.visibility = 'hidden'
+                    this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
+                }
+                // 数値が一緒の場合,現在宣言中のマークと照合する
+                if( this.number.num == this.declarationNumber) {
+                    // 選択されているのがクローバーの場合、ダイヤ、ハート、スペードのみ上書き可能・・・というようにする
+                    if (this.declarationMark === 'clover') {
+                        if (this.mark.markId === 'diamond' || this.mark.markId === 'heart' || this.mark.markId === 'spade') {
+                            this.passButton.style.visibility = 'hidden'
+                            this.desicionButton.style.visibility = 'hidden'
+                            this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
+                        } 
+                    } else if (this.declarationMark === 'diamond') {
+                        if (this.mark.markId === 'heart' || this.mark.markId === 'spade') {
+                            this.passButton.style.visibility = 'hidden'
+                            this.desicionButton.style.visibility = 'hidden'
+                            this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
+                        } 
+                    } else if (this.declarationMark === 'heart') {
+                        if (this.mark.markId === 'spade') {
+                            this.passButton.style.visibility = 'hidden'
+                            this.desicionButton.style.visibility = 'hidden'
+                            this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
+                        } 
+                    }
+                }
+                    // スペードは上書き不可だからこのままでいいや
+            }
+        }
     
-
-
-    // ソケットの初期化
+        // ソケットの初期化
     initSocket()
     {
         // 接続確立時の処理
@@ -140,13 +209,35 @@ class Screen
             () =>
             {
                 this.aTeban = 1;
+                const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
+                if (this.aTeban ===     player.playerNum && this.socket.id === player.strSocketID) {
+                    this.passButton.style.visibility = 'visible'
+                    this.desicionButton.style.visibility = 'visible'
+                }
+            } );
+
+        // カード配ったあと,宣言フェーズに以降
+        this.socket.on(
+            'pass-end',
+            (teban) =>
+            {
+                const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
+                if (teban === player.playerNum && this.socket.id === player.strSocketID) {
+                    this.passButton.style.visibility = 'visible'
+                    this.desicionButton.style.visibility = 'visible'
+                }
             } );
 
         // 宣言フェーズ中、他プレイヤーが選択したマークを受け取る
         this.socket.on(
             'send-mark-num',
-            (decNum, decMark) =>
+            (decNum, decMark,teban) =>
             {
+                const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
+                if (teban === player.playerNum && this.socket.id === player.strSocketID) {
+                    this.passButton.style.visibility = 'visible'
+                    this.desicionButton.style.visibility = 'visible'
+                }
                 this.declarationNumber = decNum;
                 this.declarationMark = decMark;
             } );            
@@ -409,35 +500,6 @@ class Screen
                 60,40
                 );
         }
-
-        // 宣言時に手番の場合、自分のエリアにボタン配置
-        if (this.phase === 'declaration' && this.aTeban === player.playerNum && this.socket.id === player.strSocketID) {
-            this.context.drawImage( this.assets.pass,
-                700, 350,
-                60,40
-                );              
-            this.context.drawImage( this.assets.kettei,
-                770, 350,
-                60,40
-                );
-        }
-        // 宣言用のOK/パス
-
-        // カード用のOK
-        if (this.phase === 'change' && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
-            ctx.drawImage( this.assets.ok,
-                player.fX + 280, player.fY + 200,
-                60,40
-                );	// 描画先領域の大きさ
-        }        
-
-        // カード用のOK
-         if (this.phase === 'mainGame' && this.socket.id === player.strSocketID && this.aTeban === player.playerNum) {
-            ctx.drawImage( this.assets.ok,
-                player.fX + 280, player.fY + 200,
-                60,40
-                );	// 描画先領域の大きさ
-        }
         ctx.restore();
 
         // ナポの表示
@@ -498,8 +560,6 @@ class Screen
         var x = e.clientX - canvas.offsetLeft - this.offsetX;
         var y = e.clientY - canvas.offsetTop - 21 - this.offsetY;;
         let c = null;
-        let n = null;
-        let m = null;
         let isNumberClicked = false;
         let isCardClicked = false;
         let isMarkClicked = false;
@@ -524,7 +584,7 @@ class Screen
                         &&
                         (number.fY <= y && y <= number.fY + SharedSettings.NUMBER_HEIGHT) 
                         ){
-                            n = number;
+                            this.number = number;
                             // サーバにクリックされたことを伝える
                             this.socket.emit( 'number-clicked' , number );
                             isNumberClicked = true;
@@ -535,7 +595,7 @@ class Screen
                 this.aNumber.forEach(
                     ( number ) =>
                     {
-                        if (number !== n) {
+                        if (number !== this.number) {
                             this.socket.emit( 'number-unclicked' , number );
                         }
                     } );  
@@ -549,7 +609,7 @@ class Screen
                         &&
                         (mark.fY <= y && y <= mark.fY + SharedSettings.MARK_HEIGHT) 
                         ){
-                            m = mark;
+                            this.mark = mark;
                             // サーバにクリックされたことを伝える
                             this.socket.emit( 'mark-clicked' , mark );
                             isMarkClicked = true;
@@ -560,61 +620,13 @@ class Screen
             this.aMark.forEach(
                 ( mark ) =>
                 {
-                    if (mark !== m) {
+                    if (mark !== this.mark) {
                         // サーバにクリックされたことを伝える
                         this.socket.emit( 'mark-unclicked' , mark );
                     }
                 } );   
             }
 
-            // パスを押されたとき
-            if ((700 <= x && x <= 760) 
-            &&
-            (350 <= y && y <= 390) 
-            ){
-                // サーバにクリックされたことを伝える
-                this.socket.emit( 'pass-clicked');
-            }
-            // 決定を押されたとき
-            if ((770 <= x && x <= 830) 
-            &&
-            (350 <= y && y <= 390) 
-            ){
-                // マークとナンバーが選択中じゃなかったら押せないようにする
-                this.aNumber.forEach(
-                    ( number ) =>
-                    {
-                        if (number.selected)  n = number;
-                    } );
-                this.aMark.forEach(
-                    ( mark ) =>
-                    {
-                        if (mark.selected)  m = mark;
-                    } );
-                if (n && m) {
-                    if( n.num > this.declarationNumber) {
-                        this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
-                    }
-                    // 数値が一緒の場合,現在宣言中のマークと照合する
-                    if( n.num == this.declarationNumber) {
-                        // 選択されているのがクローバーの場合、ダイヤ、ハート、スペードのみ上書き可能・・・というようにする
-                        if (this.declarationMark === 'clover') {
-                            if (m.markId === 'diamond' || m.markId === 'heart' || m.markId === 'spade') {
-                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
-                            } 
-                        } else if (this.declarationMark === 'diamond') {
-                            if (m.markId === 'heart' || m.markId === 'spade') {
-                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
-                            } 
-                        } else if (this.declarationMark === 'heart') {
-                            if (m.markId === 'spade') {
-                                this.socket.emit( 'kettei-clicked', this.socket.id , n , m);
-                            } 
-                        }
-                    }
-                        // スペードは上書き不可だからこのままでいいや
-                }
-            }
         }
 
         // 指名フェーズ時(大したことがないのでベタで書いちゃう)
