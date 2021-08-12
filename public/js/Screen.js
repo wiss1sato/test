@@ -44,27 +44,43 @@ class Screen
         this.passButton.style.top        = Math.floor(350)+"px";
         this.passButton.style.zIndex = 100
         this.passButton.style.visibility = 'hidden'
+        this.passButton.style.width = '70px'
+        this.passButton.style.padding = '10px'
+        
         this.desicionButton= document.createElement("button");
         this.desicionButton.innerText = "決定";
         this.desicionButton.style.position = "absolute";
-        this.desicionButton.style.left       = Math.floor(770)+"px"
+        this.desicionButton.style.left       = Math.floor(800)+"px"
         this.desicionButton.style.top        = Math.floor(350)+"px";
         this.desicionButton.style.zIndex = 100
         this.desicionButton.style.visibility = 'hidden'
+        this.desicionButton.style.width = '70px'
+        this.desicionButton.style.padding = '10px'
+        this.discardButton= document.createElement("button");
+        this.discardButton.innerText = "OK";
+        this.discardButton.style.position = "absolute";
+        this.discardButton.style.zIndex = 100
+        this.discardButton.style.visibility = 'hidden'
+        this.discardButton.style.width = '70px'
+        this.discardButton.style.padding = '10px'
         this.okButton= document.createElement("button");
         this.okButton.innerText = "OK";
         this.okButton.style.position = "absolute";
         this.okButton.style.zIndex = 100
         this.okButton.style.visibility = 'hidden'
+        this.okButton.style.width = '70px'
+        this.okButton.style.padding = '10px'
         var area= document.getElementById("area");
         area.appendChild(this.desicionButton)
         area.appendChild(this.passButton)
+        area.appendChild(this.discardButton)
         area.appendChild(this.okButton)
         this.passButton.onclick = this.pass.bind(this);
         this.desicionButton.onclick = this.decision.bind(this);
+        this.discardButton.onclick = this.discard.bind(this);
+        this.okButton.onclick = this.ok.bind(this);
         // ソケットの初期化
         this.initSocket();
-
         canvas.addEventListener('click', this.onClick.bind(this), false);
         window.addEventListener('resize', this.reOffset.bind(this), false);
         window.addEventListener('scroll', this.reOffset.bind(this), false);
@@ -74,6 +90,26 @@ class Screen
         this.passButton.style.visibility = 'hidden'
         this.desicionButton.style.visibility = 'hidden'
         this.socket.emit( 'pass-clicked');
+    }
+
+    ok() {
+        let card = null;
+        this.aCard.forEach(
+            ( c ) =>
+            {
+                if(c.selected) {
+                    card = c;
+                }
+            } ); 
+        if(card){
+            // joが台札のときだけ超特殊処理
+            if(card.cardId === 'jo' && this.fieldCardLength == 0) {
+                this.socket.emit( 'daifuda-joker' );
+            } else {
+                this.okButton.style.visibility = 'hidden'
+                this.socket.emit( 'discard' , card);
+            }
+        }
     }
 
     decision() 
@@ -122,7 +158,26 @@ class Screen
                 }
                     // スペードは上書き不可だからこのままでいいや
             }
+    }
+
+    discard() {
+        let selectedCnt = 0;
+        let discards = [];
+        this.aCard.forEach(
+            ( card ) =>
+            {
+                if(card.selected) {
+                    selectedCnt += 1;
+                    discards.push (card);
+                }
+            } ); 
+        if(selectedCnt === 3){
+            this.discardButton.style.visibility = 'hidden'
+            this.socket.emit( 'change-discards', discards);
         }
+    }
+
+
     
         // ソケットの初期化
     initSocket()
@@ -257,17 +312,27 @@ class Screen
             'designation-end',
             ( designationCard ) =>
             {
+                const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
+                if (this.napoleon === player.strSocketID) {
+                    this.discardButton.style.top = player.fY + 200
+                    this.discardButton.style.left = player.fX + 280
+                    this.discardButton.style.visibility = 'visible'
+                }
                 console.log('副官札:' + designationCard);
                 this.designationCard = designationCard;
             } );
 
-        // カードを配る
-        this.socket.on(
-            'change-end',
-            () =>
-            {
-                // this.mainGame = true;
-            } );     
+            this.socket.on(
+                'set-card',
+                ( teban ) =>
+                {
+                    const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
+                    if (teban === player.playerNum && this.socket.id === player.strSocketID) {
+                        this.okButton.style.top = player.fY + 200
+                        this.okButton.style.left = player.fX + 240
+                        this.okButton.style.visibility = 'visible'
+                    }
+                } );
 
         // ジョーカーが台札だったときの特別な処理
         this.socket.on(
@@ -731,34 +796,7 @@ class Screen
                         this.socket.emit( 'card-clicked' , card );
                     }
                 }
-            } );    
-            
-        // OKを押したとき
-        // 操作中のプレイヤーを取得する
-        let player = null;
-        this.aPlayer.forEach(
-            ( p ) =>
-            {
-                if(p.strSocketID === this.socket.id) player = p;
             } );
-            if ((player.fX + 280 <= x && x <= player.fX + 340) 
-            &&
-            (player.fY + 200 <= y && y <= player.fY + 240) 
-        ){
-            let selectedCnt = 0;
-            let discards = [];
-            this.aCard.forEach(
-                ( card ) =>
-                {
-                    if(card.selected) {
-                        selectedCnt += 1;
-                        discards.push (card);
-                    }
-                } ); 
-            if(selectedCnt === 3){
-                this.socket.emit( 'change-discards', discards);
-            }
-        }
      }
 
         // メインフェーズ時
@@ -864,33 +902,7 @@ class Screen
             }
         // OKを押したとき
         // 操作中のプレイヤーを取得する
-        let player = null;
-        this.aPlayer.forEach(
-            ( p ) =>
-            {
-                if(p.strSocketID === this.socket.id) player = p;
-            } );
-            if ((player.fX + 280 <= x && x <= player.fX + 340) 
-            &&
-            (player.fY + 200 <= y && y <= player.fY + 240) 
-            ){
-                let card = null;
-                this.aCard.forEach(
-                    ( c ) =>
-                    {
-                        if(c.selected) {
-                            card = c;
-                        }
-                    } ); 
-                if(card){
-                    // joが台札のときだけ超特殊処理
-                    if(card.cardId === 'jo' && this.fieldCardLength == 0) {
-                        this.socket.emit( 'daifuda-joker' );
-                    } else {
-                        this.socket.emit( 'discard' , card);
-                    }
-                }
-            }            
+                
          }
     }
     

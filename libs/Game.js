@@ -435,7 +435,7 @@ module.exports = class Game {
           });
         player.discardChanges(changes);
         phase = 'mainGame';
-        io.emit('change-end');
+        io.emit('set-card',teban);
       });
       socket.on('daifuda-joker', () => {
         io.emit('daifuda-joker-true');
@@ -578,7 +578,10 @@ module.exports = class Game {
                   }
                 });
             }
-        }        
+        }
+        if (fieldCards.length != GameSettings.PLAYER_NUM) {
+          io.emit('set-card',teban);
+        }
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
           turn = turn + 1;
@@ -636,6 +639,7 @@ module.exports = class Game {
               }
 
           }, 2000);
+          io.emit('set-card',teban);
           }
         if(mark) io.emit('daifuda-joker-end');
       });
