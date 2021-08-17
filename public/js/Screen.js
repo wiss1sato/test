@@ -354,7 +354,15 @@ class Screen
             () =>
             {
                 this.daifudaJoker = false;
-            } );               
+            } );
+
+        // ジョーカーが台札だったときの特別な処理(終了)
+        this.socket.on(
+            'game-end',
+            () =>
+            {
+                this.okButton.style.visibility = 'hidden'
+            } );
     }
 
     // アニメーション（無限ループ処理）
