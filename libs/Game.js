@@ -584,6 +584,11 @@ module.exports = class Game {
         }
         // 場のカードが5枚になったとき
         if (fieldCards.length == GameSettings.PLAYER_NUM) {
+          // 一旦すべてのカードを出せなくする
+          world.setCard.forEach(
+            (c) => {
+                c.setNotRequest();
+            });
           turn = turn + 1;
           let winnerArray = this.judgeWinner(fieldCards, turn, kirifuda);
           let winner = winnerArray[0];

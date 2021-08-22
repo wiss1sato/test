@@ -626,9 +626,6 @@ class Screen
         
     //　クリックされた時の処理
     async onClick(e) {
-        if(e.detail != 1) {
-            return
-        }
         console.log(e.clientX - canvas.offsetLeft);
         var x = e.clientX - canvas.offsetLeft - this.offsetX;
         var y = e.clientY - canvas.offsetTop - 21 - this.offsetY;;
@@ -646,7 +643,9 @@ class Screen
                 }
             } );
         // 手番ではないプレイヤーのクリックは受け付けない
-        if (!tebanPlayerFlg) return;
+        if (!tebanPlayerFlg){
+            return;
+        } 
         // 宣言フェーズ時
         if (this.phase === 'declaration') {
         // 宣言時の数字が押されたとき
