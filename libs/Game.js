@@ -112,11 +112,11 @@ module.exports = class Game {
             // ジョーカー
             world.createCard('jo');
             // 数字を作成する
-            let fX = 650;
+            let fX = 660;
             let fY = 270;
-            for (let i = 11; i <= 20; i++) {
-              if (i === 16) {
-                fX = 650;
+            for (let i = 13; i <= 20; i++) {
+              if (i === 17) {
+                fX = 660;
                 fY = fY + 30;
               }
               number = world.createNumber(i);

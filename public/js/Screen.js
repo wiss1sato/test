@@ -47,15 +47,15 @@ class Screen
         this.passButton.style.width = '70px'
         this.passButton.style.padding = '10px'
         
-        this.desicionButton= document.createElement("button");
-        this.desicionButton.innerText = "決定";
-        this.desicionButton.style.position = "absolute";
-        this.desicionButton.style.left       = Math.floor(800)+"px"
-        this.desicionButton.style.top        = Math.floor(350)+"px";
-        this.desicionButton.style.zIndex = 100
-        this.desicionButton.style.visibility = 'hidden'
-        this.desicionButton.style.width = '70px'
-        this.desicionButton.style.padding = '10px'
+        this.decisionButton= document.createElement("button");
+        this.decisionButton.innerText = "決定";
+        this.decisionButton.style.position = "absolute";
+        this.decisionButton.style.left       = Math.floor(800)+"px"
+        this.decisionButton.style.top        = Math.floor(350)+"px";
+        this.decisionButton.style.zIndex = 100
+        this.decisionButton.style.visibility = 'hidden'
+        this.decisionButton.style.width = '70px'
+        this.decisionButton.style.padding = '10px'
         this.discardButton= document.createElement("button");
         this.discardButton.innerText = "OK";
         this.discardButton.style.position = "absolute";
@@ -71,24 +71,22 @@ class Screen
         this.okButton.style.width = '70px'
         this.okButton.style.padding = '10px'
         var area= document.getElementById("area");
-        area.appendChild(this.desicionButton)
+        area.appendChild(this.decisionButton)
         area.appendChild(this.passButton)
         area.appendChild(this.discardButton)
         area.appendChild(this.okButton)
         this.passButton.onclick = this.pass.bind(this);
-        this.desicionButton.onclick = this.decision.bind(this);
+        this.decisionButton.onclick = this.decision.bind(this);
         this.discardButton.onclick = this.discard.bind(this);
         this.okButton.onclick = this.ok.bind(this);
         // ソケットの初期化
         this.initSocket();
         canvas.addEventListener('click', this.onClick.bind(this), false);
-        window.addEventListener('resize', this.reOffset.bind(this), false);
-        window.addEventListener('scroll', this.reOffset.bind(this), false);
     }
 
     pass() {
         this.passButton.style.visibility = 'hidden'
-        this.desicionButton.style.visibility = 'hidden'
+        this.decisionButton.style.visibility = 'hidden'
         this.socket.emit( 'pass-clicked');
     }
 
@@ -130,7 +128,7 @@ class Screen
             if (this.number && this.mark) {
                 if( this.number.num > this.declarationNumber) {
                     this.passButton.style.visibility = 'hidden'
-                    this.desicionButton.style.visibility = 'hidden'
+                    this.decisionButton.style.visibility = 'hidden'
                     this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                 }
                 // 数値が一緒の場合,現在宣言中のマークと照合する
@@ -139,19 +137,19 @@ class Screen
                     if (this.declarationMark === 'clover') {
                         if (this.mark.markId === 'diamond' || this.mark.markId === 'heart' || this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
-                            this.desicionButton.style.visibility = 'hidden'
+                            this.decisionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     } else if (this.declarationMark === 'diamond') {
                         if (this.mark.markId === 'heart' || this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
-                            this.desicionButton.style.visibility = 'hidden'
+                            this.decisionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     } else if (this.declarationMark === 'heart') {
                         if (this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
-                            this.desicionButton.style.visibility = 'hidden'
+                            this.decisionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     }
@@ -267,7 +265,7 @@ class Screen
                 const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
                 if (this.aTeban ===     player.playerNum && this.socket.id === player.strSocketID) {
                     this.passButton.style.visibility = 'visible'
-                    this.desicionButton.style.visibility = 'visible'
+                    this.decisionButton.style.visibility = 'visible'
                 }
             } );
 
@@ -279,7 +277,7 @@ class Screen
                 const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
                 if (teban === player.playerNum && this.socket.id === player.strSocketID) {
                     this.passButton.style.visibility = 'visible'
-                    this.desicionButton.style.visibility = 'visible'
+                    this.decisionButton.style.visibility = 'visible'
                 }
             } );
 
@@ -291,7 +289,7 @@ class Screen
                 const player = this.aPlayer.find(e => e.strSocketID === this.socket.id)
                 if (teban === player.playerNum && this.socket.id === player.strSocketID) {
                     this.passButton.style.visibility = 'visible'
-                    this.desicionButton.style.visibility = 'visible'
+                    this.decisionButton.style.visibility = 'visible'
                 }
                 this.declarationNumber = decNum;
                 this.declarationMark = decMark;
@@ -362,6 +360,8 @@ class Screen
             () =>
             {
                 this.okButton.style.visibility = 'hidden'
+                this.passButton.style.visibility = 'hidden'
+                this.decisionButton.style.visibility = 'hidden'
             } );
     }
 
@@ -618,17 +618,10 @@ class Screen
         ctx.restore();  
     }
 
-    reOffset(){
-        var BB=canvas.getBoundingClientRect();
-        this.offsetX=BB.left;
-        this.offsetY=BB.top;        
-    }
-        
     //　クリックされた時の処理
     async onClick(e) {
-        console.log(e.clientX - canvas.offsetLeft);
-        var x = e.clientX - canvas.offsetLeft - this.offsetX;
-        var y = e.clientY - canvas.offsetTop - 21 - this.offsetY;;
+        var x = e.clientX - this.offsetX;
+        var y = e.layerY;
         let c = null;
         let isNumberClicked = false;
         let isCardClicked = false;

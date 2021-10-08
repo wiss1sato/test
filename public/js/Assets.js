@@ -32,10 +32,6 @@ class Assets
         this.pass = new Image();
         this.pass.src = '../images/pass.png'
 
-        this.n11 = new Image();
-        this.n11.src = '../images/11.png'
-        this.n12 = new Image();
-        this.n12.src = '../images/12.png'
         this.n13 = new Image();
         this.n13.src = '../images/13.png'
         this.n14 = new Image();
@@ -53,7 +49,7 @@ class Assets
         this.n20 = new Image();
         this.n20.src = '../images/20.png'
         this.numberSet = [];
-        this.numberSet.push(this.n11,this.n12,this.n13,this.n14,this.n15,this.n16,this.n17,this.n18,this.n19,this.n20);
+        this.numberSet.push(this.n13,this.n14,this.n15,this.n16,this.n17,this.n18,this.n19,this.n20);
 
         this.c11 = new Image();
         this.c11.src = '../images/11c.png'
