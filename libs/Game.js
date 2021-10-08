@@ -185,6 +185,7 @@ module.exports = class Game {
           isPlayng = false;          
           // データはもう一回作る
           cardList = this.createCardList();
+          io.emit('game-end');
         }
       });
       // カードがクリックされた時の処理（ちょっと上にあげる）
