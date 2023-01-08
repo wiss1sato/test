@@ -1,4 +1,4 @@
-'use strict';	// 厳格モードとする
+'use strict';	// 厳格モードとするaa
 
 // モジュールa
 const express = require( 'express' );
