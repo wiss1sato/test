@@ -1,7 +1,7 @@
 // スクリーンクラス
 class Screen
 {
-    // コンストラクタaa
+    // コンストラクタ
     constructor( socket, canvas )
     {
         this.socket = socket;
@@ -56,6 +56,17 @@ class Screen
         this.decisionButton.style.visibility = 'hidden'
         this.decisionButton.style.width = '70px'
         this.decisionButton.style.padding = '10px'
+
+        this.redistributionButton= document.createElement("button");
+        this.redistributionButton.innerText = "再配布";
+        this.redistributionButton.style.position = "absolute";
+        this.redistributionButton.style.left       = Math.floor(900)+"px"
+        this.redistributionButton.style.top        = Math.floor(350)+"px";
+        this.redistributionButton.style.zIndex = 100
+        this.redistributionButton.style.visibility = 'hidden'
+        this.redistributionButton.style.width = '70px'
+        this.redistributionButton.style.padding = '10px'
+
         this.discardButton= document.createElement("button");
         this.discardButton.innerText = "OK";
         this.discardButton.style.position = "absolute";
@@ -73,10 +84,12 @@ class Screen
         var area= document.getElementById("area");
         area.appendChild(this.decisionButton)
         area.appendChild(this.passButton)
+        area.appendChild(this.redistributionButton)
         area.appendChild(this.discardButton)
         area.appendChild(this.okButton)
         this.passButton.onclick = this.pass.bind(this);
         this.decisionButton.onclick = this.decision.bind(this);
+        this.redistributionButton.onclick = this.redistribution.bind(this);
         this.discardButton.onclick = this.discard.bind(this);
         this.okButton.onclick = this.ok.bind(this);
         // ソケットの初期化
@@ -87,6 +100,7 @@ class Screen
     pass() {
         this.passButton.style.visibility = 'hidden'
         this.decisionButton.style.visibility = 'hidden'
+        this.redistributionButton.style.visibility = 'hidden'
         this.socket.emit( 'pass-clicked');
     }
 
@@ -129,6 +143,7 @@ class Screen
                 if( this.number.num > this.declarationNumber) {
                     this.passButton.style.visibility = 'hidden'
                     this.decisionButton.style.visibility = 'hidden'
+                    this.redistributionButton.style.visibility = 'hidden'
                     this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                 }
                 // 数値が一緒の場合,現在宣言中のマークと照合する
@@ -138,18 +153,21 @@ class Screen
                         if (this.mark.markId === 'diamond' || this.mark.markId === 'heart' || this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
                             this.decisionButton.style.visibility = 'hidden'
+                            this.redistributionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     } else if (this.declarationMark === 'diamond') {
                         if (this.mark.markId === 'heart' || this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
                             this.decisionButton.style.visibility = 'hidden'
+                            this.redistributionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     } else if (this.declarationMark === 'heart') {
                         if (this.mark.markId === 'spade') {
                             this.passButton.style.visibility = 'hidden'
                             this.decisionButton.style.visibility = 'hidden'
+                            this.redistributionButton.style.visibility = 'hidden'
                             this.socket.emit( 'kettei-clicked', this.socket.id , this.number , this.mark);
                         } 
                     }
@@ -175,9 +193,14 @@ class Screen
         }
     }
 
-
+    redistribution() {
+        let cartList = prompt("前回のカードリストを入力してください", "");
+        if (cartList != null) {
+            this.socket.emit( 'redistribution', cartList);
+        }
+    }
     
-        // ソケットの初期化
+    // ソケットの初期化
     initSocket()
     {
         // 接続確立時の処理
@@ -266,6 +289,7 @@ class Screen
                 if (this.aTeban ===     player.playerNum && this.socket.id === player.strSocketID) {
                     this.passButton.style.visibility = 'visible'
                     this.decisionButton.style.visibility = 'visible'
+                    this.redistributionButton.style.visibility = 'visible'
                 }
             } );
 
@@ -290,6 +314,7 @@ class Screen
                 if (teban === player.playerNum && this.socket.id === player.strSocketID) {
                     this.passButton.style.visibility = 'visible'
                     this.decisionButton.style.visibility = 'visible'
+                    this.redistributionButton.style.visibility = 'visible'
                 }
                 this.declarationNumber = decNum;
                 this.declarationMark = decMark;
@@ -362,6 +387,7 @@ class Screen
                 this.okButton.style.visibility = 'hidden'
                 this.passButton.style.visibility = 'hidden'
                 this.decisionButton.style.visibility = 'hidden'
+                this.redistributionButton.style.visibility = 'hidden'
             } );
     }
 

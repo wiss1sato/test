@@ -33,6 +33,7 @@ module.exports = class Game {
     let decNum = null;
     let isPlayng = false;
     let winnerString = null;
+    let dealCount = 0;
 
     // 接続時の処理
     // ・サーバーとクライアントの接続が確立すると、
@@ -132,6 +133,7 @@ module.exports = class Game {
             mark.setPosition(800, 175);
             mark = world.createMark('clover');
             mark.setPosition(875, 175);
+            console.log(cardList)
             // ボタンを作成する
             io.emit('start-the-game');
           }
@@ -237,6 +239,11 @@ module.exports = class Game {
         fukukanCard = designationCard;
       });
 
+      // 再配布
+      socket.on('redistribution', (cardList) => {
+        dealCard(JSON.parse(cardList.replace(/'/g, '"')));
+      });
+
       socket.on('mark-unclicked', (mark) => {
         world.setMark.forEach(
           (m) => {
@@ -249,6 +256,9 @@ module.exports = class Game {
       socket.on('button-clicked', () => {});
       // カードを配る処理
       socket.on('deal-card', () => {
+        dealCard()
+      });
+      function dealCard(pCardList) {
         if (!player) {
           return;
         }
@@ -256,8 +266,38 @@ module.exports = class Game {
         if (player.viewerMode) {
           return;
         }
+        // パラメータとして渡された場合、配り直し
+        if (pCardList) {
+          cardList = pCardList;        
+            world.setPlayer.forEach(
+              (player) => {
+                dealCount = dealCount + 1;
+                if (player.playerNum > GameSettings.PLAYER_NUM) return;
+                // プレイヤーにカードを配る
+                cards = cardList.slice((10 * (player.playerNum - 1)), (10 * (player.playerNum - 1)) + 10);
+                player.dealCards(cards);
+                // 左端のカード（初期座標）
+                let fX = player.fX - 60;
+                let fY = player.fY + 180;
+                world.setCard.forEach(
+                  (c) => {
+                    cards.forEach(
+                      (card) => {
+                        if (c.cardId === card) {
+                          c.setPosition(fX, fY, player);
+                          fX = fX + 25;
+                        }
+                      });
+                  });
+              });
+        } 
+        else
+        {
+        dealCount = dealCount + 1
+        console.log(player.playerNum)
         // プレイヤーにカードを配る
-        cards = cardList.splice(0, 10);
+        cards = cardList.slice((10 * (player.playerNum - 1)), (10 * (player.playerNum - 1)) + 10);
+        console.log(cardList)
         player.dealCards(cards);
         // 左端のカード（初期座標）
         let fX = player.fX - 60;
@@ -272,9 +312,11 @@ module.exports = class Game {
                 }
               });
           });
+        }
         // 残ったカードを真ん中に配置する
-        if (cardList.length === 3) {
-          leftCards = cardList.splice(0, 3);
+        if (dealCount == 5) {
+          dealCount = 0;
+          leftCards = cardList.slice(50, 53);
           // 左端のカード（初期座標）
           let fX = 680;
           let fY = 80;
@@ -291,7 +333,7 @@ module.exports = class Game {
             phase = 'declaration';
             io.emit('deal-end');
         }
-      });
+      }
       // 宣言中に決定が押されたとき
       socket.on('kettei-clicked', (player, num, mark) => {
         decNum = num.num;
